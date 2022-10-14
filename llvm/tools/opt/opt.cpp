@@ -21,5 +21,3 @@ class PassBuilder;
 extern "C" int optMain(int argc, char **argv,
                        llvm::ArrayRef<std::function<void(llvm::PassBuilder &)>>
                            PassBuilderCallbacks);
-
-int main(int argc, char **argv) { return optMain(argc, argv, {}); }

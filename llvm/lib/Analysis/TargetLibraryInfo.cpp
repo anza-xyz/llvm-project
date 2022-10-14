@@ -888,6 +888,13 @@ static void initializeLibCalls(TargetLibraryInfoImpl &TLI, const Triple &T,
   if (T.isOSAIX())
     TLI.setUnavailable(LibFunc_memrchr);
 
+
+  if (T.isBPF() || T.isSBF()) {
+    TLI.setUnavailable(LibFunc_rust_alloc);
+    TLI.setUnavailable(LibFunc_rust_dealloc);
+    TLI.setUnavailable(LibFunc_rust_realloc);
+  }
+
   TLI.addVectorizableFunctionsFromVecLib(ClVectorLibrary, T);
 }
 
