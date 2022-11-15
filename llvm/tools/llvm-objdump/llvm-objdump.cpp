@@ -348,6 +348,8 @@ bool objdump::UnwindInfo;
 static bool Wide;
 std::string objdump::Prefix;
 uint32_t objdump::PrefixStrip;
+static uint64_t OutputAsmVariant;
+static bool HasOutputAsmVariantFlag;
 
 DebugVarsFormat objdump::DbgVariables = DVDisabled;
 
@@ -1087,6 +1089,8 @@ DisassemblerTarget::DisassemblerTarget(const Target *TheTarget, ObjectFile &Obj,
   InstrAnalysis.reset(TheTarget->createMCInstrAnalysis(InstrInfo.get()));
 
   int AsmPrinterVariant = AsmInfo->getAssemblerDialect();
+  if (HasOutputAsmVariantFlag)
+    AsmPrinterVariant = OutputAsmVariant;
   InstPrinter.reset(TheTarget->createMCInstPrinter(Triple(TripleName),
                                                    AsmPrinterVariant, *AsmInfo,
                                                    *InstrInfo, *RegisterInfo));
@@ -3572,6 +3576,8 @@ static void parseObjdumpOptions(const llvm::opt::InputArgList &InputArgs) {
   }
 
   parseIntArg(InputArgs, OBJDUMP_debug_vars_indent_EQ, DbgIndent);
+  parseIntArg(InputArgs, OBJDUMP_output_asm_variant_EQ, OutputAsmVariant);
+  HasOutputAsmVariantFlag = InputArgs.hasArg(OBJDUMP_output_asm_variant_EQ);
 
   parseMachOOptions(InputArgs);
 
