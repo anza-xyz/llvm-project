@@ -29,6 +29,7 @@
 // RUN: %clang_cc1 -no-enable-noundef-analysis -triple arm -O3 -disable-llvm-passes -emit-llvm -o - %s | FileCheck %s --check-prefixes=ARM
 // RUN: %clang_cc1 -no-enable-noundef-analysis -triple loongarch64 -O3 -disable-llvm-passes -emit-llvm -o - %s | FileCheck %s --check-prefixes=LA64
 // RUN: %clang_cc1 -no-enable-noundef-analysis -triple loongarch32 -O3 -disable-llvm-passes -emit-llvm -o - %s | FileCheck %s --check-prefixes=LA32
+// RUN: %clang_cc1 -no-opaque-pointers -no-enable-noundef-analysis -triple sbf -O3 -disable-llvm-passes -emit-llvm -o - %s | FileCheck %s --check-prefixes=SBF
 
 // Make sure 128 and 64 bit versions are passed like integers.
 void ParamPassing(_BitInt(128) b, _BitInt(64) c) {}
