@@ -109,6 +109,8 @@ jobs:
           key: ${{ matrix.os }}
           variant: sccache
       - name: Build and Test
+        if: "!startsWith(matrix.os, 'windows') || inputs.projects != 'lld'"
+        uses: llvm/actions/build-test-llvm-project@main
         env:
           # Workaround for https://github.com/actions/virtual-environments/issues/5900.
           # This should be a no-op for non-mac OSes
@@ -138,6 +140,7 @@ jobs:
                 -DLLVM_ENABLE_ASSERTIONS=ON \
                 -DLLDB_INCLUDE_TESTS=OFF \
                 -DLIBCLC_TARGETS_TO_BUILD="amdgcn--;amdgcn--amdhsa;r600--;nvptx--;nvptx64--;nvptx--nvidiacl;nvptx64--nvidiacl" \
+                -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="BPF;SBF" \
                 -DCMAKE_C_COMPILER_LAUNCHER=sccache \
                 -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
                 $extra_cmake_args \
