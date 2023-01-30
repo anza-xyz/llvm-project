@@ -101,6 +101,16 @@ public:
     eRISCV_tso              = 0x00000010, /// RVTSO (total store ordering)
   };
 
+  // BPF specific e_flags
+  enum BPFeflags {
+    eBPF_abi_sbf_v2 = 0x00000020,
+  };
+
+  enum SBFSubType {
+    eSBFSubType_sbf,
+    eSBFSubType_sbfv2,
+  };
+
   enum RISCVSubType {
     eRISCVSubType_unknown,
     eRISCVSubType_riscv32,
