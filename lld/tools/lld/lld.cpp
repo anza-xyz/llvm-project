@@ -73,6 +73,7 @@ LLD_HAS_DRIVER(macho)
 LLD_HAS_DRIVER(wasm)
 
 int lld_main(int argc, char **argv, const llvm::ToolContext &) {
+  initLLVM();
   sys::Process::UseANSIEscapeCodes(true);
 
   if (::getenv("FORCE_LLD_DIAGNOSTICS_CRASH")) {
