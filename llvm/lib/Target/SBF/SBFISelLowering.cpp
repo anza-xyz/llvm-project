@@ -79,48 +79,28 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::Other, Custom);
 
   for (auto VT : {MVT::i8, MVT::i16, MVT::i32, MVT::i64}) {
-    if (Subtarget->isSolana()) {
-      // Implement custom lowering for all atomic operations
-      setOperationAction(ISD::ATOMIC_SWAP, VT, Custom);
-      setOperationAction(ISD::ATOMIC_CMP_SWAP_WITH_SUCCESS, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_ADD, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_AND, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_MAX, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_MIN, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_NAND, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_OR, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_SUB, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_UMAX, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_UMIN, VT, Custom);
-      setOperationAction(ISD::ATOMIC_LOAD_XOR, VT, Custom);
-      continue;
-    }
-
-    if (VT == MVT::i64) {
-      continue;
-    }
-
-    // Set unsupported atomic operations as Custom so we can emit better error
-    // messages than fatal error from selectiondag.
-    if (VT == MVT::i32) {
-      if (STI.getHasAlu32())
-        continue;
-    } else {
-      setOperationAction(ISD::ATOMIC_LOAD_ADD, VT, Custom);
-    }
-
-    setOperationAction(ISD::ATOMIC_LOAD_AND, VT, Custom);
-    setOperationAction(ISD::ATOMIC_LOAD_OR, VT, Custom);
-    setOperationAction(ISD::ATOMIC_LOAD_XOR, VT, Custom);
     setOperationAction(ISD::ATOMIC_SWAP, VT, Custom);
     setOperationAction(ISD::ATOMIC_CMP_SWAP_WITH_SUCCESS, VT, Custom);
+    setOperationAction(ISD::ATOMIC_CMP_SWAP, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_ADD, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_AND, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_MAX, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_MIN, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_NAND, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_OR, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_SUB, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_UMAX, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_UMIN, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD_XOR, VT, Custom);
+    setOperationAction(ISD::ATOMIC_LOAD, VT, Expand);
+    setOperationAction(ISD::ATOMIC_STORE, VT, Expand);
   }
 
   for (auto VT : { MVT::i32, MVT::i64 }) {
     if (VT == MVT::i32 && !STI.getHasAlu32())
       continue;
 
-    if (Subtarget->isSolana() && !STI.getHasPqrClass()) {
+    if (!STI.getHasPqrClass()) {
       setOperationAction(ISD::SDIV, VT, Expand);
       setOperationAction(ISD::SREM, VT, Expand);
       setOperationAction(ISD::MULHU, VT, Expand);
@@ -152,17 +132,10 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i32, Expand);
   }
 
-  if (Subtarget->isSolana()) {
-    setOperationAction(ISD::CTTZ, MVT::i64, Expand);
-    setOperationAction(ISD::CTLZ, MVT::i64, Expand);
-    setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i64, Expand);
-    setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i64, Expand);
-  } else {
-    setOperationAction(ISD::CTTZ, MVT::i64, Custom);
-    setOperationAction(ISD::CTLZ, MVT::i64, Custom);
-    setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i64, Custom);
-    setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i64, Custom);
-  }
+  setOperationAction(ISD::CTTZ, MVT::i64, Expand);
+  setOperationAction(ISD::CTLZ, MVT::i64, Expand);
+  setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i64, Expand);
+  setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i64, Expand);
 
   setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
   setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i8, Expand);
@@ -204,7 +177,6 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
     MaxLoadsPerMemcmp = 0;
   } else {
     auto SelectionDAGInfo = STI.getSelectionDAGInfo();
-    SelectionDAGInfo->setSolanaFlag(STI.isSolana());
     // inline memcpy() for kernel to see explicit copy
     unsigned CommonMaxStores =
       SelectionDAGInfo->getCommonMaxStoresPerMemFunc();
@@ -218,7 +190,7 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
   HasJmpExt = STI.getHasJmpExt();
-  SBFRegisterInfo::FrameLength = STI.isSolana() ? 4096 : 512;
+  SBFRegisterInfo::FrameLength = 4096;
 }
 
 bool SBFTargetLowering::allowsMisalignedMemoryAccesses(
@@ -226,11 +198,11 @@ bool SBFTargetLowering::allowsMisalignedMemoryAccesses(
   if (!VT.isSimple()) {
     return false;
   }
-  bool isSolana = Subtarget->isSolana();
-  if (isSolana && Fast) {
+
+  if (Fast) {
     *Fast = 1;
   }
-  return isSolana;
+  return true;
 }
 
 bool SBFTargetLowering::lowerAtomicStoreAsStoreSDNode(
@@ -333,16 +305,8 @@ void SBFTargetLowering::ReplaceNodeResults(SDNode *N,
   case ISD::ATOMIC_LOAD_UMAX:
   case ISD::ATOMIC_LOAD_UMIN:
   case ISD::ATOMIC_LOAD_XOR:
-    if (Subtarget->isSolana()) {
-      // We do lowering during legalization, see LowerOperation()
-      return;
-    }
-
-    if (HasAlu32 || Opcode == ISD::ATOMIC_LOAD_ADD)
-      err_msg = "Unsupported atomic operations, please use 32/64 bit version";
-    else
-      err_msg = "Unsupported atomic operations, please use 64 bit version";
-    break;
+    // We do lowering during legalization, see LowerOperation()
+    return;
   }
 
   SDLoc DL(N);
@@ -445,7 +409,7 @@ SDValue SBFTargetLowering::LowerFormalArguments(
 
         break;
       }
-    } else if (Subtarget->isSolana()) {
+    } else {
       // Argument passed via stack
       assert(VA.isMemLoc() && "Should be isMemLoc");
 
@@ -477,19 +441,11 @@ SDValue SBFTargetLowering::LowerFormalArguments(
       }
 
       InVals.push_back(SDV);
-    } else {
-      fail(DL, DAG, "defined with too many args");
-      InVals.push_back(DAG.getConstant(0, DL, VA.getLocVT()));
     }
   }
 
-  if (Subtarget->isSolana()) {
-    if (IsVarArg) {
-      fail(DL, DAG, "Functions with VarArgs are not supported");
-      assert(false);
-    }
-  } else if (IsVarArg || MF.getFunction().hasStructRetAttr()) {
-    fail(DL, DAG, "functions with VarArgs or StructRet are not supported");
+  if (IsVarArg) {
+    fail(DL, DAG, "Functions with VarArgs are not supported");
   }
 
   return Chain;
@@ -524,13 +480,8 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   // Analyze operands of the call, assigning locations to each operand.
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
-<<<<<<< HEAD
-  if (Subtarget->isSolana() && Outs.size() > MaxArgs) {
-    if (Subtarget->getEnableNewCallConvention()) {
-=======
   if (Outs.size() > MaxArgs) {
     if (Subtarget->getHasDynamicFrames()) {
->>>>>>> 59716aa31309 ([SOL] Use R10 as the stack pointer (#117))
       // Pass args 1-5 via registers, remaining args via stack
       CCInfo.AnalyzeCallOperands(Outs, getHasAlu32() ? CC_SBF32 : CC_SBF64);
     } else {
@@ -545,18 +496,6 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   unsigned NumBytes = CCInfo.getStackSize();
 
-  if (!Subtarget->isSolana()) {
-    if (Outs.size() > MaxArgs)
-      fail(CLI.DL, DAG, "too many args to ", Callee);
-
-    for (auto &Arg : Outs) {
-      ISD::ArgFlagsTy Flags = Arg.Flags;
-      if (!Flags.isByVal())
-        continue;
-
-      fail(CLI.DL, DAG, "pass by value not supported ", Callee);
-    }
-  }
 
   auto PtrVT = getPointerTy(MF.getDataLayout());
   Chain = DAG.getCALLSEQ_START(Chain, NumBytes, 0, CLI.DL);
@@ -566,7 +505,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   // Walk arg assignments
   bool HasStackArgs = false;
   unsigned e, i, ae = ArgLocs.size();
-  for (i = 0, e = (Subtarget->isSolana()) ? ae : std::min(ae, MaxArgs); i != e; ++i) {
+  for (i = 0, e = ae; i != e; ++i) {
     CCValAssign &VA = ArgLocs[i];
     SDValue Arg = OutVals[i];
 
@@ -587,7 +526,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       break;
     }
 
-    if (Subtarget->isSolana() && VA.isMemLoc()) {
+    if (VA.isMemLoc()) {
       HasStackArgs = true;
       break;
     }
@@ -664,12 +603,6 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                                         G->getOffset(), 0);
   } else if (ExternalSymbolSDNode *E = dyn_cast<ExternalSymbolSDNode>(Callee)) {
     Callee = DAG.getTargetExternalSymbol(E->getSymbol(), PtrVT, 0);
-    // This is not a warning but info, will be resolved on load
-    if (!Subtarget->isSolana()) {
-      fail(CLI.DL, DAG, Twine("A call to built-in function '"
-                              + StringRef(E->getSymbol())
-                              + "' remains unresolved"));
-    }
   }
 
   // Returns a chain & a flag for retval copy to use.
@@ -706,15 +639,12 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 }
 
 bool SBFTargetLowering::shouldSignExtendTypeInLibCall(EVT Type, bool IsSigned) const {
-  return Subtarget->isSolana() && (IsSigned || Type == MVT::i32);
+  return IsSigned || Type == MVT::i32;
 }
 
 bool SBFTargetLowering::CanLowerReturn(
     CallingConv::ID CallConv, MachineFunction &MF, bool IsVarArg,
     const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext &Context) const {
-  if (!Subtarget->isSolana()) {
-    return true;
-  }
   // At minimal return Outs.size() <= 1, or check valid types in CC.
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, Context);
@@ -736,14 +666,9 @@ SBFTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   // CCState - Info about the registers and stack slot.
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, *DAG.getContext());
 
-  if (Subtarget->isSolana()) {
-    if (Outs.size() > 1) {
-      fail(DL, DAG, "Only a single return supported");
-      assert(false);
-    }
-  } else if (MF.getFunction().getReturnType()->isAggregateType()) {
-    fail(DL, DAG, "only integer returns supported");
-    return DAG.getNode(Opc, DL, MVT::Other, Chain);
+  if (Outs.size() > 1) {
+    fail(DL, DAG, "Only a single return supported");
+    assert(false);
   }
 
   // Analize return values.
@@ -784,16 +709,9 @@ SDValue SBFTargetLowering::LowerCallResult(
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, *DAG.getContext());
 
-  if (Subtarget->isSolana()) {
-    if (Ins.size() > 1) {
-      fail(DL, DAG, "Only a single return supported");
-      assert(false);
-    }
-  } else if (Ins.size() >= 2) {
-    fail(DL, DAG, "only small returns supported");
-    for (unsigned i = 0, e = Ins.size(); i != e; ++i)
-      InVals.push_back(DAG.getConstant(0, DL, Ins[i].VT));
-    return DAG.getCopyFromReg(Chain, DL, 1, Ins[0].VT, InGlue).getValue(1);
+  if (Ins.size() > 1) {
+    fail(DL, DAG, "Only a single return supported");
+    assert(false);
   }
 
   CCInfo.AnalyzeCallResult(Ins, getHasAlu32() ? RetCC_SBF32 : RetCC_SBF64);
