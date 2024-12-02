@@ -83,6 +83,9 @@ protected:
   // Whether to use the new call convention in SBFv2
   bool NewCallConvention;
 
+  // Whether we have store imm instructions
+  bool HasStoreImm;
+
 public:
   // This constructor initializes the data members to match that
   // of the specified triple.
@@ -108,6 +111,7 @@ public:
   bool getEnableNewCallConvention() const {
     return HasDynamicFrames && NewCallConvention;
   }
+  bool getHasStoreImm() const { return HasStoreImm; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
   const SBFFrameLowering *getFrameLowering() const override {
     return &FrameLowering;
