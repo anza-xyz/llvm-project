@@ -38,7 +38,6 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
   IsSolana = true;
   HasJmpExt = false;
-  HasAlu32 = false;
   UseDwarfRIS = false;
 
   // SBFv2 features
@@ -50,6 +49,8 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   HasPqrClass = false;
   NewCallConvention = false;
   HasStoreImm = false;
+  HasAlu32 = false;
+  HasExplicitSignExt = false;
 }
 
 void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
