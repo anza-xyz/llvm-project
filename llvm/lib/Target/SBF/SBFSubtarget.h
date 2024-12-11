@@ -80,9 +80,6 @@ protected:
   // Whether we have the PQR instruction class
   bool HasPqrClass;
 
-  // Whether to use the new call convention in SBFv2
-  bool NewCallConvention;
-
   // Whether we have store imm instructions
   bool HasStoreImm;
 
@@ -111,9 +108,6 @@ public:
   bool getNoLddw() const { return NoLddw; }
   bool getCallXRegSrc() const { return CallxRegSrc; }
   bool getHasPqrClass() const { return HasPqrClass; }
-  bool getEnableNewCallConvention() const {
-    return HasDynamicFrames && NewCallConvention;
-  }
   bool getHasStoreImm() const { return HasStoreImm; }
   bool getHasExplicitSignExt() const { return HasExplicitSignExt; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
