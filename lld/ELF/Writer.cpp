@@ -786,10 +786,11 @@ static void demoteAndCopyLocalSymbols() {
       if (isSbfV3() &&
           includeInSymtab(*b) &&
           shouldKeepInSymtab(*dr) &&
-          (b->used || (!config->gcSections && (!config->copyRelocs || config->discard == DiscardPolicy::None))) &&
+          //(b->used || (!config->gcSections && (!config->copyRelocs || config->discard == DiscardPolicy::None))) &&
+          //b->used &&
           b->type == STT_FUNC) {
-//              std::ofstream out("/Users/lucasste/Documents/solana-test/program/demote.txt", std::ios::app);
-//              out << "Adding sym: " << b->getName().str() << std::endl;
+          //std::ofstream out("/Users/lucasste/Documents/sol-example/program/case1.txt", std::ios::app);
+          //out << "Used: " << (int)b->used << " not gc: " << (int)!config->gcSections << " not re: " << (int)!config->copyRelocs << " dis: " << (int)config->discard << "\n";
           partitions[b->partition - 1].dynSymTab->addSymbol(b);
       }
     }
@@ -2112,9 +2113,17 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
           if (file->isNeeded && !sym->isUndefined())
             addVerneed(sym);
       } else if (isSbfV3() &&
-                 (sym->used || (!config->gcSections && (!config->copyRelocs || config->discard == DiscardPolicy::None))) &&
+                 //(sym->used || (!config->gcSections && (!config->copyRelocs || config->discard == DiscardPolicy::None))) &&
+                 // sym->used &&
+                 includeInSymtab(*sym) &&
                  sym->type == STT_FUNC) {
-          partitions[sym->partition - 1].dynSymTab->addSymbol(sym);
+          if (const Defined * Def = dyn_cast<Defined>(sym)) {
+            if (shouldKeepInSymtab(*Def)) {
+                partitions[sym->partition - 1].dynSymTab->addSymbol(sym);
+            }
+          }
+//          std::ofstream out("/Users/lucasste/Documents/sol-example/program/case2.txt", std::ios::app);
+  //        out << "Used: " << (int)sym->used << " not gc: " << (int)!config->gcSections << " not re: " << (int)!config->copyRelocs << " dis: " << (int)config->discard << "\n";
       }
     }
 
