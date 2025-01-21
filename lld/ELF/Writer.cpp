@@ -2096,7 +2096,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
             addVerneed(sym);
       } else if (isSbfV3() && includeInSymtab(*sym) && isa<Defined>(sym) &&
                  sym->type == STT_FUNC) {
-        // We need want local functions in the dynamic symbol table for SBFv3
+        // We want local functions in the dynamic symbol table for SBFv3
         const Defined *Def = dyn_cast<Defined>(sym);
         if (shouldKeepInSymtab(*Def)) {
           partitions[sym->partition - 1].dynSymTab->addSymbol(sym);

@@ -2167,8 +2167,8 @@ void SymbolTableBaseSection::sortSymTabSymbols() {
 
 void SymbolTableBaseSection::addSymbol(Symbol *b) {
   // Adding a local symbol to a .dynsym is a bug.
-  // In SBF, we require all function symbols to be in the dynamic symbol table,
-  // no matter their visibility, so adding local symbols is not a bug for
+  // In SBF, we require all function symbols to be in the dynamic symbol table
+  // regardless of their visibility, so adding local symbols is not a bug for
   // SBFv3.
   assert(this->type != SHT_DYNSYM || !b->isLocal() ||
          (config->emachine == EM_SBF && config->eflags == 0x3));
@@ -2176,9 +2176,9 @@ void SymbolTableBaseSection::addSymbol(Symbol *b) {
   unsigned Offset;
   if (this->type == SHT_DYNSYM && b->isLocal() &&
       config->strip != StripPolicy::None) {
-    // Including the symbol name to the dynamic symbol table may increase the
+    // Including the symbol name in the dynamic symbol table may increase the
     // contract size in more than 20kb, so whenever we want to strip
-    // information, we can assign the same symbol to all local functions.
+    // information, we can assign the same string to all local symbols.
     const static unsigned HiddenOffset =
         strTabSec.addString("hidden_func", false);
     Offset = HiddenOffset;
@@ -2197,8 +2197,8 @@ void SymbolTableBaseSection::sortAndDedupSymbolsByValue() {
                     });
 
   // The linker can assign the same address to two different functions if
-  // their code is the same. When that happens, we must deduplicate symbols
-  // by st_value.
+  // their code is the same (function aliasing). When that happens, we must
+  // deduplicate symbols by st_value.
   symbols.erase(
       std::unique(symbols.begin(), symbols.end(),
                   [](const SymbolTableEntry &a, const SymbolTableEntry &b) {
