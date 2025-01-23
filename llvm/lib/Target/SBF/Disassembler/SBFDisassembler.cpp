@@ -70,6 +70,7 @@ public:
   bool isMov32(uint64_t Inst) const { return (Inst >> 56) == 0xb4; }
   bool isNewMem(uint64_t Inst) const;
   bool isSyscallOrExit(uint64_t Inst) const { return (Inst >> 56) == 0x95; }
+  bool isAlu32NewLoadStoreReg(uint64_t Inst) const;
 };
 
 } // end anonymous namespace
@@ -172,6 +173,14 @@ bool SBFDisassembler::isNewMem(uint64_t Inst) const {
   return MSB == 0x2 || MSB == 0x3 || MSB == 0x8 || MSB == 0x9;
 }
 
+bool SBFDisassembler::isAlu32NewLoadStoreReg(uint64_t Inst) const {
+  bool IsNotDw = (Inst >> 60) != 0x9;
+  bool IsNotStoreImm = (Inst >> 56 & 0xf) != 0x7;
+  return isNewMem(Inst) && IsNotDw && IsNotStoreImm &&
+      STI.hasFeature(SBF::FeatureNewMemEncoding) &&
+      STI.hasFeature(SBF::ALU32);
+}
+
 DecodeStatus SBFDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
                                              ArrayRef<uint8_t> Bytes,
                                              uint64_t Address,
@@ -197,17 +206,17 @@ DecodeStatus SBFDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
            STI.hasFeature(SBF::FeatureDisableLddw))
     Result =
         decodeInstruction(DecoderTableSBFv264, Instr, Insn, Address, this, STI);
-  else if (isNewMem(Insn) && (Insn >> 60) != 0x9 &&
-           STI.hasFeature(SBF::FeatureNewMemEncoding) &&
-           STI.hasFeature(SBF::ALU32))
+  else if (isAlu32NewLoadStoreReg(Insn)) {
     Result =
         decodeInstruction(DecoderTableSBFALU32MEMv264,
                           Instr, Insn, Address, this, STI);
+  }
   else if ((isNewMem(Insn) && STI.hasFeature(SBF::FeatureNewMemEncoding)) ||
-           (isSyscallOrExit(Insn) && STI.hasFeature(SBF::FeatureStaticSyscalls)))
+           (isSyscallOrExit(Insn) && STI.hasFeature(SBF::FeatureStaticSyscalls))) {
     Result =
         decodeInstruction(DecoderTableSBFv264,
                           Instr, Insn, Address, this, STI);
+  }
   else
     Result =
         decodeInstruction(DecoderTableSBF64, Instr, Insn, Address, this, STI);
