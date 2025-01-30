@@ -407,7 +407,7 @@ SDValue SBFTargetLowering::LowerFormalArguments(
       if (Subtarget->getHasDynamicFrames()) {
         // In the new convention, arguments are in at the end of the callee
         // frame.
-        uint64_t Size = PtrVT.getFixedSizeInBits() / 8;
+        uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
         int64_t Offset = -static_cast<int64_t>(VA.getLocMemOffset() + Size);
         int FrameIndex =
             MF.getFrameInfo().CreateFixedObject(Size, Offset, false);
