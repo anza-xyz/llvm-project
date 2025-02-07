@@ -27,7 +27,6 @@ add_llvm_target(SBFCodeGen
   SBFMCInstLower.cpp
   SBFPreserveDIType.cpp
   SBFRegisterInfo.cpp
-  SBFSelectionDAGInfo.cpp
   SBFSubtarget.cpp
   SBFTargetMachine.cpp
   SBFMIPeephole.cpp

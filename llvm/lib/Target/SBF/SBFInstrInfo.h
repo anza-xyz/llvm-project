@@ -33,8 +33,6 @@ public:
                    const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
                    bool KillSrc) const override;
 
-  bool expandPostRAPseudo(MachineInstr &MI) const override;
-
   void storeRegToStackSlot(MachineBasicBlock &MBB,
                            MachineBasicBlock::iterator MBBI, Register SrcReg,
                            bool isKill, int FrameIndex,
@@ -61,7 +59,6 @@ public:
   void initializeTargetFeatures(bool HasExplicitSext, bool NewMemEncoding);
 
 private:
-  void expandMEMCPY(MachineBasicBlock::iterator) const;
   bool HasExplicitSignExt;
   bool NewMemEncoding;
 };
