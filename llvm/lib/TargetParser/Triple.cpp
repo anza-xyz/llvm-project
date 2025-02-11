@@ -359,7 +359,8 @@ static Triple::ArchType parseBPFArch(StringRef ArchName) {
     return Triple::bpfeb;
   } else if (ArchName.equals("bpf_le") || ArchName.equals("bpfel")) {
     return Triple::bpfel;
-  } else if (ArchName.equals("sbf")) {
+  } else if (ArchName.equals("sbf") || ArchName.equals("sbfv1") ||
+             ArchName.equals("sbfv2") || ArchName.equals("sbfv3")) {
     return Triple::sbf;
   } else {
     return Triple::UnknownArch;
@@ -744,6 +745,14 @@ static Triple::SubArchType parseSubArch(StringRef SubArchName) {
         .EndsWith("v1.5", Triple::SPIRVSubArch_v15)
         .EndsWith("v1.6", Triple::SPIRVSubArch_v16)
         .Default(Triple::NoSubArch);
+
+  if (SubArchName.starts_with("sbf")) {
+    return StringSwitch<Triple::SubArchType>(SubArchName)
+        .EndsWith("v1", Triple::SBFSubArch_v1)
+        .EndsWith("v2", Triple::SBFSubArch_v2)
+        .EndsWith("v3", Triple::SBFSubArch_v3)
+        .Default(Triple::NoSubArch);
+  }
 
   StringRef ARMSubArch = ARM::getCanonicalArchName(SubArchName);
 

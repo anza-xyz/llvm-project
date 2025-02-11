@@ -1,4 +1,5 @@
 ; RUN: llc -O2 -march=sbf -mcpu=v1 < %s | FileCheck %s
+; RUN: llc -O2 -mtriple=sbfv1-solana-solana < %s | FileCheck %s
 ; RUN: llc -O2 -march=sbf -mcpu=v1 -mattr=+mem-encoding < %s | FileCheck %s
 
 ; Function Attrs: nounwind uwtable
