@@ -170,15 +170,20 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
     MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = 0;
     MaxLoadsPerMemcmp = 0;
   } else {
-    auto SelectionDAGInfo = STI.getSelectionDAGInfo();
-    // inline memcpy() for kernel to see explicit copy
-    unsigned CommonMaxStores =
-      SelectionDAGInfo->getCommonMaxStoresPerMemFunc();
+    // A syscall consumes at least 10 CUs, so we should only invoke it when
+    // the number of instructions is at least 10.
 
-    MaxStoresPerMemset = MaxStoresPerMemsetOptSize = CommonMaxStores;
-    MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize = CommonMaxStores;
-    MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = CommonMaxStores;
-    MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = CommonMaxStores;
+    // Memset translates to stdw or stdxw, so the maximum should be 10.
+    MaxStoresPerMemset = MaxStoresPerMemsetOptSize = 10;
+    // Each store in memcpy follows a load, so the maximum is 5.
+    MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize = 5;
+    // Each store in memmove follows a load, so the maximum is 5.
+    MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = 5;
+    // Memcmp expands to three instructions for each load:
+    // 1. One load for each pointer being compared.
+    // 2. One jne for each load.
+    // The limit here should be three, since 3*3 = 9;
+    MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = 3;
   }
 
   // CPU/Feature control
