@@ -1,4 +1,4 @@
-; RUN: llc -O2 -march=sbf -mcpu=v2 < %s | FileCheck %s
+; RUN: llc -O2 -march=sbf -mcpu=v2 -mattr=+alu32 < %s | FileCheck %s
 ;
 ; long long select_u(unsigned a, unsigned b, long long c, long long d)
 ; {

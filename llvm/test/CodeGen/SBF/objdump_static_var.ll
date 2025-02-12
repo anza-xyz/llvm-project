@@ -1,4 +1,4 @@
-; RUN: llc -march=sbf -mcpu=v2 -filetype=obj -o - %s | llvm-objdump -dr - | FileCheck --check-prefix=CHECK %s
+; RUN: llc -march=sbf -mcpu=v2 -mattr=+alu32 -filetype=obj -o - %s | llvm-objdump -dr - | FileCheck --check-prefix=CHECK %s
 
 ; src:
 ;   static volatile long a = 2;
@@ -10,15 +10,15 @@
 ; Function Attrs: norecurse nounwind
 define dso_local i32 @test() local_unnamed_addr #0 {
   %1 = load volatile i64, i64* @a, align 8, !tbaa !2
-; CHECK: mov32 w1, 0x0
+; CHECK: mov32 r1, 0x0
 ; CHECK: R_SBF_64_64	a
 ; CHECK: hor64 r1, 0x0
 ; CHECK: ldxdw r1, [r1 + 0x0]
   %2 = load volatile i32, i32* @b, align 4, !tbaa !6
-; CHECK: mov32 w2, 0x0
+; CHECK: mov32 r2, 0x0
 ; CHECK: R_SBF_64_64	b
 ; CHECK: hor64 r2, 0x0
-; CHECK: ldxw w0, [r2 + 0x0]
+; CHECK: ldxw r0, [r2 + 0x0]
   %3 = trunc i64 %1 to i32
   %4 = add i32 %2, %3
 ; CHECK: add32 w0, w1

@@ -1,5 +1,5 @@
 ; RUN: llc -O2 -march=sbf -mattr=+alu32 < %s | FileCheck --check-prefixes=CHECK,CHECK-V0 %s
-; RUN: llc -O2 -march=sbf -mcpu=v3 < %s | FileCheck --check-prefixes=CHECK,CHECK-V3 %s
+; RUN: llc -O2 -march=sbf -mcpu=v3 -mattr=+alu32 < %s | FileCheck --check-prefixes=CHECK,CHECK-V3 %s
 ;
 ; int mov(int a)
 ; {
