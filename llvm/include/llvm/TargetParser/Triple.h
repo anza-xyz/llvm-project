@@ -163,6 +163,10 @@ public:
     SPIRVSubArch_v13,
     SPIRVSubArch_v14,
     SPIRVSubArch_v15,
+
+    SBFSubArch_v1,
+    SBFSubArch_v2,
+    SBFSubArch_v3,
   };
   enum VendorType {
     UnknownVendor,
