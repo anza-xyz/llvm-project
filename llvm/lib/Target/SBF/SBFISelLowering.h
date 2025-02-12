@@ -28,7 +28,6 @@ enum NodeType : unsigned {
   SELECT_CC,
   BR_CC,
   Wrapper,
-  MEMCPY,
 };
 }
 
@@ -158,10 +157,6 @@ private:
 
   unsigned EmitSubregExt(MachineInstr &MI, MachineBasicBlock *BB, unsigned Reg,
                          bool isSigned) const;
-
-  MachineBasicBlock * EmitInstrWithCustomInserterMemcpy(MachineInstr &MI,
-                                                        MachineBasicBlock *BB)
-                                                        const;
 
 };
 }

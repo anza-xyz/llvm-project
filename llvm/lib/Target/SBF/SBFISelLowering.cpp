@@ -29,10 +29,6 @@ using namespace llvm;
 
 #define DEBUG_TYPE "sbf-lower"
 
-static cl::opt<bool> SBFExpandMemcpyInOrder("sbf-expand-memcpy-in-order",
-  cl::Hidden, cl::init(false),
-  cl::desc("Expand memcpy into load/store pairs in order"));
-
 static void fail(const SDLoc &DL, SelectionDAG &DAG, const Twine &Msg) {
   MachineFunction &MF = DAG.getMachineFunction();
   DAG.getContext()->diagnose(
@@ -153,38 +149,20 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   setMinFunctionAlignment(Align(8));
   setPrefFunctionAlignment(Align(8));
 
-  if (SBFExpandMemcpyInOrder) {
-    // LLVM generic code will try to expand memcpy into load/store pairs at this
-    // stage which is before quite a few IR optimization passes, therefore the
-    // loads and stores could potentially be moved apart from each other which
-    // will cause trouble to memcpy pattern matcher inside kernel eBPF JIT
-    // compilers.
-    //
-    // When -sbf-expand-memcpy-in-order specified, we want to defer the expand
-    // of memcpy to later stage in IR optimization pipeline so those load/store
-    // pairs won't be touched and could be kept in order. Hence, we set
-    // MaxStoresPerMem* to zero to disable the generic getMemcpyLoadsAndStores
-    // code path, and ask LLVM to use target expander EmitTargetCodeForMemcpy.
-    MaxStoresPerMemset = MaxStoresPerMemsetOptSize = 0;
-    MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize = 0;
-    MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = 0;
-    MaxLoadsPerMemcmp = 0;
-  } else {
-    // A syscall consumes at least 10 CUs, so we should only invoke it when
-    // the number of instructions is at least 10.
+  // A syscall consumes at least 10 CUs, so we should only invoke it when
+  // the number of instructions is at least 10.
 
-    // Memset translates to stdw or stdxw, so the maximum should be 10.
-    MaxStoresPerMemset = MaxStoresPerMemsetOptSize = 10;
-    // Each store in memcpy follows a load, so the maximum is 5.
-    MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize = 5;
-    // Each store in memmove follows a load, so the maximum is 5.
-    MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = 5;
-    // Memcmp expands to three instructions for each load:
-    // 1. One load for each pointer being compared.
-    // 2. One jne for each load.
-    // The limit here should be three, since 3*3 = 9;
-    MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = 3;
-  }
+  // Memset translates to stdw or stdxw, so the maximum should be 10.
+  MaxStoresPerMemset = MaxStoresPerMemsetOptSize = 10;
+  // Each store in memcpy follows a load, so the maximum is 5.
+  MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize = 5;
+  // Each store in memmove follows a load, so the maximum is 5.
+  MaxStoresPerMemmove = MaxStoresPerMemmoveOptSize = 5;
+  // Memcmp expands to three instructions for each load:
+  // 1. One load for each pointer being compared.
+  // 2. One jne for each load.
+  // The limit here should be three, since 3*3 = 9;
+  MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = 3;
 
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
@@ -915,8 +893,6 @@ const char *SBFTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "SBFISD::BR_CC";
   case SBFISD::Wrapper:
     return "SBFISD::Wrapper";
-  case SBFISD::MEMCPY:
-    return "SBFISD::MEMCPY";
   }
   return nullptr;
 }
@@ -967,37 +943,6 @@ SBFTargetLowering::EmitSubregExt(MachineInstr &MI, MachineBasicBlock *BB,
 }
 
 MachineBasicBlock *
-SBFTargetLowering::EmitInstrWithCustomInserterMemcpy(MachineInstr &MI,
-                                                     MachineBasicBlock *BB)
-                                                     const {
-  MachineFunction *MF = MI.getParent()->getParent();
-  MachineRegisterInfo &MRI = MF->getRegInfo();
-  MachineInstrBuilder MIB(*MF, MI);
-  unsigned ScratchReg;
-
-  // This function does custom insertion during lowering SBFISD::MEMCPY which
-  // only has two register operands from memcpy semantics, the copy source
-  // address and the copy destination address.
-  //
-  // Because we will expand SBFISD::MEMCPY into load/store pairs, we will need
-  // a third scratch register to serve as the destination register of load and
-  // source register of store.
-  //
-  // The scratch register here is with the Define | Dead | EarlyClobber flags.
-  // The EarlyClobber flag has the semantic property that the operand it is
-  // attached to is clobbered before the rest of the inputs are read. Hence it
-  // must be unique among the operands to the instruction. The Define flag is
-  // needed to coerce the machine verifier that an Undef value isn't a problem
-  // as we anyway is loading memory into it. The Dead flag is needed as the
-  // value in scratch isn't supposed to be used by any other instruction.
-  ScratchReg = MRI.createVirtualRegister(&SBF::GPRRegClass);
-  MIB.addReg(ScratchReg,
-             RegState::Define | RegState::Dead | RegState::EarlyClobber);
-
-  return BB;
-}
-
-MachineBasicBlock *
 SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                MachineBasicBlock *BB) const {
   const TargetInstrInfo &TII = *BB->getParent()->getSubtarget().getInstrInfo();
@@ -1008,7 +953,6 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                        Opc == SBF::Select_32 ||
                        Opc == SBF::Select_32_64);
 
-  bool isMemcpyOp = Opc == SBF::MEMCPY;
   bool isAtomicFence = Opc == SBF::ATOMIC_FENCE;
 
 #ifndef NDEBUG
@@ -1018,12 +962,10 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                        Opc == SBF::Select_Ri_32_64);
 
 
-  assert((isSelectRROp || isSelectRIOp || isMemcpyOp || isAtomicFence) &&
+  assert((isSelectRROp || isSelectRIOp || isAtomicFence) &&
          "Unexpected instr type to insert");
 #endif
 
-  if (isMemcpyOp)
-    return EmitInstrWithCustomInserterMemcpy(MI, BB);
 
   if (isAtomicFence) {
     // this is currently a nop
