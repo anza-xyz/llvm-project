@@ -28,10 +28,6 @@ def SDT_SBFBrCC         : SDTypeProfile<0, 4, [SDTCisSameAs<0, 1>,
                                                SDTCisVT<3, OtherVT>]>;
 def SDT_SBFWrapper      : SDTypeProfile<1, 1, [SDTCisSameAs<0, 1>,
                                                SDTCisPtrTy<0>]>;
-def SDT_SBFMEMCPY       : SDTypeProfile<0, 4, [SDTCisVT<0, i64>,
-                                               SDTCisVT<1, i64>,
-                                               SDTCisVT<2, i64>,
-                                               SDTCisVT<3, i64>]>;
 
 def SBFcall         : SDNode<"SBFISD::CALL", SDT_SBFCall,
                              [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
@@ -47,9 +43,6 @@ def SBFbrcc         : SDNode<"SBFISD::BR_CC", SDT_SBFBrCC,
 
 def SBFselectcc     : SDNode<"SBFISD::SELECT_CC", SDT_SBFSelectCC, [SDNPInGlue]>;
 def SBFWrapper      : SDNode<"SBFISD::Wrapper", SDT_SBFWrapper>;
-def SBFmemcpy       : SDNode<"SBFISD::MEMCPY", SDT_SBFMEMCPY,
-                             [SDNPHasChain, SDNPInGlue, SDNPOutGlue,
-                              SDNPMayStore, SDNPMayLoad]>;
 def SBFIsLittleEndian : Predicate<"CurDAG->getDataLayout().isLittleEndian()">;
 def SBFIsBigEndian    : Predicate<"!CurDAG->getDataLayout().isLittleEndian()">;
 def SBFHasALU32 : Predicate<"Subtarget->getHasAlu32()">;
@@ -1462,12 +1455,4 @@ let Predicates = [SBFHasALU32, SBFNewMemEncoding] in {
             (SUBREG_TO_REG (i64 0), (LDH32_V2 ADDRri:$src), sub_32)>;
   def : Pat<(i64 (extloadi32 ADDRri:$src)),
             (SUBREG_TO_REG (i64 0), (LDW32_V2 ADDRri:$src), sub_32)>;
-}
-
-let usesCustomInserter = 1, isCodeGenOnly = 1 in {
-    def MEMCPY : Pseudo<
-      (outs),
-      (ins GPR:$dst, GPR:$src, i64imm:$len, i64imm:$align, variable_ops),
-      "#memcpy dst: $dst, src: $src, len: $len, align: $align",
-      [(SBFmemcpy GPR:$dst, GPR:$src, imm:$len, imm:$align)]>;
 }
