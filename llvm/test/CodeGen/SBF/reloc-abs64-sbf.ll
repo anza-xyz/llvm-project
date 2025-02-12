@@ -1,5 +1,6 @@
 ; RUN: llc -march=sbf -filetype=obj < %s | llvm-objdump -r - | tee -i /tmp/foo | FileCheck --check-prefix=CHECK-RELOC-BPF %s
 ; RUN: llc -march=sbf -mcpu=v3 -filetype=obj < %s | llvm-objdump -r - | tee -i /tmp/foo | FileCheck --check-prefix=CHECK-RELOC-SBFv3 %s
+; RUN: llc -mtriple=sbpfv3-solana-solana -filetype=obj < %s | llvm-objdump -r - | tee -i /tmp/foo | FileCheck --check-prefix=CHECK-RELOC-SBFv3 %s
 
 @.str = private unnamed_addr constant [25 x i8] c"reloc_64_relative_data.c\00", align 1
 @FILE = dso_local constant i64 ptrtoint ([25 x i8]* @.str to i64), align 8

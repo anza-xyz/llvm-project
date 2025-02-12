@@ -54,7 +54,9 @@ static MCRegisterInfo *createSBFMCRegisterInfo(const Triple &TT) {
 
 static MCSubtargetInfo *createSBFMCSubtargetInfo(const Triple &TT,
                                                  StringRef CPU, StringRef FS) {
-  return createSBFMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+  std::string CpuStr = cpuFromSubArch(TT, CPU.str());
+  StringRef CpuRef = CpuStr;
+  return createSBFMCSubtargetInfoImpl(TT, CpuRef, /*TuneCPU*/ CpuRef, FS);
 }
 
 static MCStreamer *createSBFMCStreamer(const Triple &T, MCContext &Ctx,

@@ -618,6 +618,33 @@ TEST(TripleTest, ParsedIDs) {
   EXPECT_EQ(Triple::SolanaOS, T.getOS());
   EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
 
+  T = Triple("sbpf-solana-solana");
+  EXPECT_EQ(Triple::sbf, T.getArch());
+  EXPECT_EQ(Triple::Solana, T.getVendor());
+  EXPECT_EQ(Triple::SolanaOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
+  T = Triple("sbpfv1-solana-solana");
+  EXPECT_EQ(Triple::sbf, T.getArch());
+  EXPECT_EQ(Triple::SBFSubArch_v1, T.getSubArch());
+  EXPECT_EQ(Triple::Solana, T.getVendor());
+  EXPECT_EQ(Triple::SolanaOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
+  T = Triple("sbpfv2-solana-solana");
+  EXPECT_EQ(Triple::sbf, T.getArch());
+  EXPECT_EQ(Triple::SBFSubArch_v2, T.getSubArch());
+  EXPECT_EQ(Triple::Solana, T.getVendor());
+  EXPECT_EQ(Triple::SolanaOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
+  T = Triple("sbpfv3-solana-solana");
+  EXPECT_EQ(Triple::sbf, T.getArch());
+  EXPECT_EQ(Triple::SBFSubArch_v3, T.getSubArch());
+  EXPECT_EQ(Triple::Solana, T.getVendor());
+  EXPECT_EQ(Triple::SolanaOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
   T = Triple("sbf-unknown-unknown");
   EXPECT_EQ(Triple::sbf, T.getArch());
   EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
@@ -625,6 +652,12 @@ TEST(TripleTest, ParsedIDs) {
   EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
 
   T = Triple("sbf");
+  EXPECT_EQ(Triple::sbf, T.getArch());
+  EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
+  EXPECT_EQ(Triple::UnknownOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
+  T = Triple("sbpf");
   EXPECT_EQ(Triple::sbf, T.getArch());
   EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
   EXPECT_EQ(Triple::UnknownOS, T.getOS());

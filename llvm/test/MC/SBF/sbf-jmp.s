@@ -1,5 +1,7 @@
 # RUN: llvm-mc %s -triple=sbf-solana-solana --mcpu=v3 --show-encoding \
 # RUN:     | FileCheck %s --check-prefix=CHECK-ASM-NEW
+# RUN: llvm-mc %s -triple=sbpfv3-solana-solana --show-encoding \
+# RUN:     | FileCheck %s --check-prefix=CHECK-ASM-NEW
 # RUN: llvm-mc %s -triple=sbf-solana-solana --show-encoding \
 # RUN:     | FileCheck %s --check-prefix=CHECK-ASM-OLD
 # RUN: llvm-mc %s -triple=sbf-solana-solana --mcpu=v3 -filetype=obj \
