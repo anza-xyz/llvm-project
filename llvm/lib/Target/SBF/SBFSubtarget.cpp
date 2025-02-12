@@ -14,6 +14,7 @@
 #include "SBF.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/TargetParser/Host.h"
+#include "TargetInfo/SBFTargetInfo.h"
 
 using namespace llvm;
 
@@ -59,8 +60,8 @@ void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
 
 SBFSubtarget::SBFSubtarget(const Triple &TT, const std::string &CPU,
                            const std::string &FS, const TargetMachine &TM)
-    : SBFGenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS), InstrInfo(),
-      FrameLowering(initializeSubtargetDependencies(TT, CPU, FS)),
+    : SBFGenSubtargetInfo(TT, cpuFromSubArch(TT, CPU), /*TuneCPU*/ cpuFromSubArch(TT, CPU), FS), InstrInfo(),
+      FrameLowering(initializeSubtargetDependencies(TT, cpuFromSubArch(TT, CPU), FS)),
       TLInfo(TM, *this) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
 }

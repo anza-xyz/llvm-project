@@ -387,6 +387,10 @@ static Triple::ArchType parseBPFArch(StringRef ArchName) {
     return Triple::bpfeb;
   } else if (ArchName == "bpf_le" || ArchName == "bpfel") {
     return Triple::bpfel;
+  } else if (ArchName.equals("sbf") || ArchName.equals("sbpf") ||
+             ArchName.equals("sbpfv1") || ArchName.equals("sbpfv2") ||
+             ArchName.equals("sbpfv3")) {
+    return Triple::sbf;
   } else {
     return Triple::UnknownArch;
   }
@@ -422,6 +426,8 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("riscv32", riscv32)
     .Case("riscv64", riscv64)
     .Case("hexagon", hexagon)
+    .Case("sbf", BPFArch)
+    .Case("sbpf", BPFArch)
     .Case("sparc", sparc)
     .Case("sparcel", sparcel)
     .Case("sparcv9", sparcv9)
@@ -617,7 +623,8 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     if (ArchName.starts_with("arm") || ArchName.starts_with("thumb") ||
         ArchName.starts_with("aarch64"))
       return parseARMArch(ArchName);
-    if (ArchName.starts_with("bpf"))
+    if (ArchName.starts_with("bpf") || ArchName.starts_with("sbf") ||
+        ArchName.starts_with("sbpf"))
       return parseBPFArch(ArchName);
   }
 
@@ -791,6 +798,14 @@ static Triple::SubArchType parseSubArch(StringRef SubArchName) {
         .EndsWith("v1.7", Triple::DXILSubArch_v1_7)
         .EndsWith("v1.8", Triple::DXILSubArch_v1_8)
         .Default(Triple::NoSubArch);
+
+  if (SubArchName.starts_with("sbpf")) {
+    return StringSwitch<Triple::SubArchType>(SubArchName)
+        .EndsWith("v1", Triple::SBFSubArch_v1)
+        .EndsWith("v2", Triple::SBFSubArch_v2)
+        .EndsWith("v3", Triple::SBFSubArch_v3)
+        .Default(Triple::NoSubArch);
+  }
 
   StringRef ARMSubArch = ARM::getCanonicalArchName(SubArchName);
 

@@ -1,4 +1,5 @@
 ; RUN: llc -march=sbf -mcpu=v2 < %s | FileCheck %s
+; RUN: llc -mtriple=sbpfv2-solana-solana < %s | FileCheck %s
 
 define i64 @test_func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e) {
 start:

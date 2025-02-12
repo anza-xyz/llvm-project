@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+#include "llvm/TargetParser/Triple.h"
 
 #ifndef LLVM_LIB_TARGET_SBF_TARGETINFO_SBFTARGETINFO_H
 #define LLVM_LIB_TARGET_SBF_TARGETINFO_SBFTARGETINFO_H
@@ -14,6 +15,7 @@ namespace llvm {
 class Target;
 
 Target &getTheSBFXTarget();
+std::string cpuFromSubArch(const Triple &TT, const std::string &CPU);
 } // namespace llvm
 
 #endif // LLVM_LIB_TARGET_SBF_TARGETINFO_SBFTARGETINFO_H
