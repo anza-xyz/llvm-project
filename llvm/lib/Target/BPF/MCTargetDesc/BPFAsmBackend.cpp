@@ -15,7 +15,6 @@
 #include "llvm/MC/MCFixup.h"
 #include "llvm/MC/MCFixupKindInfo.h"
 #include "llvm/MC/MCObjectWriter.h"
-#include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/Support/EndianStream.h"
 #include <cassert>
 #include <cstdint>

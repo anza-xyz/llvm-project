@@ -12,6 +12,10 @@
 
 #include "SBFSubtarget.h"
 #include "SBF.h"
+#include "SBFTargetMachine.h"
+#include "GISel/SBFCallLowering.h"
+#include "GISel/SBFLegalizerInfo.h"
+#include "GISel/SBFRegisterBankInfo.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/TargetParser/Host.h"
 #include "TargetInfo/SBFTargetInfo.h"
@@ -64,4 +68,12 @@ SBFSubtarget::SBFSubtarget(const Triple &TT, const std::string &CPU,
       FrameLowering(initializeSubtargetDependencies(TT, cpuFromSubArch(TT, CPU), FS)),
       TLInfo(TM, *this) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
+
+  CallLoweringInfo.reset(new SBFCallLowering(*getTargetLowering()));
+  Legalizer.reset(new SBFLegalizerInfo(*this));
+  auto *RBI = new SBFRegisterBankInfo(*getRegisterInfo());
+  RegBankInfo.reset(RBI);
+
+  InstSelector.reset(createSBFInstructionSelector(
+      *static_cast<const SBFTargetMachine *>(&TM), *this, *RBI));
 }

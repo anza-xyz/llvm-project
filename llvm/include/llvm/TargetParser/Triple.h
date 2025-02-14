@@ -106,6 +106,7 @@ public:
     wasm64,         // WebAssembly with 64-bit pointers
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
+    sbf,
     ve,             // NEC SX-Aurora Vector Engine
     LastArchType = ve
   };
@@ -199,6 +200,7 @@ public:
     Mesa,
     SUSE,
     Solana,
+    OpenEmbedded,
     LastVendorType = OpenEmbedded
   };
   enum OSType {
@@ -243,6 +245,7 @@ public:
     ShaderModel, // DirectX ShaderModel
     LiteOS,
     Serenity,
+    SolanaOS,
     Vulkan, // Vulkan SPIR-V
     LastOSType = Vulkan
   };

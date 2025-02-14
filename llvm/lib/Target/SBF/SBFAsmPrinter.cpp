@@ -24,6 +24,7 @@
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
+#include "llvm/IR/Module.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCStreamer.h"
@@ -69,9 +70,7 @@ bool SBFAsmPrinter::doInitialization(Module &M) {
   if (MAI->doesSupportDebugInformation() && !M.debug_compile_units().empty() &&
       SBFEnableBTFEmission) {
     BTF = new BTFX::BTFDebug(this);
-    Handlers.push_back(HandlerInfo(std::unique_ptr<BTFX::BTFDebug>(BTF), "emit",
-                                   "Debug Info Emission", "BTF",
-                                   "BTF Emission"));
+    DebugHandlers.push_back(std::unique_ptr<BTFX::BTFDebug>(BTF));
   }
 
   return false;

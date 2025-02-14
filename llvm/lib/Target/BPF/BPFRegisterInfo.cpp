@@ -32,8 +32,6 @@ static cl::opt<int>
                        cl::desc("Specify the BPF stack size limit"),
                        cl::init(512));
 
-unsigned BPFRegisterInfo::FrameLength = 512;
-
 BPFRegisterInfo::BPFRegisterInfo()
     : BPFGenRegisterInfo(BPF::R0) {}
 

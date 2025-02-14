@@ -38,9 +38,8 @@ public:
   createObjectTargetWriter() const override;
 
   // No instruction requires relaxation
-  bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value,
-                            const MCRelaxableFragment *DF,
-                            const MCAsmLayout &Layout) const override {
+  bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value)
+                                                    const override {
     return false;
   }
 

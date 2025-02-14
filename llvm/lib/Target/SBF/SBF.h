@@ -15,6 +15,10 @@
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
+class SBFRegisterBankInfo;
+class SBFSubtarget;
+class SBFTargetMachine;
+class InstructionSelector;
 class SBFTargetMachine;
 class PassRegistry;
 
@@ -27,8 +31,12 @@ FunctionPass *createSBFMIPeepholeTruncElimPass();
 FunctionPass *createSBFMIPreEmitPeepholePass();
 FunctionPass *createSBFMIPreEmitCheckingPass();
 
+InstructionSelector *createSBFInstructionSelector(const SBFTargetMachine &,
+                                                  const SBFSubtarget &,
+                                                  const SBFRegisterBankInfo &);
+
 void initializeSBFCheckAndAdjustIRPass(PassRegistry&);
-void initializeSBFDAGToDAGISelPass(PassRegistry &);
+void initializeSBFDAGToDAGISelLegacyPass(PassRegistry &);
 void initializeSBFMIPeepholePass(PassRegistry&);
 void initializeSBFMIPeepholeTruncElimPass(PassRegistry &);
 void initializeSBFMIPreEmitCheckingPass(PassRegistry&);

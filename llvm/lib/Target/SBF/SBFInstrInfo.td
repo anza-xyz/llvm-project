@@ -43,8 +43,6 @@ def SBFbrcc         : SDNode<"SBFISD::BR_CC", SDT_SBFBrCC,
 
 def SBFselectcc     : SDNode<"SBFISD::SELECT_CC", SDT_SBFSelectCC, [SDNPInGlue]>;
 def SBFWrapper      : SDNode<"SBFISD::Wrapper", SDT_SBFWrapper>;
-def SBFIsLittleEndian : Predicate<"CurDAG->getDataLayout().isLittleEndian()">;
-def SBFIsBigEndian    : Predicate<"!CurDAG->getDataLayout().isLittleEndian()">;
 def SBFHasALU32 : Predicate<"Subtarget->getHasAlu32()">;
 def SBFNoALU32 : Predicate<"!Subtarget->getHasAlu32()">;
 def SBFHasLddw : Predicate<"!Subtarget->getNoLddw()">;
@@ -990,7 +988,7 @@ class XADD<SBFWidthModifer SizeOp, string Mnemonic, PatFrag OpNode>
 
 let Constraints = "$dst = $val" in {
   let Predicates = [SBFNoALU32] in {
-    def XADDW : XADD<SBF_W, "stxxaddw", atomic_load_add_32>;
+    def XADDW : XADD<SBF_W, "stxxaddw", atomic_load_add_i32>;
   }
 }
 
@@ -1080,16 +1078,16 @@ class XFALU32<SBFWidthModifer SizeOp, SBFArithOp Opc, string OpcStr,
 
 let Constraints = "$dst = $val" in {
   let Predicates = [SBFHasALU32], DecoderNamespace = "SBFALU32" in {
-    def XFADDW32 : XFALU32<SBF_W, SBF_ADD, "add", atomic_load_add_32>;
-    def XFANDW32 : XFALU32<SBF_W, SBF_AND, "and", atomic_load_and_32>;
-    def XFORW32  : XFALU32<SBF_W, SBF_OR,  "or",  atomic_load_or_32>;
-    def XFXORW32 : XFALU32<SBF_W, SBF_XOR, "xor", atomic_load_xor_32>;
+    def XFADDW32 : XFALU32<SBF_W, SBF_ADD, "add", atomic_load_add_i32>;
+    def XFANDW32 : XFALU32<SBF_W, SBF_AND, "and", atomic_load_and_i32>;
+    def XFORW32  : XFALU32<SBF_W, SBF_OR,  "or",  atomic_load_or_i32>;
+    def XFXORW32 : XFALU32<SBF_W, SBF_XOR, "xor", atomic_load_xor_i32>;
   }
 
-  def XFADDD : XFALU64<SBF_DW, SBF_ADD, "add", atomic_load_add_64>;
-  def XFANDD : XFALU64<SBF_DW, SBF_AND, "and", atomic_load_and_64>;
-  def XFORD  : XFALU64<SBF_DW, SBF_OR,  "or",  atomic_load_or_64>;
-  def XFXORD : XFALU64<SBF_DW, SBF_XOR, "xor", atomic_load_xor_64>;
+  def XFADDD : XFALU64<SBF_DW, SBF_ADD, "add", atomic_load_add_i64>;
+  def XFANDD : XFALU64<SBF_DW, SBF_AND, "and", atomic_load_and_i64>;
+  def XFORD  : XFALU64<SBF_DW, SBF_OR,  "or",  atomic_load_or_i64>;
+  def XFXORD : XFALU64<SBF_DW, SBF_XOR, "xor", atomic_load_xor_i64>;
 }
 
 let usesCustomInserter = 1, isCodeGenOnly = 1 in {
@@ -1137,10 +1135,10 @@ class XCHG32<SBFWidthModifer SizeOp, PatFrag OpNode>
 
 let Constraints = "$dst = $val" in {
   let Predicates = [SBFHasALU32], DecoderNamespace = "SBFALU32" in {
-    def XCHGW32 : XCHG32<SBF_W, atomic_swap_32>;
+    def XCHGW32 : XCHG32<SBF_W, atomic_swap_i32>;
   }
 
-  def XCHGD : XCHG<SBF_DW, atomic_swap_64>;
+  def XCHGD : XCHG<SBF_DW, atomic_swap_i64>;
 }
 
 // Compare-And-Exchange
@@ -1180,11 +1178,11 @@ class CMPXCHG32<SBFWidthModifer SizeOp, PatFrag OpNode>
 
 let Predicates = [SBFHasALU32], Defs = [W0], Uses = [W0],
     DecoderNamespace = "SBFALU32" in {
-  def CMPXCHGW32 : CMPXCHG32<SBF_W, atomic_cmp_swap_32>;
+  def CMPXCHGW32 : CMPXCHG32<SBF_W, atomic_cmp_swap_i32>;
 }
 
 let Defs = [R0], Uses = [R0] in {
-  def CMPXCHGD : CMPXCHG<SBF_DW, atomic_cmp_swap_64>;
+  def CMPXCHGD : CMPXCHG<SBF_DW, atomic_cmp_swap_i64>;
 }
 
 // bswap16, bswap32, bswap64
@@ -1203,11 +1201,9 @@ class BSWAP<bits<32> SizeOp, string OpcodeStr, SBFSrcType SrcType, list<dag> Pat
 
 
 let Constraints = "$dst = $src" in {
-    let Predicates = [SBFIsLittleEndian] in {
-        def BE16 : BSWAP<16, "be16", SBF_TO_BE, [(set GPR:$dst, (srl (bswap GPR:$src), (i64 48)))]>;
-        def BE32 : BSWAP<32, "be32", SBF_TO_BE, [(set GPR:$dst, (srl (bswap GPR:$src), (i64 32)))]>;
-        def BE64 : BSWAP<64, "be64", SBF_TO_BE, [(set GPR:$dst, (bswap GPR:$src))]>;
-    }
+    def BE16 : BSWAP<16, "be16", SBF_TO_BE, [(set GPR:$dst, (srl (bswap GPR:$src), (i64 48)))]>;
+    def BE32 : BSWAP<32, "be32", SBF_TO_BE, [(set GPR:$dst, (srl (bswap GPR:$src), (i64 32)))]>;
+    def BE64 : BSWAP<64, "be64", SBF_TO_BE, [(set GPR:$dst, (bswap GPR:$src))]>;
 }
 
 let DecoderNamespace = "SBFv2" in {

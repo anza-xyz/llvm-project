@@ -17,6 +17,7 @@
 #include "llvm/BinaryFormat/ELF.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
+#include "llvm/IR/Module.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCObjectFileInfo.h"
 #include "llvm/MC/MCSectionELF.h"
@@ -589,7 +590,7 @@ void BTFDebug::processDeclAnnotations(DINodeArray Annotations,
   for (const Metadata *Annotation : Annotations->operands()) {
     const MDNode *MD = cast<MDNode>(Annotation);
     const MDString *Name = cast<MDString>(MD->getOperand(0));
-    if (!Name->getString().equals("btf_decl_tag"))
+    if (Name->getString() != "btf_decl_tag")
       continue;
 
     const MDString *Value = cast<MDString>(MD->getOperand(1));
@@ -628,7 +629,7 @@ int BTFDebug::genBTFTypeTags(const DIDerivedType *DTy, int BaseTypeId) {
     for (const Metadata *Annotations : Annots->operands()) {
       const MDNode *MD = cast<MDNode>(Annotations);
       const MDString *Name = cast<MDString>(MD->getOperand(0));
-      if (!Name->getString().equals("btf_type_tag"))
+      if (Name->getString() != "btf_type_tag")
         continue;
       MDStrs.push_back(cast<MDString>(MD->getOperand(1)));
     }

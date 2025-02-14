@@ -11,6 +11,7 @@ include "llvm/Target/Target.td"
 include "SBFRegisterInfo.td"
 include "SBFCallingConv.td"
 include "SBFInstrInfo.td"
+include "GISel/SBFRegisterBanks.td"
 
 def SBFInstrInfo : InstrInfo;
 //===----------------------------------------------------------------------===//

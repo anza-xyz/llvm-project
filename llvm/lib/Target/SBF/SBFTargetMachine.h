@@ -41,7 +41,7 @@ public:
     return TLOF.get();
   }
 
-  void registerPassBuilderCallbacks(PassBuilder &PB, bool PopulateClassToPassNames) override;
+  void registerPassBuilderCallbacks(PassBuilder &PB) override;
 
   MachineFunctionInfo *
   createMachineFunctionInfo(BumpPtrAllocator &Allocator, const Function &F,

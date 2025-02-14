@@ -22,10 +22,11 @@ namespace clang {
 namespace targets {
 
 class LLVM_LIBRARY_VISIBILITY BPFTargetInfo : public TargetInfo {
+  bool HasSolanaFeature = false;
   bool HasAlu32 = false;
 
 public:
-  BPFTargetInfo(const llvm::Triple &Triple, const TargetOptions &)
+  BPFTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : TargetInfo(Triple) {
     LongWidth = LongAlign = PointerWidth = PointerAlign = 64;
     SizeType = UnsignedLong;
@@ -34,10 +35,28 @@ public:
     IntMaxType = SignedLong;
     Int64Type = SignedLong;
     RegParmMax = 5;
-    if (Triple.getArch() == llvm::Triple::bpfeb) {
-      resetDataLayout("E-m:e-p:64:64-i64:64-i128:128-n32:64-S128");
+    if (Triple.getArch() == llvm::Triple::sbf) {
+      HasSolanaFeature = true;
     } else {
-      resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n32:64-S128");
+      for (auto& it : Opts.FeaturesAsWritten) {
+        if (it == "+solana") {
+          HasSolanaFeature = true;
+          break;
+        }
+      }
+    }
+    if (Triple.getArch() == llvm::Triple::bpfeb) {
+      if (HasSolanaFeature) {
+        resetDataLayout("E-m:e-p:64:64-i64:64-n32:64-S128");
+      } else {
+        resetDataLayout("E-m:e-p:64:64-i64:64-i128:128-n32:64-S128");
+      }
+    } else {
+      if (HasSolanaFeature) {
+        resetDataLayout("e-m:e-p:64:64-i64:64-n32:64-S128");
+      } else {
+        resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n32:64-S128");
+      }
     }
     MaxAtomicPromoteWidth = 64;
     MaxAtomicInlineWidth = 64;
@@ -117,6 +136,8 @@ public:
   std::pair<unsigned, unsigned> hardwareInterferenceSizes() const override {
     return std::make_pair(32, 32);
   }
+
+  bool hasBitIntType() const override { return HasSolanaFeature; }
 };
 } // namespace targets
 } // namespace clang

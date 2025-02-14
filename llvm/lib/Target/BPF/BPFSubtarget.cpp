@@ -51,9 +51,7 @@ BPFSubtarget &BPFSubtarget::initializeSubtargetDependencies(StringRef CPU,
   return *this;
 }
 
-void BPFSubtarget::initializeEnvironment(const Triple &TT) {
-  // TODO: jle: remove, sbf is now provided by the SBF backend.
-  IsSolana = false;
+void BPFSubtarget::initializeEnvironment() {
   HasJmpExt = false;
   HasJmp32 = false;
   HasAlu32 = false;
@@ -101,10 +99,6 @@ BPFSubtarget::BPFSubtarget(const Triple &TT, const std::string &CPU,
       FrameLowering(initializeSubtargetDependencies(CPU, FS)),
       TLInfo(TM, *this) {
   IsLittleEndian = TT.isLittleEndian();
-<<<<<<< HEAD
-=======
-  TSInfo.setSolanaFlag(false);
->>>>>>> 3d16ab60503b ([SOL] Initial squash commit for new SBF LLVM back-end and related.)
 
   CallLoweringInfo.reset(new BPFCallLowering(*getTargetLowering()));
   Legalizer.reset(new BPFLegalizerInfo(*this));

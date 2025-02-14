@@ -10,6 +10,7 @@ add_llvm_component_library(LLVMSBFDesc
   MC
   SBFInfo
   Support
+  TargetParser
 
   ADD_TO_COMPONENT
   SBF

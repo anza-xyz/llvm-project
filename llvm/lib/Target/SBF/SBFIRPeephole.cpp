@@ -58,7 +58,7 @@ static bool SBFIRPeepholeImpl(Function &F) {
 
       if (auto *Call = dyn_cast<CallInst>(&I)) {
         if (auto *GV = dyn_cast<GlobalValue>(Call->getCalledOperand())) {
-          if (!GV->getName().equals("llvm.stacksave"))
+          if (GV->getName() != "llvm.stacksave")
             continue;
           if (!Call->hasOneUser())
             continue;
@@ -81,7 +81,7 @@ static bool SBFIRPeepholeImpl(Function &F) {
         auto *GV = dyn_cast<GlobalValue>(Call->getCalledOperand());
         if (!GV)
           continue;
-        if (!GV->getName().equals("llvm.stackrestore"))
+        if (GV->getName() != "llvm.stackrestore")
           continue;
         LLVM_DEBUG(dbgs() << "Remove:"; I.dump());
         LLVM_DEBUG(dbgs() << "Remove:"; Call->dump(); dbgs() << '\n');

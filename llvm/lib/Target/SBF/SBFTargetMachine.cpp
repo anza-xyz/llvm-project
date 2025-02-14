@@ -42,6 +42,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSBFTarget() {
   initializeSBFCheckAndAdjustIRPass(PR);
   initializeSBFMIPeepholePass(PR);
   initializeSBFMIPeepholeTruncElimPass(PR);
+  initializeSBFDAGToDAGISelLegacyPass(PR);
 }
 
 // DataLayout: little or big endian
@@ -97,8 +98,7 @@ TargetPassConfig *SBFTargetMachine::createPassConfig(PassManagerBase &PM) {
   return new SBFPassConfig(*this, PM);
 }
 
-void SBFTargetMachine::registerPassBuilderCallbacks(
-    PassBuilder &PB, bool PopulateClassToPassNames) {
+void SBFTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
   PB.registerPipelineParsingCallback(
       [](StringRef PassName, FunctionPassManager &FPM,
          ArrayRef<PassBuilder::PipelineElement>) {

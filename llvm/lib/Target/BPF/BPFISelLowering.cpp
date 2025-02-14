@@ -99,7 +99,7 @@ BPFTargetLowering::BPFTargetLowering(const TargetMachine &TM,
 
     setOperationAction(ISD::SDIVREM, VT, Expand);
     setOperationAction(ISD::UDIVREM, VT, Expand);
-    if (!STI.hasSdivSmod() && !Subtarget->isSolana()) {
+    if (!STI.hasSdivSmod()) {
       setOperationAction(ISD::SDIV, VT, Custom);
       setOperationAction(ISD::SREM, VT, Custom);
     }
@@ -280,6 +280,10 @@ void BPFTargetLowering::ReplaceNodeResults(
   switch (Opcode) {
   default:
     report_fatal_error("unhandled custom legalization: " + Twine(Opcode));
+  case ISD::ATOMIC_LOAD_ADD:
+  case ISD::ATOMIC_LOAD_AND:
+  case ISD::ATOMIC_LOAD_OR:
+  case ISD::ATOMIC_LOAD_XOR:
   case ISD::ATOMIC_SWAP:
   case ISD::ATOMIC_CMP_SWAP_WITH_SUCCESS:
     if (HasAlu32 || Opcode == ISD::ATOMIC_LOAD_ADD)

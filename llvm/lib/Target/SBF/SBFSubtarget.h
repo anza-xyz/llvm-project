@@ -16,7 +16,12 @@
 #include "SBFFrameLowering.h"
 #include "SBFISelLowering.h"
 #include "SBFInstrInfo.h"
+#include "SBFRegisterInfo.h"
 #include "SBFSelectionDAGInfo.h"
+#include "llvm/CodeGen/GlobalISel/CallLowering.h"
+#include "llvm/CodeGen/GlobalISel/InstructionSelector.h"
+#include "llvm/CodeGen/GlobalISel/LegalizerInfo.h"
+#include "llvm/CodeGen/RegisterBankInfo.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/DataLayout.h"
@@ -83,6 +88,11 @@ protected:
   // Whether we enable the new encoding for memory instructions
   bool NewMemEncoding;
 
+  std::unique_ptr<CallLowering> CallLoweringInfo;
+  std::unique_ptr<InstructionSelector> InstSelector;
+  std::unique_ptr<LegalizerInfo> Legalizer;
+  std::unique_ptr<RegisterBankInfo> RegBankInfo;
+
 public:
   // This constructor initializes the data members to match that
   // of the specified triple.
@@ -118,7 +128,7 @@ public:
   const SBFSelectionDAGInfo *getSelectionDAGInfo() const override {
     return &TSInfo;
   }
-  const TargetRegisterInfo *getRegisterInfo() const override {
+  const SBFRegisterInfo *getRegisterInfo() const override {
     return &InstrInfo.getRegisterInfo();
   }
 };

@@ -62,12 +62,10 @@ static MCSubtargetInfo *createSBFMCSubtargetInfo(const Triple &TT,
 static MCStreamer *createSBFMCStreamer(const Triple &T, MCContext &Ctx,
                                        std::unique_ptr<MCAsmBackend> &&MAB,
                                        std::unique_ptr<MCObjectWriter> &&OW,
-                                       std::unique_ptr<MCCodeEmitter> &&Emitter,
-                                       bool RelaxAll) {
+                                       std::unique_ptr<MCCodeEmitter> &&Emitter) {
   MCELFStreamer *S =
       new MCELFStreamer(Ctx, std::move(MAB), std::move(OW), std::move(Emitter));
-  if (RelaxAll)
-    S->getAssembler().setRelaxAll(true);
+
   const MCSubtargetInfo *STI = Ctx.getSubtargetInfo();
 
   StringRef CPU = STI->getCPU();
@@ -79,7 +77,7 @@ static MCStreamer *createSBFMCStreamer(const Triple &T, MCContext &Ctx,
   } else if (CPU == "v3") {
     EFlag = llvm::ELF::EF_SBF_V3;
   }
-  S->getAssembler().setELFHeaderEFlags(EFlag);
+  S->getWriter().setELFHeaderEFlags(EFlag);
 
   return S;
 }

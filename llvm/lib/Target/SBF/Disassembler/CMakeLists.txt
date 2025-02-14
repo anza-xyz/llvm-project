@@ -3,6 +3,7 @@ add_llvm_component_library(LLVMSBFDisassembler
 
   LINK_COMPONENTS
   MCDisassembler
+  MC
   SBFInfo
   Support
 

@@ -33,8 +33,6 @@ using namespace llvm;
 
 #define DEBUG_TYPE "sbf-mi-zext-elim"
 
-STATISTIC(ZExtElemNum, "Number of zero extension shifts eliminated");
-
 namespace {
 
 struct SBFMIPeephole : public MachineFunctionPass {

@@ -138,9 +138,9 @@ public:
   /// getEndLoc - Gets location of the last token of this operand
   SMLoc getEndLoc() const override { return EndLoc; }
 
-  unsigned getReg() const override {
+  MCRegister getReg() const override {
     assert(Kind == Register && "Invalid type access!");
-    return Reg.RegNum;
+    return MCRegister(Reg.RegNum);
   }
 
   const MCExpr *getImm() const {
@@ -167,7 +167,7 @@ public:
       break;
     case Register:
       OS << "<register ";
-      OS << RegName(getReg()) << ">";
+      OS << RegName(getReg().id()) << ">";
       break;
     case Token:
       OS << "'" << getToken() << "'";
@@ -187,7 +187,7 @@ public:
   // Used by the TableGen Code
   void addRegOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
-    Inst.addOperand(MCOperand::createReg(getReg()));
+    Inst.addOperand(MCOperand::createReg(getReg().id()));
   }
 
   void addImmOperands(MCInst &Inst, unsigned N) const {

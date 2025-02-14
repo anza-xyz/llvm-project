@@ -45,12 +45,10 @@ class SBFDAGToDAGISel : public SelectionDAGISel {
   const SBFSubtarget *Subtarget;
 
 public:
-  static char ID;
-
   SBFDAGToDAGISel() = delete;
 
   explicit SBFDAGToDAGISel(SBFTargetMachine &TM)
-      : SelectionDAGISel(ID, TM), Subtarget(nullptr) {}
+      : SelectionDAGISel(TM), Subtarget(nullptr) {}
 
   bool runOnMachineFunction(MachineFunction &MF) override {
     // Reset the subtarget each time through.
@@ -93,11 +91,18 @@ private:
   // Mapping from ConstantStruct global value to corresponding byte-list values
   std::map<const void *, val_vec_type> cs_vals_;
 };
+
+class SBFDAGToDAGISelLegacy : public SelectionDAGISelLegacy {
+public:
+  static char ID;
+  SBFDAGToDAGISelLegacy(SBFTargetMachine &TM)
+      : SelectionDAGISelLegacy(ID, std::make_unique<SBFDAGToDAGISel>(TM)) {}
+};
 } // namespace
 
-char SBFDAGToDAGISel::ID = 0;
+char SBFDAGToDAGISelLegacy::ID = 0;
 
-INITIALIZE_PASS(SBFDAGToDAGISel, DEBUG_TYPE, PASS_NAME, false, false)
+INITIALIZE_PASS(SBFDAGToDAGISelLegacy, DEBUG_TYPE, PASS_NAME, false, false)
 
 // ComplexPattern used on SBF Load/Store instructions
 bool SBFDAGToDAGISel::SelectAddr(SDValue Addr, SDValue &Base, SDValue &Offset) {
@@ -221,7 +226,9 @@ void SBFDAGToDAGISel::PreprocessLoad(SDNode *Node,
   bool to_replace = false;
   SDLoc DL(Node);
   const LoadSDNode *LD = cast<LoadSDNode>(Node);
-  uint64_t size = LD->getMemOperand()->getSize();
+  if (!LD->getMemOperand()->getSize().hasValue())
+    return;
+  uint64_t size = LD->getMemOperand()->getSize().getValue();
 
   if (!size || size > 8 || (size & (size - 1)) || !LD->isSimple())
     return;
@@ -472,5 +479,5 @@ bool SBFDAGToDAGISel::fillConstantStruct(const DataLayout &DL,
 }
 
 FunctionPass *llvm::createSBFISelDag(SBFTargetMachine &TM) {
-  return new SBFDAGToDAGISel(TM);
+  return new SBFDAGToDAGISelLegacy(TM);
 }

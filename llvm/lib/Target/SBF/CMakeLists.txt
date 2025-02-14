@@ -11,15 +11,22 @@ tablegen(LLVM SBFGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM SBFGenMCCodeEmitter.inc -gen-emitter)
 tablegen(LLVM SBFGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM SBFGenSubtargetInfo.inc -gen-subtarget)
+tablegen(LLVM SBFGenGlobalISel.inc -gen-global-isel)
+tablegen(LLVM SBFGenRegisterBank.inc -gen-register-bank)
 
 add_public_tablegen_target(SBFCommonTableGen)
 
 add_llvm_target(SBFCodeGen
+  GISel/SBFCallLowering.cpp
+  GISel/SBFInstructionSelector.cpp
+  GISel/SBFRegisterBankInfo.cpp
+  GISel/SBFLegalizerInfo.cpp
   SBFAbstractMemberAccess.cpp
   SBFAdjustOpt.cpp
   SBFAsmPrinter.cpp
   SBFCheckAndAdjustIR.cpp
   SBFFrameLowering.cpp
+  SBFFunctionInfo.cpp
   SBFInstrInfo.cpp
   SBFIRPeephole.cpp
   SBFISelDAGToDAG.cpp
@@ -33,7 +40,6 @@ add_llvm_target(SBFCodeGen
   SBFMIChecking.cpp
   SBFMISimplifyPatchable.cpp
   BTFDebug.cpp
-  SBFFunctionInfo.cpp
 
   LINK_COMPONENTS
   Analysis
@@ -41,10 +47,12 @@ add_llvm_target(SBFCodeGen
   CodeGen
   CodeGenTypes
   Core
+  GlobalISel
   MC
   SBFDesc
   SBFInfo
   IPO
+  Passes
   Scalar
   SelectionDAG
   Support
