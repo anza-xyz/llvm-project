@@ -1266,18 +1266,13 @@ def : Pat<(i64 (zext GPR32:$src)), (INSERT_SUBREG (i64 (IMPLICIT_DEF)),
 def : Pat<(i64 (zext GPR32:$src)), (MOV_32_64 GPR32:$src)>,
                                 Requires<[SBFNoExplicitSignExt]>;
 
-// SBFv2 truncation
-def : Pat<(i32 (trunc GPR:$src)),
-          (AND_ri_32 (i32 (EXTRACT_SUBREG GPR:$src, sub_32)),
-          (i32 0xffffffff))>, Requires<[SBFExplicitSignExt]>;
-
 // SBFv1 truncation
 def : Pat<(i32 (trunc GPR:$src)),
-          (i32 (EXTRACT_SUBREG GPR:$src, sub_32))>, Requires<[SBFNoExplicitSignExt]>;
+          (i32 (EXTRACT_SUBREG GPR:$src, sub_32))>;
 
 // SBFv2 anyext
-def : Pat<(i64 (anyext GPR32:$src)),
-          (MOV_32_64 GPR32:$src)>, Requires<[SBFExplicitSignExt]>;
+def : Pat<(i64 (anyext GPR32:$src)), (INSERT_SUBREG (i64 (IMPLICIT_DEF)),
+                                    GPR32:$src, sub_32)>, Requires<[SBFExplicitSignExt]>;
 
 // SBFv1 anyext
 def : Pat<(i64 (anyext GPR32:$src)),

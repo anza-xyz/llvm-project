@@ -60,7 +60,7 @@ def : Proc<"generic", []>;
 def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt]>;
 def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
-                  FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
+                  FeatureDisableNeg, ALU32, FeatureReverseSubImm]>;
 def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
