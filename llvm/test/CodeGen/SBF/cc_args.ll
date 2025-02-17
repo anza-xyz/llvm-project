@@ -1,5 +1,5 @@
 ; RUN: llc < %s -march=sbf -show-mc-encoding | FileCheck --check-prefix=CHECK-v0 %s
-; RUN: llc < %s -march=sbf -mcpu=v2 -show-mc-encoding | FileCheck --check-prefix=CHECK-v2 %s
+; RUN: llc < %s -march=sbf -mcpu=v2 -mattr=+alu32 -show-mc-encoding | FileCheck --check-prefix=CHECK-v2 %s
 
 define void @test() #0 {
 entry:

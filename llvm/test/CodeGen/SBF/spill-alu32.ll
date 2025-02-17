@@ -1,4 +1,4 @@
-; RUN: llc -march=sbf -mcpu=v2 < %s | FileCheck %s
+; RUN: llc -march=sbf -mcpu=v2 -mattr=+alu32 < %s | FileCheck %s
 ;
 ; Source code:
 ;   void foo(int, int, int, long, int);

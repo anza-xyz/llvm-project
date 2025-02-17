@@ -1,4 +1,4 @@
-; RUN: llc -O2 -march=sbf -mcpu=v2 < %s | FileCheck %s
+; RUN: llc -O2 -march=sbf -mcpu=v2 -mattr=+alu32 < %s | FileCheck %s
 
 define dso_local i32 @test_32_unsigned(i32 noundef %a, i32 noundef %b) {
 entry:

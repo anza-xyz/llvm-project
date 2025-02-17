@@ -1,5 +1,5 @@
 ; RUN: llc -march=sbf < %s | FileCheck %s -check-prefixes=CHECK-SBF
-; RUN: llc -march=sbf -mcpu=v2 < %s | FileCheck %s -check-prefixes=CHECK-SBFV2
+; RUN: llc -march=sbf -mcpu=v2 -mattr=+alu32 < %s | FileCheck %s -check-prefixes=CHECK-SBFV2
 
 ; Function Attrs: norecurse nounwind readnone
 define i32 @test(i32 %len) #0 {
