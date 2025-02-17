@@ -1276,8 +1276,8 @@ def : Pat<(i32 (trunc GPR:$src)),
           (i32 (EXTRACT_SUBREG GPR:$src, sub_32))>, Requires<[SBFNoExplicitSignExt]>;
 
 // SBFv2 anyext
-def : Pat<(i64 (anyext GPR32:$src)),
-          (MOV_32_64 GPR32:$src)>, Requires<[SBFExplicitSignExt]>;
+def : Pat<(i64 (anyext GPR32:$src)), (INSERT_SUBREG (i64 (IMPLICIT_DEF)),
+                                    GPR32:$src, sub_32)>, Requires<[SBFExplicitSignExt]>;
 
 // SBFv1 anyext
 def : Pat<(i64 (anyext GPR32:$src)),
