@@ -35,12 +35,27 @@ public:
 };
 } // namespace
 
+static uint32_t getEFlags(InputFile *file) {
+  if (config->ekind == ELF64BEKind)
+    return cast<ObjFile<ELF64BE>>(file)->getObj().getHeader().e_flags;
+  return cast<ObjFile<ELF64LE>>(file)->getObj().getHeader().e_flags;
+}
+
+static uint32_t getSampleEFlag() {
+  if (ctx.objectFiles.empty())
+    return 0;
+  InputFile * f = ctx.objectFiles[0];
+  return getEFlags(f);
+}
+
 SBF::SBF() {
   relativeRel = R_SBF_64_RELATIVE;
   symbolicRel = R_SBF_64_64;
-  defaultCommonPageSize = 8;
-  defaultMaxPageSize = 8;
-  defaultImageBase = 0;
+  if (getSampleEFlag() == 0x3) {
+    defaultCommonPageSize = 8;
+    defaultMaxPageSize = 8;
+    defaultImageBase = 0;
+  }
 }
 
 RelExpr SBF::getRelExpr(RelType type, const Symbol &s,
@@ -115,12 +130,6 @@ void SBF::relocate(uint8_t *loc, const Relocation &rel, uint64_t val) const {
     default:
       error(getErrorLocation(loc) + "unrecognized reloc " + toString(rel.type));
   }
-}
-
-static uint32_t getEFlags(InputFile *file) {
-  if (config->ekind == ELF64BEKind)
-    return cast<ObjFile<ELF64BE>>(file)->getObj().getHeader().e_flags;
-  return cast<ObjFile<ELF64LE>>(file)->getObj().getHeader().e_flags;
 }
 
 uint32_t SBF::calcEFlags() const {
