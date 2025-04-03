@@ -510,6 +510,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   SDValue InGlue;
 
+  SmallVector<SDValue, 8> MemOpChain;
   if (HasStackArgs) {
     SBFFunctionInfo * SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
     // Stack arguments have to be walked in reverse order by inserting
@@ -541,8 +542,12 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       SBFFuncInfo->storeFrameIndexArgument(FrameIndex);
       DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
       DstInfo = MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
-      Chain = DAG.getStore(Chain, CLI.DL, Arg, DstAddr, DstInfo);
+      SDValue Store = DAG.getStore(Chain, CLI.DL, Arg, DstAddr, DstInfo);
+      MemOpChain.push_back(Store);
     }
+
+    if (!MemOpChain.empty())
+      Chain = DAG.getNode(ISD::TokenFactor, CLI.DL, MVT::Other, MemOpChain);
 
     if (!Subtarget->getHasDynamicFrames()) {
       // Pass the current stack frame pointer via SBF::R5, gluing the
