@@ -524,10 +524,6 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
       assert(VA.isMemLoc());
 
-      EVT PtrVT = DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout());
-      SDValue DstAddr;
-      MachinePointerInfo DstInfo;
-      int FrameIndex;
       int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset());
       uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
       if (Subtarget->getHasDynamicFrames()) {
@@ -537,11 +533,11 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
         Offset += Size;
       }
 
-      FrameIndex = MF.getFrameInfo().CreateFixedObject(
+      int FrameIndex = MF.getFrameInfo().CreateFixedObject(
           Size, Offset, false);
       SBFFuncInfo->storeFrameIndexArgument(FrameIndex);
-      DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
-      DstInfo = MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
+      SDValue DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
+      MachinePointerInfo DstInfo = MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
       SDValue Store = DAG.getStore(Chain, CLI.DL, Arg, DstAddr, DstInfo);
       MemOpChain.push_back(Store);
     }
