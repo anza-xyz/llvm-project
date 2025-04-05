@@ -11,8 +11,8 @@ entry:
 ; CHECK-NOT: add64 r10
 
 ; Saving arguments on the stack
-; CHECK: stdw [r10 - 32], 55
 ; CHECK: stdw [r10 - 40], 60
+; CHECK: stdw [r10 - 32], 55
 ; CHECK: stdw [r10 - 24], 50
 ; CHECK: stdw [r10 - 16], 4
 ; CHECK: stdw [r10 - 8], 3
@@ -32,10 +32,10 @@ define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 
 ; Saving arguments in the callee's frame
 
-; Offset in the callee: frame_size - 32
-; CHECK: stdw [r10 - 32], 55
 ; Offset in the callee: frame_size - 40
 ; CHECK: stdw [r10 - 40], 60
+; Offset in the callee: frame_size - 32
+; CHECK: stdw [r10 - 32], 55
 ; Offset in the callee: frame_size - 24
 ; CHECK: stdw [r10 - 24], 50
 ; Offset in the callee: frame_size - 16
