@@ -473,9 +473,11 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SmallVector<std::pair<unsigned, SDValue>, MaxArgs> RegsToPass;
 
   // Walk arg assignments
-  bool HasStackArgs = false;
-  unsigned e, i, ae = ArgLocs.size();
-  for (i = 0, e = ae; i != e; ++i) {
+  unsigned i;
+  SmallVector<SDValue, 8> MemOpChain;
+  SBFFunctionInfo * SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
+
+  for (i = 0; i < ArgLocs.size(); i++) {
     CCValAssign &VA = ArgLocs[i];
     SDValue Arg = OutVals[i];
 
@@ -496,37 +498,13 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       break;
     }
 
-    if (VA.isMemLoc()) {
-      HasStackArgs = true;
-      break;
-    }
-
     // Push arguments into RegsToPass vector
     if (VA.isRegLoc())
       RegsToPass.push_back(std::make_pair(VA.getLocReg(), Arg));
-    else
-      llvm_unreachable("call arg pass bug");
-  }
+    else if (VA.isMemLoc()) {
+      CCValAssign &VA = ArgLocs[i];
+      SDValue Arg = OutVals[i];
 
-  SDValue InGlue;
-
-  if (HasStackArgs) {
-    SBFFunctionInfo * SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
-    // Stack arguments have to be walked in reverse order by inserting
-    // chained stores, this ensures their order is not changed by the scheduler
-    // and that the push instruction sequence generated is correct, otherwise they
-    // can be freely intermixed.
-    for (ae = i, i = ArgLocs.size(); i != ae; --i) {
-      unsigned Loc = i - 1;
-      CCValAssign &VA = ArgLocs[Loc];
-      SDValue Arg = OutVals[Loc];
-
-      assert(VA.isMemLoc());
-
-      EVT PtrVT = DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout());
-      SDValue DstAddr;
-      MachinePointerInfo DstInfo;
-      int FrameIndex;
       int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset());
       uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
       if (Subtarget->getHasDynamicFrames()) {
@@ -536,14 +514,22 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
         Offset += Size;
       }
 
-      FrameIndex = MF.getFrameInfo().CreateFixedObject(
+      int FrameIndex = MF.getFrameInfo().CreateFixedObject(
           Size, Offset, false);
       SBFFuncInfo->storeFrameIndexArgument(FrameIndex);
-      DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
-      DstInfo = MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
-      Chain = DAG.getStore(Chain, CLI.DL, Arg, DstAddr, DstInfo);
-    }
+      SDValue DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
+      MachinePointerInfo DstInfo = MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
+      SDValue Store = DAG.getStore(Chain, CLI.DL, Arg, DstAddr, DstInfo);
+      MemOpChain.push_back(Store);
 
+    } else
+      llvm_unreachable("call arg pass bug");
+  }
+
+  SDValue InGlue;
+
+  if (!MemOpChain.empty()) {
+    Chain = DAG.getNode(ISD::TokenFactor, CLI.DL, MVT::Other, MemOpChain);
     if (!Subtarget->getHasDynamicFrames()) {
       // Pass the current stack frame pointer via SBF::R5, gluing the
       // instruction to instructions passing the first 4 arguments in
@@ -554,7 +540,6 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       Chain = DAG.getCopyToReg(Chain, CLI.DL, SBF::R5, FramePtr, InGlue);
       InGlue = Chain.getValue(1);
     }
-
   }
 
   // Build a sequence of copy-to-reg nodes chained together with token chain and
@@ -586,7 +571,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   for (auto &Reg : RegsToPass)
     Ops.push_back(DAG.getRegister(Reg.first, Reg.second.getValueType()));
 
-  if (HasStackArgs && !Subtarget->getHasDynamicFrames()) {
+  if (!MemOpChain.empty() && !Subtarget->getHasDynamicFrames()) {
     Ops.push_back(DAG.getRegister(SBF::R5, MVT::i64));
   }
 

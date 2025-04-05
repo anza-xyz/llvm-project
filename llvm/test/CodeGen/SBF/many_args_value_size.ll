@@ -5,8 +5,8 @@ define i64 @test_func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e) {
 start:
 ; CHECK-LABEL: test_func:
 
-; CHECK: stw [r10 - 20], 300
 ; CHECK: stdw [r10 - 32], 5400
+; CHECK: stw [r10 - 20], 300
 ; CHECK: stw [r10 - 12], 65516
 ; CHECK: stw [r10 - 4], 5
 
