@@ -54,7 +54,7 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BRIND, MVT::Other, Expand);
   setOperationAction(ISD::BRCOND, MVT::Other, Expand);
 
-  setOperationAction(ISD::GlobalAddress, MVT::i64, Custom);
+  setOperationAction({ISD::GlobalAddress, ISD::ConstantPool}, MVT::i64, Custom);
 
   setOperationAction(ISD::DYNAMIC_STACKALLOC, MVT::i64, Custom);
   setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
@@ -102,6 +102,10 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::SRL_PARTS, VT, Expand);
     setOperationAction(ISD::SRA_PARTS, VT, Expand);
     setOperationAction(ISD::CTPOP, VT, Expand);
+    setOperationAction(ISD::CTTZ, VT, Expand);
+    setOperationAction(ISD::CTLZ, VT, Expand);
+    setOperationAction(ISD::CTTZ_ZERO_UNDEF, VT, Expand);
+    setOperationAction(ISD::CTLZ_ZERO_UNDEF, VT, Expand);
 
     setOperationAction(ISD::SETCC, VT, Expand);
     setOperationAction(ISD::SELECT, VT, Expand);
@@ -121,11 +125,6 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i32, Expand);
     setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i32, Expand);
   }
-
-  setOperationAction(ISD::CTTZ, MVT::i64, Expand);
-  setOperationAction(ISD::CTLZ, MVT::i64, Expand);
-  setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i64, Expand);
-  setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i64, Expand);
 
   setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
   setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i8, Expand);
@@ -290,6 +289,8 @@ SDValue SBFTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
     return LowerGlobalAddress(Op, DAG);
   case ISD::SELECT_CC:
     return LowerSELECT_CC(Op, DAG);
+  case ISD::ConstantPool:
+    return LowerConstantPool(Op, DAG);
   case ISD::ATOMIC_SWAP:
   case ISD::ATOMIC_CMP_SWAP_WITH_SUCCESS:
   case ISD::ATOMIC_CMP_SWAP:
@@ -882,16 +883,40 @@ const char *SBFTargetLowering::getTargetNodeName(unsigned Opcode) const {
   return nullptr;
 }
 
-SDValue SBFTargetLowering::LowerGlobalAddress(SDValue Op,
-                                              SelectionDAG &DAG) const {
-  auto N = cast<GlobalAddressSDNode>(Op);
-  assert(N->getOffset() == 0 && "Invalid offset for global address");
+static SDValue getTargetNode(GlobalAddressSDNode *N, const SDLoc &DL, EVT Ty,
+                             SelectionDAG &DAG, unsigned Flags) {
+  return DAG.getTargetGlobalAddress(N->getGlobal(), DL, Ty, 0, Flags);
+}
 
-  SDLoc DL(Op);
-  const GlobalValue *GV = N->getGlobal();
-  SDValue GA = DAG.getTargetGlobalAddress(GV, DL, MVT::i64);
+static SDValue getTargetNode(ConstantPoolSDNode *N, const SDLoc &DL, EVT Ty,
+                             SelectionDAG &DAG, unsigned Flags) {
+  return DAG.getTargetConstantPool(N->getConstVal(), Ty, N->getAlign(),
+                                   N->getOffset(), Flags);
+}
+
+template <class NodeTy>
+SDValue SBFTargetLowering::getAddr(NodeTy *N, SelectionDAG &DAG,
+                                   unsigned Flags) const {
+  SDLoc DL(N);
+
+  SDValue GA = getTargetNode(N, DL, MVT::i64, DAG, Flags);
 
   return DAG.getNode(SBFISD::Wrapper, DL, MVT::i64, GA);
+}
+
+SDValue SBFTargetLowering::LowerGlobalAddress(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  GlobalAddressSDNode *N = cast<GlobalAddressSDNode>(Op);
+  assert(N->getOffset() == 0 && "Invalid offset for global address");
+
+  return getAddr(N, DAG);
+}
+
+SDValue SBFTargetLowering::LowerConstantPool(llvm::SDValue Op,
+                                             llvm::SelectionDAG &DAG) const {
+  ConstantPoolSDNode *N = cast<ConstantPoolSDNode>(Op);
+
+  return getAddr(N, DAG);
 }
 
 unsigned

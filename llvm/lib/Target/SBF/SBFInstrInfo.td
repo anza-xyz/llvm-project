@@ -1245,6 +1245,12 @@ def : Pat<(SBFWrapper tglobaladdr:$in),
         (HOR_addr (MOV_32_64_addr tglobaladdr:$in),
                             tglobaladdr:$in)>, Requires<[SBFNoLddw]>;
 
+def : Pat<(SBFWrapper tconstpool:$in), (LD_imm64 tconstpool:$in)>,
+                                                    Requires<[SBFHasLddw]>;
+def : Pat<(SBFWrapper tconstpool:$in),
+        (HOR_addr (MOV_32_64_addr tconstpool:$in),
+                            tconstpool:$in)>, Requires<[SBFNoLddw]>;
+
 // SBFv2 sign extension
 def : Pat<(i64 (sext GPR32:$src)),
           (MOV_32_64 GPR32:$src)>, Requires<[SBFExplicitSignExt]>;
