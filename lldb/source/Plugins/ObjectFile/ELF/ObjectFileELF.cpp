@@ -249,9 +249,18 @@ bool ELFNote::Parse(const DataExtractor &data, lldb::offset_t *offset) {
 }
 
 static uint32_t sbfVariantFromElfFlags(const elf::ELFHeader &header) {
-  if (header.e_flags & llvm::ELF::EF_SBF_V2)
-      return ArchSpec::eSBFSubType_sbfv2;
-  return ArchSpec::eSBFSubType_sbf;
+  switch (header.e_flags) {
+  case llvm::ELF::EF_SBF_V0:
+    return ArchSpec::eSBFSubType_sbfv0;
+  case llvm::ELF::EF_SBF_V1:
+    return ArchSpec::eSBFSubType_sbfv1;
+  case llvm::ELF::EF_SBF_V2:
+    return ArchSpec::eSBFSubType_sbfv2;
+  case llvm::ELF::EF_SBF_V3:
+    return ArchSpec::eSBFSubType_sbfv3;
+  default:
+    return ArchSpec::eSBFSubType_sbfv0;
+  }
 }
 
 static uint32_t mipsVariantFromElfFlags (const elf::ELFHeader &header) {

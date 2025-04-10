@@ -39,7 +39,7 @@ int Opcode::Dump(Stream *s, uint32_t min_byte_width, const ArchSpec &arch) {
     break;
 
   case Opcode::eType64:
-    if (arch.IsBPF()) {
+    if (arch.GetMachine() == llvm::Triple::sbf) {
       for (uint32_t i = 0; i < 8; ++i) {
         if (i > 0)
           s->PutChar(' ');
