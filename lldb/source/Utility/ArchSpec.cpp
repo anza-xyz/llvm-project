@@ -242,7 +242,8 @@ static const CoreDefinition g_core_definitions[] = {
      "wasm32"},
 
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::bpfel, ArchSpec::eCore_bpf, "bpf"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbf, "sbf"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv0, "sbf"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv1, "sbfv1"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv2, "sbfv2"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv3, "sbfv3"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv4, "sbfv4"},
@@ -432,14 +433,10 @@ static const ArchDefinitionEntry g_elf_arch_entries[] = {
      0xFFFFFFFFu}, // loongarch64
     {ArchSpec::eCore_bpf, llvm::ELF::EM_BPF, LLDB_INVALID_CPUTYPE,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // bpf
-    {ArchSpec::eCore_sbf, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbf,
-     0xFFFFFFFFu, 0xFFFFFFFFu}, // sbf
-    {ArchSpec::eCore_sbfv2, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv2,
-     0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv2
-    {ArchSpec::eCore_sbfv3, llvm::ELF::EM_BPF, ArchSpec::eSBFSubType_sbfv3,
-     0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv3
-    {ArchSpec::eCore_sbfv4, llvm::ELF::EM_BPF, ArchSpec::eSBFSubType_sbfv4,
-      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv4
+    {ArchSpec::eCore_sbfv0,           llvm::ELF::EM_SBF,        ArchSpec::eSBFSubType_sbfv0}, // sbf
+    {ArchSpec::eCore_sbfv1,           llvm::ELF::EM_SBF,        ArchSpec::eSBFSubType_sbfv1}, // sbfv1
+    {ArchSpec::eCore_sbfv2,           llvm::ELF::EM_BPF,        ArchSpec::eSBFSubType_sbfv2}, // sbfv2
+    {ArchSpec::eCore_sbfv3,           llvm::ELF::EM_BPF,        ArchSpec::eSBFSubType_sbfv3}, // sbfv3
 };
 
 static const ArchDefinition g_elf_arch_def = {
