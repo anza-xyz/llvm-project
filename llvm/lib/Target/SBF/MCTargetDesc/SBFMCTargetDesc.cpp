@@ -76,6 +76,8 @@ static MCStreamer *createSBFMCStreamer(const Triple &T, MCContext &Ctx,
     EFlag = llvm::ELF::EF_SBF_V2;
   } else if (CPU == "v3") {
     EFlag = llvm::ELF::EF_SBF_V3;
+  } else if (CPU == "v4") {
+    EFlag = llvm::ELF::EF_SBF_V4;
   }
   S->getWriter().setELFHeaderEFlags(EFlag);
 

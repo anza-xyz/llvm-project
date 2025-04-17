@@ -2597,6 +2597,9 @@ static void disassembleObject(ObjectFile *Obj, bool InlineRelocs) {
       case llvm::ELF::EF_SBF_V3:
         MCPU = "v3";
         break;
+      case llvm::ELF::EF_SBF_V4:
+        MCPU = "v4";
+        break;
       default:
         MCPU = "generic";
         break;

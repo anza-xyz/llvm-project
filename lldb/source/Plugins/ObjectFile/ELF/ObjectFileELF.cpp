@@ -258,6 +258,8 @@ static uint32_t sbfVariantFromElfFlags(const elf::ELFHeader &header) {
     return ArchSpec::eSBFSubType_sbfv2;
   case llvm::ELF::EF_SBF_V3:
     return ArchSpec::eSBFSubType_sbfv3;
+  case llvm::ELF::EF_SBF_V4:
+    return ArchSpec::eSBFSubType_sbfv4;
   default:
     return ArchSpec::eSBFSubType_sbfv0;
   }
