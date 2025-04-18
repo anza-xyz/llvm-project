@@ -899,6 +899,7 @@ enum : unsigned {
   EF_SBF_V1 = 0x01,
   EF_SBF_V2 = 0x02,
   EF_SBF_V3 = 0x03,
+  EF_SBF_V4 = 0x04,
 };
 
 // ELF Relocation types for SBF.

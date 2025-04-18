@@ -244,6 +244,8 @@ static const CoreDefinition g_core_definitions[] = {
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::bpfel, ArchSpec::eCore_bpf, "bpf"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbf, "sbf"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv2, "sbfv2"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv3, "sbfv3"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv4, "sbfv4"},
 };
 
 // Ensure that we have an entry in the g_core_definitions for each core. If you
@@ -434,6 +436,10 @@ static const ArchDefinitionEntry g_elf_arch_entries[] = {
      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbf
     {ArchSpec::eCore_sbfv2, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv2,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv2
+    {ArchSpec::eCore_sbfv3, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv3,
+     0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv3
+    {ArchSpec::eCore_sbfv4, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv4,
+      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv4
 };
 
 static const ArchDefinition g_elf_arch_def = {

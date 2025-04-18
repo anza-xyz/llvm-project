@@ -83,7 +83,9 @@ protected:
   // Whether we enable the new encoding for memory instructions
   bool NewMemEncoding;
 
-public:
+  // Whether we are using AbiV2
+  bool IsAbiV2;
+
   // This constructor initializes the data members to match that
   // of the specified triple.
   SBFSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,

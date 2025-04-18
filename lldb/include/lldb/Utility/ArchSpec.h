@@ -109,6 +109,8 @@ public:
   enum SBFSubType {
     eSBFSubType_sbf,
     eSBFSubType_sbfv2,
+    eSBFSubType_sbfv3,
+    eSBFSubType_sbfv4,
   };
 
   enum RISCVSubType {
@@ -236,6 +238,8 @@ public:
     eCore_bpf,
     eCore_sbf,
     eCore_sbfv2,
+    eCore_sbfv3,
+    eCore_sbfv4,
 
     kNumCores,
 
