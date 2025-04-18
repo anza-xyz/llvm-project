@@ -4,6 +4,9 @@
 # RUN: llvm-mc -triple=sbpf-solana-solana -filetype=obj < %s \
 # RUN:   | llvm-readobj --file-headers - \
 # RUN:   | FileCheck -check-prefix=CHECK-NONE %s
+# RUN: llvm-mc -triple=sbpfv0-solana-solana -filetype=obj < %s \
+# RUN:   | llvm-readobj --file-headers - \
+# RUN:   | FileCheck -check-prefix=CHECK-NONE %s
 # RUN: llvm-mc -triple=sbf-solana-solana -mcpu=v1 -filetype=obj < %s \
 # RUN:   | llvm-readobj --file-headers - \
 # RUN:   | FileCheck -check-prefix=CHECK-SBFV1 %s
@@ -23,6 +26,9 @@
 # RUN:   | llvm-readobj --file-headers - \
 # RUN:   | FileCheck -check-prefix=CHECK-SBFV3 %s
 # RUN: llvm-mc -triple=sbf-solana-solana -mcpu=v4 -filetype=obj < %s \
+# RUN:   | llvm-readobj --file-headers - \
+# RUN:   | FileCheck -check-prefix=CHECK-SBFV4 %s
+# RUN: llvm-mc -triple=sbpfv4-solana-solana -filetype=obj < %s \
 # RUN:   | llvm-readobj --file-headers - \
 # RUN:   | FileCheck -check-prefix=CHECK-SBFV4 %s
 
