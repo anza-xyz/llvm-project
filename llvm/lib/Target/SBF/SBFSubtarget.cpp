@@ -39,7 +39,7 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
   UseDwarfRIS = false;
 
-  // SBFv2 features
+  // New SBF features
   HasJmpExt = false;
   HasDynamicFrames = false;
   DisableNeg = false;
@@ -52,6 +52,7 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   HasExplicitSignExt = false;
   NewMemEncoding = false;
   HasStaticSyscalls = false;
+  IsAbiV2 = false;
 }
 
 void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
