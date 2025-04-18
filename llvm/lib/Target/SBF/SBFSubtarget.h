@@ -88,6 +88,9 @@ protected:
   // Whether we enable the new encoding for memory instructions
   bool NewMemEncoding;
 
+  // Whether we are using AbiV2
+  bool IsAbiV2;
+
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
   std::unique_ptr<LegalizerInfo> Legalizer;
