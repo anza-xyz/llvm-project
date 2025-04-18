@@ -52,15 +52,26 @@ def FeatureNewMemEncoding : SubtargetFeature<"mem-encoding", "NewMemEncoding",
 def FeatureJumpExt : SubtargetFeature<"jmp-ext", "HasJmpExt",
                                        "true", "Enable jumps with less than and less than or equal">;
 
+def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
+                                       "true", "Enables AbiV2 in SBF (no-op in LLVM)">;
+
+
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
 def : Proc<"generic", []>;
 
 def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt]>;
+
 def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
+
 def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
+
+def : Proc<"v4", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+                  FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
+                  FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
+                  FeatureAbiV2]>;
