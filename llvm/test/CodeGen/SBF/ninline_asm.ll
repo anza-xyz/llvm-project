@@ -1,4 +1,6 @@
 ; RUN: llc < %s -march=sbf -verify-machineinstrs | FileCheck %s
+; RUN: llc < %s -mtriple=sbpf-solana-solana -verify-machineinstrs | FileCheck %s
+; RUN: llc < %s -mtriple=sbpfv0-solana-solana -verify-machineinstrs | FileCheck %s
 
 @g = common global [2 x i32] zeroinitializer, align 4
 
