@@ -19,6 +19,9 @@ Target &llvm::getTheSBFXTarget() {
 std::string llvm::cpuFromSubArch(const Triple &TT, const std::string &CPU) {
   std::string CpuType;
   switch (TT.getSubArch()) {
+  case Triple::SBFSubArch_v0:
+    CpuType = "generic";
+    break;
   case Triple::SBFSubArch_v1:
     CpuType = "v1";
     break;
@@ -27,6 +30,9 @@ std::string llvm::cpuFromSubArch(const Triple &TT, const std::string &CPU) {
     break;
   case Triple::SBFSubArch_v3:
     CpuType = "v3";
+    break;
+  case Triple::SBFSubArch_v4:
+    CpuType = "v4";
     break;
   default:
     break;

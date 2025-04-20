@@ -328,9 +328,10 @@ static Triple::ArchType parseBPFArch(StringRef ArchName) {
     return Triple::bpfeb;
   } else if (ArchName.equals("bpf_le") || ArchName.equals("bpfel")) {
     return Triple::bpfel;
-  } else if (ArchName.equals("sbf") || ArchName.equals("sbpf") ||
-             ArchName.equals("sbpfv1") || ArchName.equals("sbpfv2") ||
-             ArchName.equals("sbpfv3")) {
+  } else if (ArchName == "sbf" || ArchName == "sbpf" ||
+             ArchName == "sbpfv0" || ArchName == "sbpfv1" ||
+             ArchName == "sbpfv2" || ArchName == "sbpfv3" ||
+             ArchName == "sbpfv4") {
     return Triple::sbf;
   } else {
     return Triple::UnknownArch;
@@ -718,9 +719,11 @@ static Triple::SubArchType parseSubArch(StringRef SubArchName) {
 
   if (SubArchName.starts_with("sbpf")) {
     return StringSwitch<Triple::SubArchType>(SubArchName)
+        .EndsWith("v0", Triple::SBFSubArch_v0)
         .EndsWith("v1", Triple::SBFSubArch_v1)
         .EndsWith("v2", Triple::SBFSubArch_v2)
         .EndsWith("v3", Triple::SBFSubArch_v3)
+        .EndsWith("v4", Triple::SBFSubArch_v4)
         .Default(Triple::NoSubArch);
   }
 
