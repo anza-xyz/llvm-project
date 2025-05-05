@@ -158,7 +158,7 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
       dbgs() << "Error: A function call in method "
              << MF.getFunction().getName()
              << " overwrites values in the frame. Please, decrease stack usage "
-             << "or remove parameters from the call."
+             << "or remove parameters from the call. "
              << "The function call may cause undefined behavior "
                 "during execution.\n\n";
     }
