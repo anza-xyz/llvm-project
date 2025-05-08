@@ -131,8 +131,12 @@ struct SBFMIPreEmitPeephole : public MachineFunctionPass {
   const TargetRegisterInfo *TRI;
   const SBFInstrInfo *TII;
   const SBFSubtarget *SubTarget;
+  const CodeGenOptLevel OptLevel;
+  const bool DisablePeephole;
 
-  SBFMIPreEmitPeephole() : MachineFunctionPass(ID) {
+  SBFMIPreEmitPeephole(CodeGenOptLevel OptLevel, bool DisablePeephole)
+      : MachineFunctionPass(ID), OptLevel(OptLevel),
+        DisablePeephole(DisablePeephole) {
     initializeSBFMIPreEmitPeepholePass(*PassRegistry::getPassRegistry());
   }
 
@@ -147,14 +151,16 @@ public:
 
   // Main entry point for this pass.
   bool runOnMachineFunction(MachineFunction &MF) override {
-    if (skipFunction(MF.getFunction()))
-      return false;
-
     initialize(MF);
 
     bool PeepholeExecuted = false;
     if (SubTarget->getHasStaticSyscalls())
       PeepholeExecuted |= addReturn();
+
+    // We shall not skip adding the return to SBPFv3 functions
+    if (skipFunction(MF.getFunction()) || OptLevel == CodeGenOptLevel::None ||
+        DisablePeephole)
+      return PeepholeExecuted;
 
     PeepholeExecuted |= eliminateRedundantMov();
 
@@ -250,9 +256,9 @@ INITIALIZE_PASS(SBFMIPreEmitPeephole, "sbf-mi-pemit-peephole",
                 "SBF PreEmit Peephole Optimization", false, false)
 
 char SBFMIPreEmitPeephole::ID = 0;
-FunctionPass* llvm::createSBFMIPreEmitPeepholePass()
+FunctionPass* llvm::createSBFMIPreEmitPeepholePass(CodeGenOptLevel OptLevel, bool DisablePeephole)
 {
-  return new SBFMIPreEmitPeephole();
+  return new SBFMIPreEmitPeephole(OptLevel, DisablePeephole);
 }
 
 STATISTIC(TruncElemNum, "Number of truncation eliminated");
