@@ -1,4 +1,5 @@
 ; RUN: llc -O2 -march=sbf -mcpu=v3 < %s | FileCheck %s
+; RUN: llc -O0 -march=sbf -mcpu=v3 < %s | FileCheck %s
 
 declare void @dummy_func(i8, ptr, ptr, ptr, ptr, ptr, ptr)
 

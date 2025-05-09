@@ -24,7 +24,8 @@ FunctionPass *createSBFISelDag(SBFTargetMachine &TM);
 FunctionPass *createSBFMISimplifyPatchablePass();
 FunctionPass *createSBFMIPeepholePass();
 FunctionPass *createSBFMIPeepholeTruncElimPass();
-FunctionPass *createSBFMIPreEmitPeepholePass();
+FunctionPass *createSBFMIPreEmitPeepholePass(CodeGenOptLevel OptLevel,
+                                             bool DisablePeephole);
 FunctionPass *createSBFMIPreEmitCheckingPass();
 
 void initializeSBFCheckAndAdjustIRPass(PassRegistry&);
