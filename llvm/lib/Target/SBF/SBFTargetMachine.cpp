@@ -167,7 +167,5 @@ void SBFPassConfig::addMachineSSAOptimization() {
 
 void SBFPassConfig::addPreEmitPass() {
   addPass(createSBFMIPreEmitCheckingPass());
-  if (getOptLevel() != CodeGenOpt::None)
-    if (!DisableMIPeephole)
-      addPass(createSBFMIPreEmitPeepholePass());
+  addPass(createSBFMIPreEmitPeepholePass(getOptLevel(), DisableMIPeephole));
 }
