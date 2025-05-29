@@ -259,8 +259,8 @@ static OutputSection *findSection(StringRef name, unsigned partition = 1) {
   return nullptr;
 }
 
-static bool isSbfV3() {
-  return config->emachine == EM_SBF && config->eflags == 0x3;
+static bool isSbfV3OrHigher() {
+  return config->emachine == EM_SBF && config->eflags >= 0x3;
 }
 
 template <class ELFT> void elf::createSyntheticSections() {
@@ -710,7 +710,7 @@ template <class ELFT> void Writer<ELFT>::copyLocalSymbols() {
         in.symTab->addSymbol(b);
 
       // We want local functions in the dynamic symbol table for SBFv3
-      if (isSbfV3() && includeInSymtab(*b) && shouldKeepInSymtab(*dr) &&
+      if (isSbfV3OrHigher() && includeInSymtab(*b) && shouldKeepInSymtab(*dr) &&
           b->type == STT_FUNC)
         partitions[b->partition - 1].dynSymTab->addSymbol(b);
     }
@@ -1666,7 +1666,7 @@ template <class ELFT> void Writer<ELFT>::finalizeAddressDependentContent() {
 
     const Defined *changedSym = script->assignAddresses();
 
-    if (!SbfDuplicateRemoval && isSbfV3()) {
+    if (!SbfDuplicateRemoval && isSbfV3OrHigher()) {
       // When we deduplicate symbols, the address dependent content must be
       // recalculated as the symbol table might have been shortened.
       for (Partition &part: partitions) {
@@ -1991,7 +1991,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
         if (auto *file = dyn_cast_or_null<SharedFile>(sym->file))
           if (file->isNeeded && !sym->isUndefined())
             addVerneed(sym);
-      } else if (isSbfV3() && includeInSymtab(*sym) && isa<Defined>(sym) &&
+      } else if (isSbfV3OrHigher() && includeInSymtab(*sym) && isa<Defined>(sym) &&
                  sym->type == STT_FUNC) {
         // We want local functions in the dynamic symbol table for SBFv3
         const Defined *Def = dyn_cast<Defined>(sym);
