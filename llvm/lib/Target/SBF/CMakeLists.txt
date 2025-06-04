@@ -22,7 +22,6 @@ add_llvm_target(SBFCodeGen
   GISel/SBFRegisterBankInfo.cpp
   GISel/SBFLegalizerInfo.cpp
   SBFAbstractMemberAccess.cpp
-  SBFAdjustOpt.cpp
   SBFAsmPrinter.cpp
   SBFCheckAndAdjustIR.cpp
   SBFFrameLowering.cpp

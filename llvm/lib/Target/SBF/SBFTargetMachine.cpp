@@ -120,10 +120,6 @@ void SBFTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
                                     OptimizationLevel Level) {
     FPM.addPass(SimplifyCFGPass(SimplifyCFGOptions().hoistCommonInsts(true)));
   });
-  PB.registerPipelineEarlySimplificationEPCallback(
-      [=](ModulePassManager &MPM, OptimizationLevel) {
-        MPM.addPass(SBFAdjustOptPass());
-      });
 }
 
 void SBFPassConfig::addIRPasses() {
