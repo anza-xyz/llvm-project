@@ -68,11 +68,6 @@ public:
 
   static bool isRequired() { return true; }
 };
-
-class SBFAdjustOptPass : public PassInfoMixin<SBFAdjustOptPass> {
-public:
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-};
 } // namespace llvm
 
 #endif
