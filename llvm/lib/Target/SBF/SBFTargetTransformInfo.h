@@ -44,6 +44,16 @@ public:
     return TTI::TCC_Basic;
   }
 
+  bool shouldBuildLookupTables() const {
+    return true;
+  }
+
+  bool shouldBuildRelLookupTables() const {
+    // Relational lookup tables are not working for SBF, since the offset
+    // calculation is not implemented.
+    return false;
+  }
+
   InstructionCost getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
                                      CmpInst::Predicate VecPred,
                                      TTI::TargetCostKind CostKind,
