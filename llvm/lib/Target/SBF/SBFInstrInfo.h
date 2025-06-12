@@ -58,6 +58,11 @@ public:
                         int *BytesAdded = nullptr) const override;
   void initializeTargetFeatures(bool HasExplicitSext, bool NewMemEncoding);
 
+  bool
+  reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+
+  MachineBasicBlock *getBranchDestBlock(const MachineInstr &MI) const override;
+
 private:
   bool HasExplicitSignExt;
   bool NewMemEncoding;
