@@ -27,12 +27,11 @@ define i32 @cttz_i32_zdef(i32 %a) {
 define i32 @cttz_i32(i32 %a) {
 ; CHECK-LABEL: cttz_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, 32
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    lsh64 r2, 32
 ; CHECK-NEXT:    rsh64 r2, 32
-; CHECK-NEXT:    jeq r2, 0, LBB1_2
-; CHECK-NEXT:  # %bb.1: # %cond.false
+; CHECK-NEXT:    jeq r2, 0, LBB1_1
+; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
 ; CHECK-NEXT:    and64 r1, r2
@@ -43,7 +42,10 @@ define i32 @cttz_i32(i32 %a) {
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
 ; CHECK-NEXT:    add64 r2, r1
 ; CHECK-NEXT:    ldxb r0, [r2 + 0]
-; CHECK-NEXT:  LBB1_2: # %cond.end
+; CHECK-NEXT:    ja LBB1_3
+; CHECK-NEXT:  LBB1_1:
+; CHECK-NEXT:    mov64 r0, 32
+; CHECK-NEXT:  LBB1_3: # %cond.end
 ; CHECK-NEXT:    exit
     %ret = call i32 @llvm.cttz.i32(i32 %a, i1 0)
     ret i32 %ret
@@ -72,9 +74,8 @@ define i64 @cttz_i64_zdef(i64 %a) {
 define i64 @cttz_i64(i64 %a) {
 ; CHECK-LABEL: cttz_i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, 64
-; CHECK-NEXT:    jeq r1, 0, LBB3_2
-; CHECK-NEXT:  # %bb.1: # %cond.false
+; CHECK-NEXT:    jeq r1, 0, LBB3_1
+; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
 ; CHECK-NEXT:    and64 r1, r2
@@ -84,7 +85,10 @@ define i64 @cttz_i64(i64 %a) {
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
 ; CHECK-NEXT:    add64 r2, r1
 ; CHECK-NEXT:    ldxb r0, [r2 + 0]
-; CHECK-NEXT:  LBB3_2: # %cond.end
+; CHECK-NEXT:    ja LBB3_3
+; CHECK-NEXT:  LBB3_1:
+; CHECK-NEXT:    mov64 r0, 64
+; CHECK-NEXT:  LBB3_3: # %cond.end
 ; CHECK-NEXT:    exit
     %ret = call i64 @llvm.cttz.i64(i64 %a, i1 0)
     ret i64 %ret
@@ -148,12 +152,11 @@ define i32 @ctlz_i32_zdef(i32 %a) {
 define i32 @ctlz_i32(i32 %a) {
 ; CHECK-LABEL: ctlz_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, 32
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    lsh64 r2, 32
 ; CHECK-NEXT:    rsh64 r2, 32
-; CHECK-NEXT:    jeq r2, 0, LBB5_2
-; CHECK-NEXT:  # %bb.1: # %cond.false
+; CHECK-NEXT:    jeq r2, 0, LBB5_1
+; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    lddw r2, 4294967294
 ; CHECK-NEXT:    mov64 r3, r1
 ; CHECK-NEXT:    and64 r3, r2
@@ -197,7 +200,10 @@ define i32 @ctlz_i32(i32 %a) {
 ; CHECK-NEXT:    lddw r1, 4278190080
 ; CHECK-NEXT:    and64 r0, r1
 ; CHECK-NEXT:    rsh64 r0, 24
-; CHECK-NEXT:  LBB5_2: # %cond.end
+; CHECK-NEXT:    ja LBB5_3
+; CHECK-NEXT:  LBB5_1:
+; CHECK-NEXT:    mov64 r0, 32
+; CHECK-NEXT:  LBB5_3: # %cond.end
 ; CHECK-NEXT:    exit
     %ret = call i32 @llvm.ctlz.i32(i32 %a, i1 0)
     ret i32 %ret
@@ -255,9 +261,8 @@ define i64 @ctlz_i64_zdef(i64 %a) {
 define i64 @ctlz_i64(i64 %a) {
 ; CHECK-LABEL: ctlz_i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, 64
-; CHECK-NEXT:    jeq r1, 0, LBB7_2
-; CHECK-NEXT:  # %bb.1: # %cond.false
+; CHECK-NEXT:    jeq r1, 0, LBB7_1
+; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 1
 ; CHECK-NEXT:    or64 r1, r2
@@ -296,7 +301,10 @@ define i64 @ctlz_i64(i64 %a) {
 ; CHECK-NEXT:    lddw r1, 72340172838076673
 ; CHECK-NEXT:    mul64 r0, r1
 ; CHECK-NEXT:    rsh64 r0, 56
-; CHECK-NEXT:  LBB7_2: # %cond.end
+; CHECK-NEXT:    ja LBB7_3
+; CHECK-NEXT:  LBB7_1:
+; CHECK-NEXT:    mov64 r0, 64
+; CHECK-NEXT:  LBB7_3: # %cond.end
 ; CHECK-NEXT:    exit
     %ret = call i64 @llvm.ctlz.i64(i64 %a, i1 0)
     ret i64 %ret

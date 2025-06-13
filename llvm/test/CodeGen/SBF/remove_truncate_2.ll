@@ -44,15 +44,15 @@ if.end:                                           ; preds = %entry
   %cmp4 = icmp eq i8 %2, 1
 ; CHECK:  mov64 r0, 3
 ; CHECK-NOT:  and64 r1, 255
-; CHECK:  jeq r1, 1,
+; CHECK:  jne r1, 1,
   br i1 %cmp4, label %cleanup, label %if.end13
 
 if.else:                                          ; preds = %entry
   %cmp9 = icmp eq i8 %2, 0
-; CHECK:  mov64 r0, 2
 ; CHECK-NOT:  and64 r1, 255
 ; CHECK:  jeq r1, 0,
   br i1 %cmp9, label %cleanup, label %if.end13
+; CHECK:  mov64 r0, 2
 
 if.end13:                                         ; preds = %if.else, %if.end
   br label %cleanup

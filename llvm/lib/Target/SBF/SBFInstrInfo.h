@@ -63,6 +63,8 @@ public:
 
   MachineBasicBlock *getBranchDestBlock(const MachineInstr &MI) const override;
 
+  unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+
 private:
   bool HasExplicitSignExt;
   bool NewMemEncoding;

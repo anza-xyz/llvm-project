@@ -393,3 +393,10 @@ SBFInstrInfo::getBranchDestBlock(const MachineInstr &MI) const {
 
   llvm_unreachable("unexpected opcode!");
 }
+
+unsigned SBFInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
+  if (MI.getOpcode() == SBF::LD_imm64)
+    return 16;
+
+  return 8;
+}
