@@ -200,7 +200,7 @@ bool SBFMIPreEmitPeephole::addReturn() {
 
     MachineInstr &MI = MBB.back();
     unsigned Opcode = MI.getOpcode();
-    if (Opcode != SBF::RETURN_v3) {
+    if (Opcode != SBF::RETURN_v3 && Opcode != SBF::JMP) {
       BuildMI(&MBB, MI.getDebugLoc(), TII->get(SBF::RETURN_v3));
       Added = true;
     }
