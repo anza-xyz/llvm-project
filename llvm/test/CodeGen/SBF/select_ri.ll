@@ -57,7 +57,7 @@ define i32 @test2() local_unnamed_addr #0 {
 entry:
   %0 = load i32, i32* @m, align 4
   %cmp = icmp slt i32 %0, 6
-; CHECK:  {{jslt|jsgt}} r{{[0-9]+}}, 6,
+; CHECK:  {{jsle|jsge}} r{{[0-9]+}}, 6,
   %1 = load i32, i32* @n, align 4
   %spec.select = select i1 %cmp, i32 %1, i32 %0
   ret i32 %spec.select

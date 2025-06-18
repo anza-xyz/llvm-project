@@ -18,12 +18,49 @@
 #include "llvm/IR/DebugLoc.h"
 #include "llvm/Support/ErrorHandling.h"
 #include <cassert>
-#include <iterator>
 
 #define GET_INSTRINFO_CTOR_DTOR
 #include "SBFGenInstrInfo.inc"
 
 using namespace llvm;
+
+static inline bool isUncondBranchOpcode(int Opc) { return Opc == SBF::JMP; }
+
+static inline bool isCondBranchOpcode(int Opc) {
+  switch (Opc) {
+  case SBF::JEQ_ri:
+  case SBF::JEQ_rr:
+  case SBF::JUGT_ri:
+  case SBF::JUGT_rr:
+  case SBF::JUGE_ri:
+  case SBF::JUGE_rr:
+  case SBF::JNE_ri:
+  case SBF::JNE_rr:
+  case SBF::JSGT_ri:
+  case SBF::JSGT_rr:
+  case SBF::JSGE_ri:
+  case SBF::JSGE_rr:
+  case SBF::JULT_ri:
+  case SBF::JULT_rr:
+  case SBF::JULE_ri:
+  case SBF::JULE_rr:
+  case SBF::JSLT_ri:
+  case SBF::JSLT_rr:
+  case SBF::JSLE_ri:
+  case SBF::JSLE_rr:
+    return true;
+  default:
+    return false;
+  }
+}
+
+static void parseCondBranch(MachineInstr *LastInst, MachineBasicBlock *&Target,
+                            SmallVectorImpl<MachineOperand> &Cond) {
+  Cond.push_back(MachineOperand::CreateImm(LastInst->getOpcode()));
+  Cond.push_back(LastInst->getOperand(0));
+  Cond.push_back(LastInst->getOperand(1));
+  Target = LastInst->getOperand(2).getMBB();
+}
 
 SBFInstrInfo::SBFInstrInfo()
     : SBFGenInstrInfo(SBF::ADJCALLSTACKDOWN, SBF::ADJCALLSTACKUP) {}
@@ -104,65 +141,114 @@ bool SBFInstrInfo::analyzeBranch(MachineBasicBlock &MBB,
                                  MachineBasicBlock *&FBB,
                                  SmallVectorImpl<MachineOperand> &Cond,
                                  bool AllowModify) const {
-  // Start from the bottom of the block and work up, examining the
-  // terminator instructions.
-  MachineBasicBlock::iterator I = MBB.end();
-  while (I != MBB.begin()) {
-    --I;
-    if (I->isDebugInstr())
-      continue;
+  // If the block has no terminators, it just falls into the block after it.
+  MachineBasicBlock::iterator I = MBB.getLastNonDebugInstr();
+  if (I == MBB.end())
+    return false;
 
-    // Working from the bottom, when we see a non-terminator
-    // instruction, we're done.
-    if (!isUnpredicatedTerminator(*I))
-      break;
+  if (!isUnpredicatedTerminator(*I))
+    return false;
 
-    // A terminator that isn't a branch can't easily be handled
-    // by this analysis.
-    if (!I->isBranch())
-      return true;
+  // Get the last instruction in the block.
+  MachineInstr *LastInst = &*I;
 
-    // Handle unconditional branches.
-    if (I->getOpcode() == SBF::JMP) {
-      if (!AllowModify) {
-        TBB = I->getOperand(0).getMBB();
-        continue;
-      }
-
-      // If the block has any instructions after a J, delete them.
-      MBB.erase(std::next(I), MBB.end());
-      Cond.clear();
-      FBB = nullptr;
-
-      // Delete the J if it's equivalent to a fall-through.
-      if (MBB.isLayoutSuccessor(I->getOperand(0).getMBB())) {
-        TBB = nullptr;
-        I->eraseFromParent();
-        I = MBB.end();
-        continue;
-      }
-
-      // TBB is used to indicate the unconditinal destination.
-      TBB = I->getOperand(0).getMBB();
-      continue;
+  // If there is only one terminator instruction, process it.
+  unsigned LastOpc = LastInst->getOpcode();
+  if (I == MBB.begin() || !isUnpredicatedTerminator(*--I)) {
+    if (isUncondBranchOpcode(LastOpc)) {
+      TBB = LastInst->getOperand(0).getMBB();
+      return false;
     }
-    // Cannot handle conditional branches
-    return true;
+    if (isCondBranchOpcode(LastOpc)) {
+      // Block ends with fall-through condbranch.
+      parseCondBranch(LastInst, TBB, Cond);
+      return false;
+    }
+    return true; // Unknown case
   }
 
-  return false;
+  // Get the instruction before it if it is a terminator.
+  MachineInstr *SecondLastInst = &*I;
+  unsigned SecondLastOpc = SecondLastInst->getOpcode();
+
+  // If AllowModify is true and the block ends with two or more unconditional
+  // branches, delete all but the first unconditional branch.
+  if (AllowModify && isUncondBranchOpcode(LastOpc)) {
+    while (isUncondBranchOpcode(SecondLastOpc)) {
+      LastInst->eraseFromParent();
+      LastInst = SecondLastInst;
+      LastOpc = LastInst->getOpcode();
+      if (I == MBB.begin() || !isUnpredicatedTerminator(*--I)) {
+        // Return now the only terminator is an unconditional branch.
+        TBB = LastInst->getOperand(0).getMBB();
+        return false;
+      }
+      SecondLastInst = &*I;
+      SecondLastOpc = SecondLastInst->getOpcode();
+    }
+  }
+
+  // If we're allowed to modify and the block ends in a unconditional branch
+  // which could simply fallthrough, remove the branch.  (Note: This case only
+  // matters when we can't understand the whole sequence, otherwise it's also
+  // handled by BranchFolding.cpp.)
+  if (AllowModify && isUncondBranchOpcode(LastOpc) &&
+      MBB.isLayoutSuccessor(getBranchDestBlock(*LastInst))) {
+    LastInst->eraseFromParent();
+    LastInst = SecondLastInst;
+    LastOpc = LastInst->getOpcode();
+    if (I == MBB.begin() || !isUnpredicatedTerminator(*--I)) {
+      assert(!isUncondBranchOpcode(LastOpc) &&
+             "unreachable unconditional branches removed above");
+
+      if (isCondBranchOpcode(LastOpc)) {
+        // Block ends with fall-through condbranch.
+        parseCondBranch(LastInst, TBB, Cond);
+        return false;
+      }
+      return true; // Can't handle indirect branch.
+    }
+    SecondLastInst = &*I;
+    SecondLastOpc = SecondLastInst->getOpcode();
+  }
+
+  // If there are three terminators, we don't know what sort of block this is.
+  if (SecondLastInst && I != MBB.begin() && isUnpredicatedTerminator(*--I))
+    return true;
+
+  // If the block ends with a conditional jump and a JA, handle it.
+  if (isCondBranchOpcode(SecondLastOpc) && isUncondBranchOpcode(LastOpc)) {
+    parseCondBranch(SecondLastInst, TBB, Cond);
+    FBB = LastInst->getOperand(0).getMBB();
+    return false;
+  }
+
+  // If the block ends with two unconditional branches, handle it.  The second
+  // one is not executed, so remove it.
+  if (isUncondBranchOpcode(SecondLastOpc) && isUncondBranchOpcode(LastOpc)) {
+    TBB = SecondLastInst->getOperand(0).getMBB();
+    I = LastInst;
+    if (AllowModify)
+      I->eraseFromParent();
+    return false;
+  }
+
+  // Otherwise, can't handle this.
+  return true;
 }
 
 unsigned SBFInstrInfo::insertBranch(MachineBasicBlock &MBB,
                                     MachineBasicBlock *TBB,
                                     MachineBasicBlock *FBB,
                                     ArrayRef<MachineOperand> Cond,
-                                    const DebugLoc &DL,
-                                    int *BytesAdded) const {
+                                    const DebugLoc &DL, int *BytesAdded) const {
   assert(!BytesAdded && "code size not handled");
 
   // Shouldn't be a fall through.
   assert(TBB && "insertBranch must not be told to insert a fallthrough");
+
+  if (BytesAdded)
+    *BytesAdded = 8;
 
   if (Cond.empty()) {
     // Unconditional branch
@@ -171,27 +257,146 @@ unsigned SBFInstrInfo::insertBranch(MachineBasicBlock &MBB,
     return 1;
   }
 
-  llvm_unreachable("Unexpected conditional branch");
+  // See the order we parse the jump information in `parseCondBranch`
+  BuildMI(&MBB, DL, get(Cond[0].getImm()))
+      .add(Cond[1])
+      .add(Cond[2])
+      .addMBB(TBB);
+
+  if (FBB) {
+    BuildMI(&MBB, DL, get(SBF::JMP)).addMBB(FBB);
+    if (BytesAdded)
+      *BytesAdded += 8;
+  }
+
+  return 1;
 }
 
 unsigned SBFInstrInfo::removeBranch(MachineBasicBlock &MBB,
                                     int *BytesRemoved) const {
   assert(!BytesRemoved && "code size not handled");
 
-  MachineBasicBlock::iterator I = MBB.end();
-  unsigned Count = 0;
+  MachineBasicBlock::iterator I = MBB.getLastNonDebugInstr();
+  if (I == MBB.end())
+    return 0;
 
-  while (I != MBB.begin()) {
-    --I;
-    if (I->isDebugInstr())
-      continue;
-    if (I->getOpcode() != SBF::JMP)
-      break;
-    // Remove the branch.
-    I->eraseFromParent();
-    I = MBB.end();
-    ++Count;
+  if (!isUncondBranchOpcode(I->getOpcode()) &&
+      !isCondBranchOpcode(I->getOpcode()))
+    return 0;
+
+  // Remove the branch.
+  I->eraseFromParent();
+
+  I = MBB.end();
+
+  if (I == MBB.begin()) {
+    if (BytesRemoved)
+      *BytesRemoved = 8;
+    return 1;
   }
 
-  return Count;
+  --I;
+  if (!isCondBranchOpcode(I->getOpcode())) {
+    if (BytesRemoved)
+      *BytesRemoved = 8;
+    return 1;
+  }
+
+  // Remove the branch.
+  I->eraseFromParent();
+  if (BytesRemoved)
+    *BytesRemoved = 16;
+
+  return 2;
+}
+
+bool SBFInstrInfo::reverseBranchCondition(
+    SmallVectorImpl<MachineOperand> &Cond) const {
+  switch (Cond[0].getImm()) {
+  default:
+    llvm_unreachable("Unknown conditional branch!");
+  case SBF::JEQ_ri:
+    Cond[0].setImm(SBF::JNE_ri);
+    break;
+  case SBF::JEQ_rr:
+    Cond[0].setImm(SBF::JNE_rr);
+    break;
+  case SBF::JUGT_ri:
+    Cond[0].setImm(SBF::JULE_ri);
+    break;
+  case SBF::JUGT_rr:
+    Cond[0].setImm(SBF::JULE_rr);
+    break;
+  case SBF::JUGE_ri:
+    Cond[0].setImm(SBF::JULT_ri);
+    break;
+  case SBF::JUGE_rr:
+    Cond[0].setImm(SBF::JULT_rr);
+    break;
+  case SBF::JNE_ri:
+    Cond[0].setImm(SBF::JEQ_ri);
+    break;
+  case SBF::JNE_rr:
+    Cond[0].setImm(SBF::JEQ_rr);
+    break;
+  case SBF::JSGT_ri:
+    Cond[0].setImm(SBF::JSLE_ri);
+    break;
+  case SBF::JSGT_rr:
+    Cond[0].setImm(SBF::JSLE_rr);
+    break;
+  case SBF::JSGE_ri:
+    Cond[0].setImm(SBF::JSLT_ri);
+    break;
+  case SBF::JSGE_rr:
+    Cond[0].setImm(SBF::JSLT_rr);
+    break;
+  case SBF::JULT_ri:
+    Cond[0].setImm(SBF::JUGE_ri);
+    break;
+  case SBF::JULT_rr:
+    Cond[0].setImm(SBF::JUGE_rr);
+    break;
+  case SBF::JULE_ri:
+    Cond[0].setImm(SBF::JUGT_ri);
+    break;
+  case SBF::JULE_rr:
+    Cond[0].setImm(SBF::JUGT_rr);
+    break;
+  case SBF::JSLT_ri:
+    Cond[0].setImm(SBF::JSGE_ri);
+    break;
+  case SBF::JSLT_rr:
+    Cond[0].setImm(SBF::JSGE_rr);
+    break;
+  case SBF::JSLE_ri:
+    Cond[0].setImm(SBF::JSGT_ri);
+    break;
+  case SBF::JSLE_rr:
+    Cond[0].setImm(SBF::JSGT_rr);
+    break;
+  }
+
+  return false;
+}
+
+MachineBasicBlock *
+SBFInstrInfo::getBranchDestBlock(const MachineInstr &MI) const {
+  unsigned Opcode = MI.getOpcode();
+  if (Opcode == SBF::JMP) {
+    return MI.getOperand(0).getMBB();
+  }
+
+  if (isCondBranchOpcode(Opcode)) {
+    return MI.getOperand(2).getMBB();
+  }
+
+  llvm_unreachable("unexpected opcode!");
+}
+
+unsigned SBFInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
+  if (MI.getOpcode() == SBF::LD_imm64)
+    return 16;
+
+  return 8;
 }

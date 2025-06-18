@@ -37,7 +37,7 @@ define signext i8 @foo_cmp2(i8 signext %a, i8 signext %b) #0 {
   %.0 = phi i8 [ %3, %2 ], [ %5, %4 ]
   ret i8 %.0
 ; CHECK-LABEL:foo_cmp2:
-; CHECK: jsgt r0, r1
+; CHECK: jsle r0, r1
 }
 
 ; Function Attrs: nounwind readnone uwtable
@@ -77,7 +77,7 @@ define signext i8 @foo_cmp4(i8 signext %a, i8 signext %b) #0 {
   %.0 = phi i8 [ %3, %2 ], [ %5, %4 ]
   ret i8 %.0
 ; CHECK-LABEL:foo_cmp4:
-; CHECK: jsgt r1, r0
+; CHECK: jsle r1, r0
 }
 
 ; Function Attrs: nounwind readnone uwtable
