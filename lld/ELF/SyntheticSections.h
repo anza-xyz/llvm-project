@@ -652,7 +652,6 @@ public:
   unsigned getNumSymbols() const { return symbols.size() + 1; }
   size_t getSymbolIndex(const Symbol &sym);
   ArrayRef<SymbolTableEntry> getSymbols() const { return symbols; }
-  void sortAndDedupSymbolsByValue();
 
 protected:
   void sortSymTabSymbols();
