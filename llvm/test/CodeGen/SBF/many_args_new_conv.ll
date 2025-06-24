@@ -1,6 +1,7 @@
 ; RUN: llc -O2 -march=sbf -mcpu=v1 < %s | FileCheck %s
 ; RUN: llc -O2 -mtriple=sbpfv1-solana-solana < %s | FileCheck %s
 ; RUN: llc -O2 -march=sbf -mcpu=v1 -mattr=+mem-encoding < %s | FileCheck %s
+; RUN: llc -O3 -march=sbf -mcpu=v3 < %s | FileCheck --check-prefix=CHECK-V3 %s
 
 ; Function Attrs: nounwind uwtable
 define i32 @caller_no_alloca(i32 %a, i32 %b, i32 %c) #0 {
@@ -9,6 +10,8 @@ entry:
 
 ; No changes to the stack pointer
 ; CHECK-NOT: add64 r10
+; Add zero to stack pointer from V3 onwards
+; CHECK-V3: add64 r10, 0
 
 ; Saving arguments on the stack
 ; CHECK: stdw [r10 - 40], 60
