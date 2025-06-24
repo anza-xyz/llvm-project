@@ -19,24 +19,6 @@
 
 using namespace llvm;
 
-namespace {
-
-void adjustStackPointer(MachineFunction &MF, MachineBasicBlock &MBB,
-                        MachineBasicBlock::iterator &MBBI, bool IsSubtract) {
-  MachineFrameInfo &MFI = MF.getFrameInfo();
-  int NumBytes = (int)MFI.getStackSize();
-  if (NumBytes) {
-    DebugLoc Dl;
-    const SBFInstrInfo &TII =
-        *static_cast<const SBFInstrInfo *>(MF.getSubtarget().getInstrInfo());
-    BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
-        .addReg(SBF::R10)
-        .addImm(IsSubtract ? -NumBytes : NumBytes);
-  }
-}
-
-} // namespace
-
 bool SBFFrameLowering::hasFP(const MachineFunction &MF) const { return true; }
 
 void SBFFrameLowering::emitPrologue(MachineFunction &MF,
@@ -45,17 +27,20 @@ void SBFFrameLowering::emitPrologue(MachineFunction &MF,
     return;
   }
   MachineBasicBlock::iterator MBBI = MBB.begin();
-  adjustStackPointer(MF, MBB, MBBI, true);
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  int NumBytes = (int)MFI.getStackSize();
+  if (NumBytes) {
+    DebugLoc Dl = MBBI->getDebugLoc();
+    const SBFInstrInfo &TII =
+        *static_cast<const SBFInstrInfo *>(MF.getSubtarget().getInstrInfo());
+    BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
+        .addReg(SBF::R10)
+        .addImm(-NumBytes);
+  }
 }
 
 void SBFFrameLowering::emitEpilogue(MachineFunction &MF,
-                                    MachineBasicBlock &MBB) const {
-  if (!MF.getSubtarget<SBFSubtarget>().getHasDynamicFrames()) {
-    return;
-  }
-  MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
-  adjustStackPointer(MF, MBB, MBBI, false);
-}
+                                    MachineBasicBlock &MBB) const {}
 
 void SBFFrameLowering::determineCalleeSaves(MachineFunction &MF,
                                             BitVector &SavedRegs,
