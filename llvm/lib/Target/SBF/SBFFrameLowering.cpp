@@ -29,7 +29,7 @@ void SBFFrameLowering::emitPrologue(MachineFunction &MF,
   MachineBasicBlock::iterator MBBI = MBB.begin();
   MachineFrameInfo &MFI = MF.getFrameInfo();
   int NumBytes = (int)MFI.getStackSize();
-  if (NumBytes) {
+  if (NumBytes || MF.getSubtarget<SBFSubtarget>().getHasStaticSyscalls()) {
     DebugLoc Dl = MBBI->getDebugLoc();
     const SBFInstrInfo &TII =
         *static_cast<const SBFInstrInfo *>(MF.getSubtarget().getInstrInfo());
