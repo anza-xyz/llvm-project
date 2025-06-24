@@ -259,10 +259,6 @@ static OutputSection *findSection(StringRef name, unsigned partition = 1) {
   return nullptr;
 }
 
-static bool isSbfV3OrHigher() {
-  return config->emachine == EM_SBF && config->eflags >= 0x3;
-}
-
 template <class ELFT> void elf::createSyntheticSections() {
   // Initialize all pointers with NULL. This is needed because
   // you can call lld::elf::main more than once as a library.
@@ -708,11 +704,6 @@ template <class ELFT> void Writer<ELFT>::copyLocalSymbols() {
         continue;
       if (includeInSymtab(*b) && shouldKeepInSymtab(*dr))
         in.symTab->addSymbol(b);
-
-      // We want local functions in the dynamic symbol table for SBFv3
-      if (isSbfV3OrHigher() && includeInSymtab(*b) && shouldKeepInSymtab(*dr) &&
-          b->type == STT_FUNC)
-        partitions[b->partition - 1].dynSymTab->addSymbol(b);
     }
   }
 }
@@ -1617,7 +1608,7 @@ template <class ELFT> void Writer<ELFT>::finalizeAddressDependentContent() {
   AArch64Err843419Patcher a64p;
   ARMErr657417Patcher a32p;
   script->assignAddresses();
-  bool SbfDuplicateRemoval = false;
+
   // .ARM.exidx and SHF_LINK_ORDER do not require precise addresses, but they
   // do require the relative addresses of OutputSections because linker scripts
   // can assign Virtual Addresses to OutputSections that are not monotonically
@@ -1665,16 +1656,6 @@ template <class ELFT> void Writer<ELFT>::finalizeAddressDependentContent() {
     }
 
     const Defined *changedSym = script->assignAddresses();
-
-    if (!SbfDuplicateRemoval && isSbfV3OrHigher()) {
-      // When we deduplicate symbols, the address dependent content must be
-      // recalculated as the symbol table might have been shortened.
-      for (Partition &part: partitions) {
-        part.dynSymTab->sortAndDedupSymbolsByValue();
-      }
-      SbfDuplicateRemoval = true;
-      changed = true;
-    }
 
     if (!changed) {
       // Some symbols may be dependent on section addresses. When we break the
@@ -1991,13 +1972,6 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
         if (auto *file = dyn_cast_or_null<SharedFile>(sym->file))
           if (file->isNeeded && !sym->isUndefined())
             addVerneed(sym);
-      } else if (isSbfV3OrHigher() && includeInSymtab(*sym) && isa<Defined>(sym) &&
-                 sym->type == STT_FUNC) {
-        // We want local functions in the dynamic symbol table for SBFv3
-        const Defined *Def = dyn_cast<Defined>(sym);
-        if (shouldKeepInSymtab(*Def)) {
-          partitions[sym->partition - 1].dynSymTab->addSymbol(sym);
-        }
       }
     }
 
