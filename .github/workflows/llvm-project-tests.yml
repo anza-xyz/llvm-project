@@ -44,7 +44,7 @@ on:
         # to install a python version linked against a newer version of glibc.
         # TODO(boomanaiden154): Bump the Ubuntu version once the version in the
         # container is bumped.
-        default: '["ubuntu-22.04", "windows-2019", "macOS-13"]'
+        default: '["ubuntu-22.04", "windows-2022", "macOS-13"]'
 
       python_version:
         required: false
@@ -74,7 +74,7 @@ jobs:
           - ubuntu-22.04
           # Use windows-2019 due to:
           # https://developercommunity.visualstudio.com/t/Prev-Issue---with-__assume-isnan-/1597317
-          - windows-2019
+          - windows-2022
           # We're using a specific version of macOS due to:
           # https://github.com/actions/virtual-environments/issues/5900
           - macOS-latest

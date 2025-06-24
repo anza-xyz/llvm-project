@@ -187,23 +187,21 @@ bool SBFMIPreEmitPeephole::addReturn() {
   //
   // Although we can change ISelLowering and manually add the return for an
   // LLVM-IR unreachable instruction, LLVM codegen uses the target machine's
-  // return instruction to determine whether a function needs an epilogue,
-  // increasing code size more, even when we know the call won't transfer
-  // control back to the caller.
+  // return instruction to determine whether a function needs an epilogue.
+  // This setting increases code size, even when we know the call won't
+  // trasnfer control back to the caller.
   //
   // In that case, we can analyze every function before emitting machine code
   // and include a useless return instruction.
 
-  for (MachineBasicBlock &MBB: *MF) {
-    if (!MBB.succ_empty() || MBB.empty())
-      continue;
-
-    MachineInstr &MI = MBB.back();
-    unsigned Opcode = MI.getOpcode();
-    if (Opcode != SBF::RETURN_v3) {
-      BuildMI(&MBB, MI.getDebugLoc(), TII->get(SBF::RETURN_v3));
-      Added = true;
-    }
+  // PreEmitPeephole happens after block placement, so the last block in
+  // the ELF layout is also the last one in MF.
+  MachineBasicBlock &MBB = MF->back();
+  MachineInstr &MI = MBB.back();
+  unsigned Opcode = MI.getOpcode();
+  if (Opcode != SBF::RETURN_v3 && Opcode != SBF::JMP) {
+    BuildMI(&MBB, MI.getDebugLoc(), TII->get(SBF::RETURN_v3));
+    Added = true;
   }
 
   return Added;
