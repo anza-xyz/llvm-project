@@ -13,7 +13,7 @@
 define i32 @test_func(ptr noundef %vec, i32 noundef %idx) #0 {
 ; CHECK-LABEL: test_func:
 ; CHECK: add64 r10, -128
-; CHECK: add64 r10, 128
+; CHECK-NOT: add64 r10, 128
 entry:
   %vec.addr = alloca ptr, align 8
   %idx.addr = alloca i512, align 4
