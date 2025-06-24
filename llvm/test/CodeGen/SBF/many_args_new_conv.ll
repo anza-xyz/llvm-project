@@ -68,7 +68,7 @@ define i32 @callee_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %p
 ; CHECK: ldxdw r2, [r10 + 88]
 ; Loading allocated i32
 ; CHECK: ldxw r0, [r10 + 24]
-; CHECK: add64 r10, 128
+; CHECK-NOT: add64 r10, 128
 
 entry:
   %o = alloca i512
@@ -97,7 +97,7 @@ define i32 @callee_no_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32
 ; CHECK: ldxdw r1, [r10 + 32]
 ; CHECK: ldxdw r1, [r10 + 24]
 
-; CHECK: add64 r10, 64
+; CHECK-NOT: add64 r10, 64
 entry:
   %g = add i32 %a, %b
   %h = sub i32 %g, %c
