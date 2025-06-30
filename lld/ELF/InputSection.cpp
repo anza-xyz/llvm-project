@@ -921,7 +921,7 @@ void InputSection::relocateNonAlloc(uint8_t *buf, ArrayRef<RelTy> rels) {
     const uint64_t offset = rel.r_offset;
 
     // FIX: Temporary remap BPF_64_64 relocations in debug sections.
-    if (config->emachine == EM_BPF && type == R_BPF_64_64 && isDebug)
+    if (config->emachine == EM_SBF && type == R_SBF_64_64 && isDebug)
       type = R_BPF_64_ABS64;
 
     uint8_t *bufLoc = buf + offset;
