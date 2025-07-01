@@ -160,8 +160,11 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   // Memcmp expands to three instructions for each load:
   // 1. One load for each pointer being compared.
   // 2. One jne for each load.
-  // The limit here should be three, since 3*3 = 9;
-  MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = 3;
+  // There is also a 3 CUs overhead for adjusting the arguments to memcmp.
+  // We need at least three mov64 to set them.
+  // A syscall takes at least 10 + 3 CUs.
+  // The limit here should be four, since 3*4 = 12;
+  MaxLoadsPerMemcmp = MaxLoadsPerMemcmpOptSize = 4;
 
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
