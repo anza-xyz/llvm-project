@@ -65,6 +65,9 @@ public:
 
   unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
 
+  std::optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
+                                           Register Reg) const override;
+
 private:
   bool HasExplicitSignExt;
   bool NewMemEncoding;

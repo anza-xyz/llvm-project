@@ -400,3 +400,30 @@ unsigned SBFInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
 
   return 8;
 }
+
+std::optional<RegImmPair> SBFInstrInfo::isAddImmediate(const MachineInstr &MI,
+                                                       Register Reg) const {
+  const MachineOperand &Op0 = MI.getOperand(0);
+  if (!Op0.isReg() || Reg != Op0.getReg())
+    return std::nullopt;
+
+  if (!MI.getOperand(1).isReg() || !MI.getOperand(2).isImm())
+    return std::nullopt;
+
+  int Sign = 1;
+  int64_t Offset = 0;
+  unsigned Opcode = MI.getOpcode();
+  switch (Opcode) {
+  default:
+    return std::nullopt;
+  case SBF::SUB_ri:
+  case SBF::SUB_ri_32:
+    Sign *= -1;
+    [[fallthrough]];
+  case SBF::ADD_ri:
+  case SBF::ADD_ri_32: {
+    Offset = MI.getOperand(2).getImm() * Sign;
+    return RegImmPair{MI.getOperand(1).getReg(), Offset};
+  }
+  }
+}
