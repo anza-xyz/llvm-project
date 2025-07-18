@@ -68,6 +68,18 @@ public:
   std::optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
                                            Register Reg) const override;
 
+  Register isStoreToStackSlot(const MachineInstr &MI,
+                              int &FrameIndex) const override;
+
+  Register isStoreToStackSlot(const MachineInstr &MI, int &FrameIndex,
+                              unsigned &MemBytes) const override;
+
+  Register isLoadFromStackSlot(const MachineInstr &MI,
+                               int &FrameIndex) const override;
+
+  Register isLoadFromStackSlot(const MachineInstr &MI, int &FrameIndex,
+                               unsigned &MemBytes) const override;
+
 private:
   bool HasExplicitSignExt;
   bool NewMemEncoding;

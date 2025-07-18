@@ -114,6 +114,41 @@ void SBFInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
     llvm_unreachable("Can't store this register to stack slot");
 }
 
+Register SBFInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
+                                          int &FrameIndex,
+                                          unsigned &MemBytes) const {
+  switch (MI.getOpcode()) {
+  default:
+    break;
+  case SBF::STD_V2:
+  case SBF::STD_V1:
+    MemBytes = 8;
+    if (MI.getOperand(0).isReg() && MI.getOperand(1).isFI() &&
+        MI.getOperand(2).isImm() && MI.getOperand(2).getImm() == 0) {
+      FrameIndex = MI.getOperand(1).getIndex();
+      return MI.getOperand(0).getReg();
+    }
+    break;
+  case SBF::STW32_V2:
+  case SBF::STW32_V1:
+    MemBytes = 4;
+    if (MI.getOperand(0).isReg() && MI.getOperand(1).isFI() &&
+        MI.getOperand(2).isImm() && MI.getOperand(2).getImm() == 0) {
+      FrameIndex = MI.getOperand(1).getIndex();
+      return MI.getOperand(0).getReg();
+    }
+    break;
+  }
+
+  return 0;
+}
+
+Register SBFInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
+                                          int &FrameIndex) const {
+  unsigned MemBytes = 0;
+  return isStoreToStackSlot(MI, FrameIndex, MemBytes);
+}
+
 void SBFInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
                                         MachineBasicBlock::iterator I,
                                         Register DestReg, int FI,
@@ -134,6 +169,41 @@ void SBFInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
             DestReg).addFrameIndex(FI).addImm(0);
   else
     llvm_unreachable("Can't load this register from stack slot");
+}
+
+Register SBFInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
+                                           int &FrameIndex,
+                                           unsigned &MemBytes) const {
+  switch (MI.getOpcode()) {
+  default:
+    break;
+  case SBF::LDD_V2:
+  case SBF::LDD_V1:
+    MemBytes = 8;
+    if (MI.getOperand(0).isReg() && MI.getOperand(1).isFI() &&
+        MI.getOperand(2).isImm() && MI.getOperand(2).getImm() == 0) {
+      FrameIndex = MI.getOperand(1).getIndex();
+      return MI.getOperand(0).getReg();
+    }
+    break;
+  case SBF::LDW32_V2:
+  case SBF::LDW32_V1:
+    MemBytes = 4;
+    if (MI.getOperand(0).isReg() && MI.getOperand(1).isFI() &&
+        MI.getOperand(2).isImm() && MI.getOperand(2).getImm() == 0) {
+      FrameIndex = MI.getOperand(1).getIndex();
+      return MI.getOperand(0).getReg();
+    }
+    break;
+  }
+
+  return 0;
+}
+
+Register SBFInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
+                                           int &FrameIndex) const {
+  unsigned MemBytes = 0;
+  return isLoadFromStackSlot(MI, FrameIndex, MemBytes);
 }
 
 bool SBFInstrInfo::analyzeBranch(MachineBasicBlock &MBB,

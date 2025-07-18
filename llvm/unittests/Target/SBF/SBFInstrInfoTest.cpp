@@ -125,6 +125,129 @@ TEST_P(SBFInstrInfoTest, IsAddImmediate) {
   ASSERT_FALSE(MI7Res.has_value());
 }
 
+TEST_P(SBFInstrInfoTest, IsStoreToStackSlot) {
+  const SBFInstrInfo *TII = ST->getInstrInfo();
+  DebugLoc DL;
+
+  MachineInstr *MI = BuildMI(*MF, DL, TII->get(SBF::STD_V2))
+                         .addReg(SBF::R1, getKillRegState(true))
+                         .addFrameIndex(10)
+                         .addImm(0)
+                         .getInstr();
+  int FI = 0;
+  unsigned Mem = 0;
+  auto MI1Res = TII->isStoreToStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R1);
+  EXPECT_EQ(FI, 10);
+  EXPECT_EQ(Mem, 8u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::STD_V1))
+           .addReg(SBF::R2, getKillRegState(true))
+           .addFrameIndex(17)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isStoreToStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R2);
+  EXPECT_EQ(FI, 17);
+  EXPECT_EQ(Mem, 8u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::STW32_V2))
+           .addReg(SBF::R2, getKillRegState(true))
+           .addFrameIndex(15)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isStoreToStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R2);
+  EXPECT_EQ(FI, 15);
+  EXPECT_EQ(Mem, 4u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::STW32_V1))
+           .addReg(SBF::R5, getKillRegState(true))
+           .addFrameIndex(18)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isStoreToStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R5);
+  EXPECT_EQ(FI, 18);
+  EXPECT_EQ(Mem, 4u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::LDW32_V1), SBF::R1)
+           .addReg(SBF::R5, getKillRegState(true))
+           .addFrameIndex(18)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isStoreToStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), 0u);
+}
+
+TEST_P(SBFInstrInfoTest, IsLoadFromStackSlot) {
+  const SBFInstrInfo *TII = ST->getInstrInfo();
+  DebugLoc DL;
+
+  MachineInstr *MI = BuildMI(*MF, DL, TII->get(SBF::LDD_V2), SBF::R1)
+                         .addFrameIndex(10)
+                         .addImm(0)
+                         .getInstr();
+  int FI = 0;
+  unsigned Mem = 0;
+  auto MI1Res = TII->isLoadFromStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R1);
+  EXPECT_EQ(FI, 10);
+  EXPECT_EQ(Mem, 8u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::LDD_V1), SBF::R2)
+           .addFrameIndex(17)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isLoadFromStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R2);
+  EXPECT_EQ(FI, 17);
+  EXPECT_EQ(Mem, 8u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::LDW32_V2), SBF::R2)
+           .addFrameIndex(15)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isLoadFromStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R2);
+  EXPECT_EQ(FI, 15);
+  EXPECT_EQ(Mem, 4u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::LDW32_V1))
+           .addReg(SBF::R5, getKillRegState(true))
+           .addFrameIndex(18)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isLoadFromStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), SBF::R5);
+  EXPECT_EQ(FI, 18);
+  EXPECT_EQ(Mem, 4u);
+
+  MI = BuildMI(*MF, DL, TII->get(SBF::STD_V2))
+           .addReg(SBF::R5, getKillRegState(true))
+           .addFrameIndex(18)
+           .addImm(0)
+           .getInstr();
+  FI = 0;
+  Mem = 0;
+  MI1Res = TII->isLoadFromStackSlot(*MI, FI, Mem);
+  EXPECT_EQ(MI1Res.id(), 0u);
+}
+
 } // namespace
 
 INSTANTIATE_TEST_SUITE_P(SBFTest, SBFInstrInfoTest, testing::Values("sbf"));
