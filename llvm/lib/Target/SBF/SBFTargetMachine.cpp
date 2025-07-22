@@ -81,7 +81,10 @@ namespace {
 class SBFPassConfig : public TargetPassConfig {
 public:
   SBFPassConfig(SBFTargetMachine &TM, PassManagerBase &PM)
-      : TargetPassConfig(TM, PM) {}
+      : TargetPassConfig(TM, PM) {
+    EnableSinkAndFold = true;
+    setEnableSinkAndFold(true);
+  }
 
   SBFTargetMachine &getSBFTargetMachine() const {
     return getTM<SBFTargetMachine>();
