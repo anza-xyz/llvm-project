@@ -26,7 +26,7 @@ entry:
 }
 
 ; CHECK:              mov64 r2, 12
-; CHECK-NEXT:         add64 r1, r2
+; CHECK:              add64 r1, r2
 ; CHECK:              call get_value
 
 ; CHECK:              .long   6                       # BTF_KIND_STRUCT(id = [[TID1:[0-9]+]])

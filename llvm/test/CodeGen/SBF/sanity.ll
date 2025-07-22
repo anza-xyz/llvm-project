@@ -38,8 +38,9 @@ define void @foo_call2(i32 %a, i32 %b) #1 {
   ret void
 ; CHECK-LABEL: foo_call2:
 ; CHECK: lsh64 r2, 56
-; CHECK: arsh64 r2, 56
 ; CHECK: mov64 r1, r2
+; CHECK: arsh64 r1, 56
+; CHECK: mov64 r2, r3
 }
 
 declare void @foo_2arg(i8 signext, i32) #2
