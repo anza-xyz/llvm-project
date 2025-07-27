@@ -443,6 +443,14 @@ let Predicates = [SBFExplicitSignExt], DecoderNamespace = "SBFv2" in {
                                 []>;
 }
 
+let Predicates = [SBFExplicitSignExt], DecoderNamespace = "Repeated" in  {
+    def MOV_ri_32_zext : MATH_RI<SBF_ALU, SBF_MOV,
+                        (outs GPR:$dst),
+                        (ins i64imm:$imm),
+                        "mov32 $dst, $imm",
+                        [(set GPR:$dst, (i64 i64immZExt32:$imm))]>;
+}
+
 def MOV_rr_32_no_sext_v1 : MATH_RR<SBF_ALU, SBF_MOV,
                         (outs GPR32:$dst),
                         (ins GPR32:$src),
