@@ -6,6 +6,7 @@ entry:
 ; CHECK-LABEL: mov_1
 ; CHECK-V1: lddw r0, 4294967294
 ; CHECK-V2: mov32 r0, -2
+; CHECK-V2-NOT: hor64
   ret i64 4294967294
 }
 
