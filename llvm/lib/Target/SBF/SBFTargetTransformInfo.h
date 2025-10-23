@@ -87,6 +87,7 @@ public:
     TTI::MemCmpExpansionOptions Options;
     Options.LoadSizes = {8, 4, 2, 1};
     Options.MaxNumLoads = TLI->getMaxExpandSizeMemcmp(OptSize);
+    Options.AllowOverlappingLoads = true;
     return Options;
   }
 

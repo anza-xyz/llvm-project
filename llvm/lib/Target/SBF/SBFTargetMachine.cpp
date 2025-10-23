@@ -10,12 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "MCTargetDesc/SBFMCAsmInfo.h"
 #include "SBF.h"
+#include "SBFFunctionInfo.h"
 #include "SBFTargetMachine.h"
 #include "SBFTargetTransformInfo.h"
-#include "SBFFunctionInfo.h"
-#include "MCTargetDesc/SBFMCAsmInfo.h"
 #include "TargetInfo/SBFTargetInfo.h"
+#include "llvm/CodeGen/ExpandMemCmp.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
@@ -23,6 +24,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Utils/SimplifyCFGOptions.h"
@@ -117,6 +119,8 @@ void SBFTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
       });
   PB.registerPeepholeEPCallback([=](FunctionPassManager &FPM,
                                     OptimizationLevel Level) {
+    FPM.addPass(ExpandMemCmpPass(this));
+    FPM.addPass(InstCombinePass());
     FPM.addPass(SimplifyCFGPass(
         SimplifyCFGOptions().hoistCommonInsts(true).convertSwitchToLookupTable(
             true)));
