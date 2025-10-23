@@ -15,16 +15,13 @@
 ; Function Attrs: nounwind uwtable
 define i32 @ebpf_filter(%struct.__sk_buff* nocapture readnone %ebpf_packet) #0 section "socket1" {
 
-; CHECK: mov64 r1, 2569
-; CHECK: stxh [r10 - 2], r1
-; CHECK: mov64 r1, 134678021
-; CHECK: stxw [r10 - 6], r1
+; CHECK-DAG: stdw [r10 + 0], 0
+; CHECK: sth [r10 - 2], 2569
+; CHECK: stw [r10 - 6], 134678021
 
-; CHECK: mov64 r1, 0
-; CHECK-DAG: stxdw [r10 + 0], r1
-; CHECK-DAG: stxdw [r10 + 8], r1
-; CHECK-DAG: stxdw [r10 + 16], r1
-; CHECK-DAG: stxdw [r10 + 22], r1
+; CHECK-DAG: stdw [r10 + 8], 0
+; CHECK-DAG: stdw [r10 + 16], 0
+; CHECK-DAG: stdw [r10 + 22], 0
 
 ; CHECK: mov64 r2, r10
 ; CHECK: add64 r2, -6

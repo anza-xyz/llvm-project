@@ -55,7 +55,6 @@ def SBFCallxSrc : Predicate<"Subtarget->getCallXRegSrc()">, AssemblerPredicate<(
 def SBFNoCallxSrc : Predicate<"!Subtarget->getCallXRegSrc()">;
 def SBFPqrInstr : Predicate<"Subtarget->getHasPqrClass()">;
 def SBFNoPqrInstr : Predicate<"!Subtarget->getHasPqrClass()">;
-def SBFHasStoreImm : Predicate<"Subtarget->getHasStoreImm()">;
 def SBFExplicitSignExt : Predicate<"Subtarget->getHasExplicitSignExt()">;
 def SBFNoExplicitSignExt : Predicate<"!Subtarget->getHasExplicitSignExt()">;
 def SBFNewMemEncoding : Predicate<"Subtarget->getNewMemEncoding()">, AssemblerPredicate<(all_of FeatureNewMemEncoding)>;
@@ -619,7 +618,7 @@ defm STW_imm : STORE_imm<SBF_W, SBF_W_V2,  "stw">;
 defm STH_imm : STORE_imm<SBF_H, SBF_H_V2, "sth">;
 defm STB_imm : STORE_imm<SBF_B, SBF_B_V2,  "stb">;
 
-let Predicates = [SBFHasStoreImm, SBFOldMemEncoding] in {
+let Predicates = [SBFOldMemEncoding] in {
   def : Pat<(store (i64 i64immSExt32:$imm), ADDRri:$addr),
             (STD_imm_V1 (i64 imm:$imm), ADDRri:$addr)>;
   def : Pat<(truncstorei32 (i64 i64immZExt32:$imm), ADDRri:$addr),
@@ -630,7 +629,7 @@ let Predicates = [SBFHasStoreImm, SBFOldMemEncoding] in {
               (STB_imm_V1 (i64 imm:$imm), ADDRri:$addr)>;
 }
 
-let Predicates = [SBFHasStoreImm, SBFNewMemEncoding] in {
+let Predicates = [SBFNewMemEncoding] in {
   def : Pat<(store (i64 i64immSExt32:$imm), ADDRri:$addr),
             (STD_imm_V2 (i64 imm:$imm), ADDRri:$addr)>;
   def : Pat<(truncstorei32 (i64 i64immZExt32:$imm), ADDRri:$addr),
@@ -641,7 +640,7 @@ let Predicates = [SBFHasStoreImm, SBFNewMemEncoding] in {
               (STB_imm_V2 (i64 imm:$imm), ADDRri:$addr)>;
 }
 
-let Predicates = [SBFHasStoreImm, SBFNewMemEncoding] in {
+let Predicates = [SBFNewMemEncoding] in {
   def : Pat<(store (i32 imm:$src), ADDRri:$dst),
             (STW_imm_V2 (imm_to_i64 $src), ADDRri:$dst)>;
   def : Pat<(truncstorei16 (i32 imm:$src), ADDRri:$dst),
@@ -651,7 +650,7 @@ let Predicates = [SBFHasStoreImm, SBFNewMemEncoding] in {
 }
 
 
-let Predicates = [SBFHasALU32, SBFHasStoreImm, SBFOldMemEncoding] in {
+let Predicates = [SBFHasALU32, SBFOldMemEncoding] in {
   def : Pat<(store (i32 imm:$src), ADDRri:$dst),
             (STW_imm_V1 (imm_to_i64 $src), ADDRri:$dst)>;
   def : Pat<(truncstorei16 (i32 imm:$src), ADDRri:$dst),
@@ -660,7 +659,7 @@ let Predicates = [SBFHasALU32, SBFHasStoreImm, SBFOldMemEncoding] in {
             (STB_imm_V1 (imm_to_i64 imm:$src), ADDRri:$dst)>;
 }
 
-let Predicates = [SBFHasALU32, SBFHasStoreImm, SBFNewMemEncoding] in {
+let Predicates = [SBFHasALU32, SBFNewMemEncoding] in {
   def : Pat<(store (i32 imm:$src), ADDRri:$dst),
             (STW_imm_V2 (imm_to_i64 $src), ADDRri:$dst)>;
   def : Pat<(truncstorei16 (i32 imm:$src), ADDRri:$dst),

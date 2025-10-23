@@ -76,9 +76,6 @@ protected:
   // Whether we have the PQR instruction class
   bool HasPqrClass;
 
-  // Whether we have store imm instructions
-  bool HasStoreImm;
-
   // Whether we have the explicit sign extension instruction (mov32)
   bool HasExplicitSignExt;
 
@@ -113,7 +110,6 @@ public:
   bool getNoLddw() const { return NoLddw; }
   bool getCallXRegSrc() const { return CallxRegSrc; }
   bool getHasPqrClass() const { return HasPqrClass; }
-  bool getHasStoreImm() const { return HasStoreImm; }
   bool getHasExplicitSignExt() const { return HasExplicitSignExt; }
   bool getNewMemEncoding() const { return NewMemEncoding; }
   bool getHasStaticSyscalls() const { return HasStaticSyscalls; }

@@ -50,7 +50,6 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   NoLddw = false;
   CallxRegSrc = false;
   HasPqrClass = false;
-  HasStoreImm = false;
   HasAlu32 = false;
   HasExplicitSignExt = false;
   NewMemEncoding = false;

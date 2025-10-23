@@ -32,13 +32,11 @@ define i32 @test() local_unnamed_addr #0 {
 entry:
     tail call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr inbounds (%struct.test_t2, %struct.test_t2* @g, i64 0, i32 0), i8* align 4 getelementptr inbounds (%struct.test_t2, %struct.test_t2* @test.t2, i64 0, i32 0), i64 32, i1 false)
 ; CHECK: lddw r1, g
-; CHECK: mov64 r2, 3
-; CHECK: stxdw [r1 + 24], r2
 ; CHECK: lddw r2, 8589934593
 ; CHECK: stxdw [r1 + 16], r2
-; CHECK: mov64 r2, 0
-; CHECK: stxdw [r1 + 8], r2
-; CHECK: stxdw [r1 + 0], r2
+; CHECK: stdw [r1 + 24], 3
+; CHECK: stdw [r1 + 8], 0
+; CHECK: stdw [r1 + 0], 0
 ; CHECK: mov64 r0, 0
 
       ret i32 0

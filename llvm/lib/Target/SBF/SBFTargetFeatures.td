@@ -40,9 +40,6 @@ def FeatureCallxRegSrc : SubtargetFeature<"callx-reg-src", "CallxRegSrc", "true"
 def FeaturePqrInstr : SubtargetFeature<"pqr-instr", "HasPqrClass", "true",
                                     "Enable the PQR instruction class">;
 
-def FeatureStoreImm : SubtargetFeature<"store-imm", "HasStoreImm", "true",
-                                           "Enable store imm instructions">;
-
 def FeatureExplicitSext : SubtargetFeature<"explicit-sext", "HasExplicitSignExt",
                     "true", "Enable the explicit sign extension instruction mov32">;
 
@@ -58,17 +55,17 @@ class Proc<string Name, list<SubtargetFeature> Features>
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm]>;
+def : Proc<"v1", [FeatureDynamicFrames]>;
 
-def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
+def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
 
-def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
+def : Proc<"v3", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
 
-def : Proc<"v4", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
+def : Proc<"v4", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
                   FeatureAbiV2]>;

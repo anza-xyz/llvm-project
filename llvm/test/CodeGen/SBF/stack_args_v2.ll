@@ -3,8 +3,7 @@
 ; Function Attrs: nounwind uwtable
 define i32 @foo(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK-LABEL: foo:
-; CHECK: mov64 r4, 3
-; CHECK: stxdw [r10 - 8], r4
+; CHECK: stdw [r10 - 8], 3
 ; CHECK: mov64 r4, 1
 ; CHECK: mov64 r5, 2
 ; CHECK: call bar
