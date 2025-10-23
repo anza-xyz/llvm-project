@@ -10,13 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "MCTargetDesc/SBFMCAsmInfo.h"
 #include "SBF.h"
+#include "SBFFunctionInfo.h"
 #include "SBFTargetMachine.h"
 #include "SBFTargetTransformInfo.h"
-#include "SBFFunctionInfo.h"
-#include "MCTargetDesc/SBFMCAsmInfo.h"
 #include "TargetInfo/SBFTargetInfo.h"
 #include "llvm/CodeGen/Passes.h"
+#include "llvm/CodeGen/ExpandMemCmp.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/IR/PassManager.h"
@@ -113,6 +114,7 @@ void SBFTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB) {
         FPM.addPass(SBFAbstractMemberAccessPass(this));
         FPM.addPass(SBFPreserveDITypePass());
         FPM.addPass(SBFIRPeepholePass());
+        FPM.addPass(ExpandMemCmpPass(this));
         MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
       });
   PB.registerPeepholeEPCallback([=](FunctionPassManager &FPM,
