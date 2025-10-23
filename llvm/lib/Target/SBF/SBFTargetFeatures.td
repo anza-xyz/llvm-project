@@ -49,9 +49,6 @@ def FeatureExplicitSext : SubtargetFeature<"explicit-sext", "HasExplicitSignExt"
 def FeatureNewMemEncoding : SubtargetFeature<"mem-encoding", "NewMemEncoding",
                                        "true", "Enable the new encoding for memory instructions">;
 
-def FeatureJumpExt : SubtargetFeature<"jmp-ext", "HasJmpExt",
-                                       "true", "Enable jumps with less than and less than or equal">;
-
 def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
                                        "true", "Enables AbiV2 in SBF (no-op in LLVM)">;
 
@@ -61,17 +58,17 @@ class Proc<string Name, list<SubtargetFeature> Features>
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt]>;
+def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm]>;
 
-def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
 
-def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
 
-def : Proc<"v4", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v4", [FeatureDynamicFrames, FeatureStoreImm, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
                   FeatureAbiV2]>;

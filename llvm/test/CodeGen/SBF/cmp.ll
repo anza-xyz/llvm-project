@@ -17,7 +17,7 @@ define signext i8 @foo_cmp1(i8 signext %a, i8 signext %b) #0 {
   %.0 = phi i8 [ %3, %2 ], [ %5, %4 ]
   ret i8 %.0
 ; CHECK-LABEL:foo_cmp1:
-; CHECK: jsge r0, r1
+; CHECK: jsle r1, r0
 }
 
 ; Function Attrs: nounwind readnone uwtable
@@ -37,7 +37,7 @@ define signext i8 @foo_cmp2(i8 signext %a, i8 signext %b) #0 {
   %.0 = phi i8 [ %3, %2 ], [ %5, %4 ]
   ret i8 %.0
 ; CHECK-LABEL:foo_cmp2:
-; CHECK: jsle r0, r1
+; CHECK: jsge r1, r0
 }
 
 ; Function Attrs: nounwind readnone uwtable
@@ -87,7 +87,7 @@ define signext i8 @min(i8 signext %a, i8 signext %b) #0 {
   ret i8 %a.b
 ; CHECK-LABEL:min:
 ; CHECK: mov64 r0, r1
-; CHECK: jsgt r2, r0
+; CHECK: jslt r0, r2
 ; CHECK: mov64 r0, r2
 }
 
@@ -97,7 +97,7 @@ define zeroext i8 @minu(i8 zeroext %a, i8 zeroext %b) #0 {
   %a.b = select i1 %1, i8 %a, i8 %b
   ret i8 %a.b
 ; CHECK-LABEL:minu:
-; CHECK: {{jlt|jgt}} r{{[0-9]+}}, r{{[0-9]+}}
+; CHECK: {{jlt|jgt}} r{{[0-9]+}}, 100
 }
 
 ; Function Attrs: nounwind readnone uwtable
