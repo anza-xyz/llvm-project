@@ -40,17 +40,11 @@ def FeatureCallxRegSrc : SubtargetFeature<"callx-reg-src", "CallxRegSrc", "true"
 def FeaturePqrInstr : SubtargetFeature<"pqr-instr", "HasPqrClass", "true",
                                     "Enable the PQR instruction class">;
 
-def FeatureStoreImm : SubtargetFeature<"store-imm", "HasStoreImm", "true",
-                                           "Enable store imm instructions">;
-
 def FeatureExplicitSext : SubtargetFeature<"explicit-sext", "HasExplicitSignExt",
                     "true", "Enable the explicit sign extension instruction mov32">;
 
 def FeatureNewMemEncoding : SubtargetFeature<"mem-encoding", "NewMemEncoding",
                                        "true", "Enable the new encoding for memory instructions">;
-
-def FeatureJumpExt : SubtargetFeature<"jmp-ext", "HasJmpExt",
-                                       "true", "Enable jumps with less than and less than or equal">;
 
 def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
                                        "true", "Enables AbiV2 in SBF (no-op in LLVM)">;
@@ -61,17 +55,17 @@ class Proc<string Name, list<SubtargetFeature> Features>
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt]>;
+def : Proc<"v1", [FeatureDynamicFrames]>;
 
-def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
 
-def : Proc<"v3", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v3", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
 
-def : Proc<"v4", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
+def : Proc<"v4", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
                   FeatureAbiV2]>;

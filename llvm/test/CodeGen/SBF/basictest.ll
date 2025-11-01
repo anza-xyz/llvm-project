@@ -8,8 +8,8 @@ define i32 @test0(i32 %X) {
 }
 
 ; CHECK-LABEL: store_imm:
-; CHECK: stxw [r1 + 0], r{{[03]}}
-; CHECK: stxw [r2 + 4], r{{[03]}}
+; CHECK: stw [r1 + 0], 0
+; CHECK: stw [r2 + 4], 0
 define i32 @store_imm(i32* %a, i32* %b) {
 entry:
   store i32 0, i32* %a, align 4

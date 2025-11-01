@@ -60,7 +60,7 @@ define signext i8 @foo_cmp(i8 signext %a, i8 signext %b) #0 {
   %a.b = select i1 %1, i8 %a, i8 %b
   ret i8 %a.b
 ; CHECK-LABEL: foo_cmp:
-; CHECK: jsgt r2, r0
+; CHECK: jslt r0, r2
 }
 
 ; Function Attrs: nounwind readnone uwtable

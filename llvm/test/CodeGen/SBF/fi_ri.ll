@@ -6,10 +6,9 @@
 define i32 @test() #0 {
   %key = alloca %struct.key_t, align 4
   %1 = bitcast %struct.key_t* %key to i8*
-; CHECK: mov64 r1, 0
-; CHECK: stxw [r10 - 8], r1
-; CHECK: stxdw [r10 - 16], r1
-; CHECK: stxdw [r10 - 24], r1
+; CHECK: stw [r10 - 8], 0
+; CHECK: stdw [r10 - 16], 0
+; CHECK: stdw [r10 - 24], 0
   call void @llvm.memset.p0i8.i64(i8* align 4 %1, i8 0, i64 20, i1 false)
 ; CHECK: mov64 r1, r10
 ; CHECK: add64 r1, -20

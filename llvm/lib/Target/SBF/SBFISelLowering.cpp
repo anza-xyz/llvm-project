@@ -168,7 +168,6 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
 
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
-  HasJmpExt = STI.getHasJmpExt();
   SBFRegisterInfo::FrameLength = 4096;
 }
 
@@ -688,20 +687,6 @@ SDValue SBFTargetLowering::LowerCallResult(
   return Chain;
 }
 
-static void NegateCC(SDValue &LHS, SDValue &RHS, ISD::CondCode &CC) {
-  switch (CC) {
-  default:
-    break;
-  case ISD::SETULT:
-  case ISD::SETULE:
-  case ISD::SETLT:
-  case ISD::SETLE:
-    CC = ISD::getSetCCSwappedOperands(CC);
-    std::swap(LHS, RHS);
-    break;
-  }
-}
-
 SDValue SBFTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue Chain = Op.getOperand(0);
   ISD::CondCode CC = cast<CondCodeSDNode>(Op.getOperand(1))->get();
@@ -709,9 +694,6 @@ SDValue SBFTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue RHS = Op.getOperand(3);
   SDValue Dest = Op.getOperand(4);
   SDLoc DL(Op);
-
-  if (!getHasJmpExt())
-    NegateCC(LHS, RHS, CC);
 
   bool IsSignedCmp = (CC == ISD::SETGT ||
                       CC == ISD::SETGE ||
@@ -748,9 +730,6 @@ SDValue SBFTargetLowering::LowerSELECT_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue FalseV = Op.getOperand(3);
   ISD::CondCode CC = cast<CondCodeSDNode>(Op.getOperand(4))->get();
   SDLoc DL(Op);
-
-  if (!getHasJmpExt())
-    NegateCC(LHS, RHS, CC);
 
   SDValue TargetCC = DAG.getConstant(CC, DL, LHS.getValueType());
   SDValue Ops[] = {LHS, RHS, TargetCC, TrueV, FalseV};

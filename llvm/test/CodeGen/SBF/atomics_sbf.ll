@@ -183,10 +183,10 @@ entry:
 
 ; CHECK-LABEL: test_min_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov32 r4, w2
-; CHECK: mov32 r5, w0
+; CHECK: mov32 r4, w0
+; CHECK: mov32 r5, w2
 ; CHECK: mov64 w3, w0
-; CHECK: jsgt r4, r5, LBB16_2
+; CHECK: jslt r4, r5, LBB16_2
 ; CHECK: mov64 w3, w2
 ; CHECK: stxw [r1 + 0], w3
 define dso_local i32 @test_min_32(i32* nocapture %ptr, i32 %v) local_unnamed_addr #0 {
@@ -198,7 +198,7 @@ entry:
 ; CHECK-LABEL: test_min_64
 ; CHECK: ldxdw r0, [r1 + 0]
 ; CHECK: mov64 r3, r0
-; CHECK: jsgt r2, r0,
+; CHECK: jslt r0, r2,
 ; CHECK: mov64 r3, r2
 ; CHECK: stxdw [r1 + 0], r3
 define dso_local  i64 @test_min_64(i64* nocapture %ptr, i64 %v) local_unnamed_addr #0 {
@@ -238,7 +238,7 @@ entry:
 ; CHECK-NOT: mov64 r4, w2
 ; CHECK-NOT: mov64 r5, w0
 ; CHECK: mov64 w3, w0
-; CHECK: jgt r2, r0,
+; CHECK: jlt r0, r2,
 ; CHECK: mov64 w3, w2
 ; CHECK: stxw [r1 + 0], w3
 define dso_local  i32 @test_umin_32(i32* nocapture %ptr, i32 %v) local_unnamed_addr #0 {
@@ -250,7 +250,7 @@ entry:
 ; CHECK-LABEL: test_umin_64
 ; CHECK: ldxdw r0, [r1 + 0]
 ; CHECK: mov64 r3, r0
-; CHECK: jgt r2, r0,
+; CHECK: jlt r0, r2,
 ; CHECK: mov64 r3, r2
 ; CHECK: stxdw [r1 + 0], r3
 define dso_local  i64 @test_umin_64(i64* nocapture %ptr, i64 %v) local_unnamed_addr #0 {

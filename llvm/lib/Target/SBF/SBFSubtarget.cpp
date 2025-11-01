@@ -44,14 +44,12 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   UseDwarfRIS = false;
 
   // New SBF features
-  HasJmpExt = false;
   HasDynamicFrames = false;
   DisableNeg = false;
   ReverseSubImm = false;
   NoLddw = false;
   CallxRegSrc = false;
   HasPqrClass = false;
-  HasStoreImm = false;
   HasAlu32 = false;
   HasExplicitSignExt = false;
   NewMemEncoding = false;
