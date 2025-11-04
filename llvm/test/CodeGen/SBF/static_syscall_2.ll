@@ -20,7 +20,7 @@ entry:
   %1 = load i32, ptr %b.addr, align 4
 
 ; Ensure the syscall instruction is emitted
-; CHECK: syscall 50
+; CHECK: call 50
 
   %call = call i32 inttoptr (i64 50 to ptr)(i32 noundef %0, i32 noundef %1)
   ret i32 %call
@@ -43,7 +43,7 @@ start:
   store ptr getelementptr (i8, ptr null, i64 60), ptr %syscall.dbg.spill, align 8
 
 ; Ensure the syscall instruction is emitted
-; CHECK: syscall 60
+; CHECK: call 60
 
   %_0 = call i32 getelementptr (i8, ptr null, i64 60)(i64 %b)
   ret i32 %_0
