@@ -210,8 +210,7 @@ DecodeStatus SBFDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
         decodeInstruction(DecoderTableSBFALU32MEMv264,
                           Instr, Insn, Address, this, STI);
   }
-  else if ((isNewMem(Insn) && STI.hasFeature(SBF::FeatureNewMemEncoding)) ||
-           (isSyscallOrExit(Insn) && STI.hasFeature(SBF::FeatureStaticSyscalls))) {
+  else if (isNewMem(Insn) && STI.hasFeature(SBF::FeatureNewMemEncoding)) {
     Result =
         decodeInstruction(DecoderTableSBFv264,
                           Instr, Insn, Address, this, STI);

@@ -147,26 +147,16 @@ private:
   void initialize(MachineFunction &MFParm);
 
   bool eliminateRedundantMov();
-  bool addReturn();
 
 public:
 
   // Main entry point for this pass.
   bool runOnMachineFunction(MachineFunction &MF) override {
+    if (skipFunction(MF.getFunction()))
+      return false;
+
     initialize(MF);
-
-    bool PeepholeExecuted = false;
-    if (SubTarget->getHasStaticSyscalls())
-      PeepholeExecuted |= addReturn();
-
-    // We shall not skip adding the return to SBPFv3 functions
-    if (skipFunction(MF.getFunction()) || OptLevel == CodeGenOptLevel::None ||
-        DisablePeephole)
-      return PeepholeExecuted;
-
-    PeepholeExecuted |= eliminateRedundantMov();
-
-    return PeepholeExecuted;
+    return eliminateRedundantMov();
   }
 };
 
@@ -177,36 +167,6 @@ void SBFMIPreEmitPeephole::initialize(MachineFunction &MFParm) {
   TRI = SubTarget->getRegisterInfo();
   TII = SubTarget->getInstrInfo();
   LLVM_DEBUG(dbgs() << "*** SBF PreEmit peephole pass ***\n\n");
-}
-
-bool SBFMIPreEmitPeephole::addReturn() {
-  bool Added = false;
-
-  // In SBFv3, every function must either end with either a JA or a RETURN
-  // instruction. When we call a function that will never return the control
-  // flow (e.g. when the callee aborts execution), the caller last instruction
-  // will be a CALL, failing validation.
-  //
-  // Although we can change ISelLowering and manually add the return for an
-  // LLVM-IR unreachable instruction, LLVM codegen uses the target machine's
-  // return instruction to determine whether a function needs an epilogue.
-  // This setting increases code size, even when we know the call won't
-  // trasnfer control back to the caller.
-  //
-  // In that case, we can analyze every function before emitting machine code
-  // and include a useless return instruction.
-
-  // PreEmitPeephole happens after block placement, so the last block in
-  // the ELF layout is also the last one in MF.
-  MachineBasicBlock &MBB = MF->back();
-  MachineInstr &MI = MBB.back();
-  unsigned Opcode = MI.getOpcode();
-  if (Opcode != SBF::RETURN_v3 && Opcode != SBF::JMP) {
-    BuildMI(&MBB, MI.getDebugLoc(), TII->get(SBF::RETURN_v3));
-    Added = true;
-  }
-
-  return Added;
 }
 
 bool SBFMIPreEmitPeephole::eliminateRedundantMov() {
