@@ -312,31 +312,29 @@ multiclass PQR<SBFArithOp Opc, string Mnemonic, SDNode OpNode> {
   defm "" : MATH_32<Opc, Mnemonic, SBF_PQR, OpNode>;
 }
 
-let Constraints = "$dst = $src2" in {
-    let isAsCheapAsAMove = 1 in {
-        defm ADD : ALU<SBF_ADD, "add", add>;
-        defm SUB : ALU<SBF_SUB, "sub", sub, 0>;
-        defm OR  : ALU<SBF_OR, "or", or>;
-        defm AND : ALU<SBF_AND, "and", and>;
-        defm SLL : ALU<SBF_LSH, "lsh", shl>;
-        defm SRL : ALU<SBF_RSH, "rsh", srl>;
-        defm XOR : ALU<SBF_XOR, "xor", xor>;
-        defm SRA : ALU<SBF_ARSH, "arsh", sra>;
+let Constraints = "$dst = $src2", isReMaterializable = 1 in {
+    defm ADD : ALU<SBF_ADD, "add", add>;
+    defm SUB : ALU<SBF_SUB, "sub", sub, 0>;
+    defm OR  : ALU<SBF_OR, "or", or>;
+    defm AND : ALU<SBF_AND, "and", and>;
+    defm SLL : ALU<SBF_LSH, "lsh", shl>;
+    defm SRL : ALU<SBF_RSH, "rsh", srl>;
+    defm XOR : ALU<SBF_XOR, "xor", xor>;
+    defm SRA : ALU<SBF_ARSH, "arsh", sra>;
 
-        let Predicates = [SBFNoLddw] in {
-            def HOR :  MATH_RI<SBF_ALU64, SBF_HOR,
-                        (outs GPR:$dst),
-                        (ins GPR:$src2, i32imm:$imm),
-                        "hor64 $dst, $imm",
-                        []>;
-            let DecoderNamespace = "SBFv2" in {
-              def HOR_addr :  MATH_RI<SBF_ALU64, SBF_HOR,
-                                      (outs GPR:$dst),
-                                      (ins GPR:$src2, u64imm:$imm),
-                                      "hor64 $dst, $imm",
-                                      []>;
+    let Predicates = [SBFNoLddw] in {
+        def HOR :  MATH_RI<SBF_ALU64, SBF_HOR,
+                    (outs GPR:$dst),
+                    (ins GPR:$src2, i32imm:$imm),
+                    "hor64 $dst, $imm",
+                    []>;
+        let DecoderNamespace = "SBFv2" in {
+          def HOR_addr :  MATH_RI<SBF_ALU64, SBF_HOR,
+                                  (outs GPR:$dst),
+                                  (ins GPR:$src2, u64imm:$imm),
+                                  "hor64 $dst, $imm",
+                                  []>;
 
-            }
         }
     }
 
