@@ -37,6 +37,9 @@ def FeatureDisableLddw : SubtargetFeature<"no-lddw", "NoLddw", "true",
 def FeatureCallxRegSrc : SubtargetFeature<"callx-reg-src", "CallxRegSrc", "true",
                                     "Encode Callx destination register in the src field">;
 
+def FeatureCallxRegDst : SubtargetFeature<"callx-reg-dst", "CallxRegDst", "true",
+                                    "Encode Callx destination register in the dst field">;
+
 def FeaturePqrInstr : SubtargetFeature<"pqr-instr", "HasPqrClass", "true",
                                     "Enable the PQR instruction class">;
 
@@ -62,10 +65,10 @@ def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
 
 def : Proc<"v3", [FeatureDynamicFrames, FeatureDisableLddw,
-                  FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
+                  FeatureNewMemEncoding, FeatureCallxRegDst, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
 
 def : Proc<"v4", [FeatureDynamicFrames, FeatureDisableLddw,
-                  FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
+                  FeatureNewMemEncoding, FeatureCallxRegDst, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
                   FeatureAbiV2]>;
