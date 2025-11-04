@@ -2,9 +2,9 @@
 
 ; CHECK: jslt r1, 0x0,
 ; CHECK: call 0x1
-; CHECK: return
+; CHECK: exit
 ; CHECK: call 0x2
-; CHECK: return
+; CHECK: exit
 
 define void @foo(i32 %a) {
 %b = icmp sgt i32 %a, -1

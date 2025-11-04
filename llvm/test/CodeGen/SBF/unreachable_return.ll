@@ -14,5 +14,5 @@ start:
   unreachable
 ; CHECK: call dummy_func
 ; CHECK-NOT: add64 r10, 64
-; CHECK: return
+; CHECK-NOT: exit
 }
