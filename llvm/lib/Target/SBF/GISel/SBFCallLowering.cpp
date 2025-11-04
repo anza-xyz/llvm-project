@@ -29,7 +29,7 @@ bool SBFCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
                                   Register SwiftErrorVReg) const {
   if (!VRegs.empty())
     return false;
-  MIRBuilder.buildInstr(SBF::RETURN_v3);
+  MIRBuilder.buildInstr(SBF::EXIT);
   return true;
 }
 
