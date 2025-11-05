@@ -73,6 +73,9 @@ protected:
   // Whether to encode destination register in Callx's src field
   bool CallxRegSrc;
 
+  // Whether to encode destination register in Callx's dst field
+  bool CallxRegDst;
+
   // Whether we have the PQR instruction class
   bool HasPqrClass;
 
@@ -109,6 +112,7 @@ public:
   bool getReverseSubImm() const { return ReverseSubImm; }
   bool getNoLddw() const { return NoLddw; }
   bool getCallXRegSrc() const { return CallxRegSrc; }
+  bool getCallXRegDst() const { return CallxRegDst; }
   bool getHasPqrClass() const { return HasPqrClass; }
   bool getHasExplicitSignExt() const { return HasExplicitSignExt; }
   bool getNewMemEncoding() const { return NewMemEncoding; }
