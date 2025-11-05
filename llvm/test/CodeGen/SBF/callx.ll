@@ -2,6 +2,8 @@
 ; RUN:      | FileCheck %s -check-prefixes=CHECK-v0
 ; RUN: llc < %s -march=sbf --mcpu=v2 --show-mc-encoding \
 ; RUN:      | FileCheck %s -check-prefixes=CHECK-v2
+; RUN: llc < %s -march=sbf --mcpu=v3 --show-mc-encoding \
+; RUN:      | FileCheck %s -check-prefixes=CHECK-v3
 ; source:
 ;   int test(int (*f)(void)) { return f(); }
 
@@ -11,6 +13,7 @@ entry:
   %call = tail call i32 %f() #1
 ; CHECK-v0: callx r{{[0-9]+}} # encoding: [0x8d,0x00,0x00,0x00,0x0{{[0-9]|a|b}},0x00,0x00,0x00]
 ; CHECK-v2: callx r{{[0-9]+}} # encoding: [0x8d,0x{{[0-9]}}0,0x00,0x00,0x00,0x00,0x00,0x00]
+; CHECK-v3: callx r{{[0-9]+}} # encoding: [0x8d,0x0{{[0-9]}},0x00,0x00,0x00,0x00,0x00,0x00]
   ret i32 %call
 }
 
