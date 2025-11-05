@@ -244,6 +244,9 @@ DecodeStatus SBFDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
     if (STI.hasFeature(SBF::FeatureCallxRegSrc)) {
       Result = decodeInstruction(DecoderTableSBFv264, Instr, Insn, Address,
                                  this, STI);
+    } else if (STI.hasFeature(SBF::FeatureCallxRegDst)) {
+      Result = decodeInstruction(DecoderTableSBFv364, Instr, Insn, Address,
+                                 this, STI);
     }
   }
   }
