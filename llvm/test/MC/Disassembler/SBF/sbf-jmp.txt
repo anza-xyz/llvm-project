@@ -1,5 +1,9 @@
 # RUN: llvm-mc --disassemble %s -triple=sbf-solana-solana \
 # RUN:                          | FileCheck %s --check-prefix=CHECK-NEW
+# RUN: llvm-mc --disassemble %s -triple=sbpfv2-solana-solana \
+# RUN:                          | FileCheck %s --check-prefix=CHECK-V2
+# RUN: llvm-mc --disassemble %s -triple=sbpfv3-solana-solana \
+# RUN:                          | FileCheck %s --check-prefix=CHECK-V3
 
 # TODO: Test immediate field ranges.
 
@@ -102,6 +106,12 @@
 
 # CHECK-NEW: callx r4
 0x8d,0x00,0x00,0x00,0x04,0x00,0x00,0x00
+
+# CHECK-V2: callx r4
+0x8d,0x40,0x00,0x00,0x00,0x00,0x00,0x00
+
+# CHECK-V3: callx r4
+0x8d,0x04,0x00,0x00,0x00,0x00,0x00,0x00
 
 # CHECK-NEW: call -1
 0x85,0x10,0x00,0x00,0xff,0xff,0xff,0xff
