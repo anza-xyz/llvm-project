@@ -50,8 +50,10 @@ def FeatureNewMemEncoding : SubtargetFeature<"mem-encoding", "NewMemEncoding",
                                        "true", "Enable the new encoding for memory instructions">;
 
 def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
-                                       "true", "Enables AbiV2 in SBF (no-op in LLVM)">;
+                                       "true", "Enable AbiV2 in SBF (no-op in LLVM)">;
 
+def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
+                                                "Enable the JMP32 instruction class">;
 
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;

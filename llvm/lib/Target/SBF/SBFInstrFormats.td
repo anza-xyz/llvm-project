@@ -17,6 +17,7 @@ def SBF_STX   : SBFOpClass<0x3>;
 def SBF_ALU   : SBFOpClass<0x4>;
 def SBF_JMP   : SBFOpClass<0x5>;
 def SBF_PQR   : SBFOpClass<0x6>;
+def SBF_JMP32 : SBFOpClass<0x6>;
 def SBF_ALU64 : SBFOpClass<0x7>;
 
 def SBF_LD_V2 : SBFOpClass<0x4>;

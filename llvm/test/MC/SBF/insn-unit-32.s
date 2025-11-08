@@ -54,3 +54,51 @@
 // CHECK: b4 09 00 00 01 00 00 00      mov32 w9, 0x1
 // CHECK: b4 09 00 00 ff ff ff ff      mov32 w9, -0x1
 // CHECK: c4 0a 00 00 40 00 00 00      arsh32 w10, 0x40
+
+
+  jeq32 w0, w1, Llabel0   // BPF_JEQ  | BPF_X
+  jne32 w3, w4, Llabel0   // BPF_JNE  | BPF_X
+// CHECK: 1e 10 0b 00 00 00 00 00 	jeq32 w0, w1, +0xb
+// CHECK: 5e 43 0a 00 00 00 00 00 	jne32 w3, w4, +0xa
+
+  jgt32 w1, w2, Llabel0    // BPF_JGT  | BPF_X
+  jge32 w2, w3, Llabel0   // BPF_JGE  | BPF_X
+  jsgt32 w4, w5, Llabel0   // BPF_JSGT | BPF_X
+  jsge32 w5, w6, Llabel0  // BPF_JSGE | BPF_X
+// CHECK: 2e 21 09 00 00 00 00 00 	jgt32 w1, w2, +0x9
+// CHECK: 3e 32 08 00 00 00 00 00 	jge32 w2, w3, +0x8
+// CHECK: 6e 54 07 00 00 00 00 00 	jsgt32 w4, w5, +0x7
+// CHECK: 7e 65 06 00 00 00 00 00 	jsge32 w5, w6, +0x6
+
+  jlt32 w6, w7, Llabel0    // BPF_JLT  | BPF_X
+  jle32 w7, w8, Llabel0   // BPF_JLE  | BPF_X
+  jslt32 w8, w9, Llabel0   // BPF_JSLT | BPF_X
+  jsle32 w9, w10, Llabel0 // BPF_JSLE | BPF_X
+// CHECK: ae 76 05 00 00 00 00 00 	jlt32 w6, w7, +0x5
+// CHECK: be 87 04 00 00 00 00 00 	jle32 w7, w8, +0x4
+// CHECK: ce 98 03 00 00 00 00 00 	jslt32 w8, w9, +0x3
+// CHECK: de a9 02 00 00 00 00 00 	jsle32 w9, w10, +0x2
+
+  jeq32 w0, 0, Llabel0           // BPF_JEQ  | BPF_K
+  jne32 w3, -1, Llabel0          // BPF_JNE  | BPF_K
+// CHECK: 16 00 01 00 00 00 00 00 	jeq32 w0, 0x0, +0x1
+// CHECK: 56 03 00 00 ff ff ff ff 	jne32 w3, -0x1, +0x0
+
+Llabel0:
+  jgt32 w1, 64, Llabel0           // BPF_JGT  | BPF_K
+  jge32 w2, 0xffffffff, Llabel0  // BPF_JGE  | BPF_K
+  jsgt32 w4, 0xffffffff, Llabel0  // BPF_JSGT | BPF_K
+  jsge32 w5, 0x7fffffff, Llabel0 // BPF_JSGE | BPF_K
+// CHECK: 26 01 ff ff 40 00 00 00 	jgt32 w1, 0x40, -0x1
+// CHECK: 36 02 fe ff ff ff ff ff 	jge32 w2, -0x1, -0x2
+// CHECK: 66 04 fd ff ff ff ff ff 	jsgt32 w4, -0x1, -0x3
+// CHECK: 76 05 fc ff ff ff ff 7f 	jsge32 w5, 0x7fffffff, -0x4
+
+  jlt32 w6, 0xff, Llabel0         // BPF_JLT  | BPF_K
+  jle32 w7, 0xffff, Llabel0      // BPF_JLE  | BPF_K
+  jslt32 w8, 0, Llabel0           // BPF_JSLT | BPF_K
+  jsle32 w9, -1, Llabel0         // BPF_JSLE | BPF_K
+// CHECK: a6 06 fb ff ff 00 00 00 	jlt32 w6, 0xff, -0x5
+// CHECK: b6 07 fa ff ff ff 00 00 	jle32 w7, 0xffff, -0x6
+// CHECK: c6 08 f9 ff 00 00 00 00 	jslt32 w8, 0x0, -0x7
+// CHECK: d6 09 f8 ff ff ff ff ff 	jsle32 w9, -0x1, -0x8
