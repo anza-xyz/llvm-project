@@ -40,7 +40,7 @@ public:
     SBF_STX = 0x3,
     SBF_ALU = 0x4,
     SBF_JMP = 0x5,
-    SBF_PQR = 0x6,
+    SBF_PQR_OR_JMP32 = 0x6,
     SBF_ALU64 = 0x7
   };
 
@@ -215,6 +215,9 @@ DecodeStatus SBFDisassembler::getInstruction(MCInst &Instr, uint64_t &Size,
     Result =
         decodeInstruction(DecoderTableSBFv264,
                           Instr, Insn, Address, this, STI);
+  } else if (InstClass == SBF_PQR_OR_JMP32 && !STI.hasFeature(SBF::FeaturePqrInstr)) {
+    Result = decodeInstruction(DecoderTableSBFv364,
+                               Instr, Insn, Address, this, STI);
   }
   else
     Result =

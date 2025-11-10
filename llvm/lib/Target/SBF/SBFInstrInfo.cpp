@@ -28,26 +28,22 @@ static inline bool isUncondBranchOpcode(int Opc) { return Opc == SBF::JMP; }
 
 static inline bool isCondBranchOpcode(int Opc) {
   switch (Opc) {
-  case SBF::JEQ_ri:
-  case SBF::JEQ_rr:
-  case SBF::JUGT_ri:
-  case SBF::JUGT_rr:
-  case SBF::JUGE_ri:
-  case SBF::JUGE_rr:
-  case SBF::JNE_ri:
-  case SBF::JNE_rr:
-  case SBF::JSGT_ri:
-  case SBF::JSGT_rr:
-  case SBF::JSGE_ri:
-  case SBF::JSGE_rr:
-  case SBF::JULT_ri:
-  case SBF::JULT_rr:
-  case SBF::JULE_ri:
-  case SBF::JULE_rr:
-  case SBF::JSLT_ri:
-  case SBF::JSLT_rr:
-  case SBF::JSLE_ri:
-  case SBF::JSLE_rr:
+#define BRANCH_INSTR(X)  \
+  case SBF::X##_ri:      \
+  case SBF::X##_rr:      \
+  case SBF::X##_ri_32:   \
+  case SBF::X##_rr_32:   \
+
+  BRANCH_INSTR(JEQ)
+  BRANCH_INSTR(JNE)
+  BRANCH_INSTR(JUGT)
+  BRANCH_INSTR(JUGE)
+  BRANCH_INSTR(JSGT)
+  BRANCH_INSTR(JSGE)
+  BRANCH_INSTR(JULT)
+  BRANCH_INSTR(JULE)
+  BRANCH_INSTR(JSLT)
+  BRANCH_INSTR(JSLE)
     return true;
   default:
     return false;
@@ -388,66 +384,31 @@ bool SBFInstrInfo::reverseBranchCondition(
   switch (Cond[0].getImm()) {
   default:
     llvm_unreachable("Unknown conditional branch!");
-  case SBF::JEQ_ri:
-    Cond[0].setImm(SBF::JNE_ri);
-    break;
-  case SBF::JEQ_rr:
-    Cond[0].setImm(SBF::JNE_rr);
-    break;
-  case SBF::JUGT_ri:
-    Cond[0].setImm(SBF::JULE_ri);
-    break;
-  case SBF::JUGT_rr:
-    Cond[0].setImm(SBF::JULE_rr);
-    break;
-  case SBF::JUGE_ri:
-    Cond[0].setImm(SBF::JULT_ri);
-    break;
-  case SBF::JUGE_rr:
-    Cond[0].setImm(SBF::JULT_rr);
-    break;
-  case SBF::JNE_ri:
-    Cond[0].setImm(SBF::JEQ_ri);
-    break;
-  case SBF::JNE_rr:
-    Cond[0].setImm(SBF::JEQ_rr);
-    break;
-  case SBF::JSGT_ri:
-    Cond[0].setImm(SBF::JSLE_ri);
-    break;
-  case SBF::JSGT_rr:
-    Cond[0].setImm(SBF::JSLE_rr);
-    break;
-  case SBF::JSGE_ri:
-    Cond[0].setImm(SBF::JSLT_ri);
-    break;
-  case SBF::JSGE_rr:
-    Cond[0].setImm(SBF::JSLT_rr);
-    break;
-  case SBF::JULT_ri:
-    Cond[0].setImm(SBF::JUGE_ri);
-    break;
-  case SBF::JULT_rr:
-    Cond[0].setImm(SBF::JUGE_rr);
-    break;
-  case SBF::JULE_ri:
-    Cond[0].setImm(SBF::JUGT_ri);
-    break;
-  case SBF::JULE_rr:
-    Cond[0].setImm(SBF::JUGT_rr);
-    break;
-  case SBF::JSLT_ri:
-    Cond[0].setImm(SBF::JSGE_ri);
-    break;
-  case SBF::JSLT_rr:
-    Cond[0].setImm(SBF::JSGE_rr);
-    break;
-  case SBF::JSLE_ri:
-    Cond[0].setImm(SBF::JSGT_ri);
-    break;
-  case SBF::JSLE_rr:
-    Cond[0].setImm(SBF::JSGT_rr);
-    break;
+
+#define REVERSE_X_FOR_Y(X, Y)       \
+  case SBF::X##_ri:                 \
+    Cond[0].setImm(SBF::Y##_ri);    \
+    break;                          \
+  case SBF::X##_rr:                 \
+    Cond[0].setImm(SBF::Y##_rr);    \
+    break;                          \
+  case SBF::X##_ri_32:              \
+    Cond[0].setImm(SBF::Y##_ri_32); \
+    break;                          \
+  case SBF::X##_rr_32:              \
+   Cond[0].setImm(SBF::Y##_rr_32);  \
+   break;                           \
+
+  REVERSE_X_FOR_Y(JEQ, JNE)
+  REVERSE_X_FOR_Y(JNE, JEQ)
+  REVERSE_X_FOR_Y(JUGT, JULE)
+  REVERSE_X_FOR_Y(JUGE, JULT)
+  REVERSE_X_FOR_Y(JSGT, JSLE)
+  REVERSE_X_FOR_Y(JSGE, JSLT)
+  REVERSE_X_FOR_Y(JULT, JUGE)
+  REVERSE_X_FOR_Y(JULE, JUGT)
+  REVERSE_X_FOR_Y(JSLT, JSGE)
+  REVERSE_X_FOR_Y(JSLE, JSGT)
   }
 
   return false;

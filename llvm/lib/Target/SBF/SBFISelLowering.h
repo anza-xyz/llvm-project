@@ -62,6 +62,7 @@ public:
                               MachineBasicBlock *BB) const override;
 
   bool getHasAlu32() const { return HasAlu32; }
+  bool getHasJmp32() const { return HasJmp32; }
 
   EVT getSetCCResultType(const DataLayout &DL, LLVMContext &Context,
                          EVT VT) const override;
@@ -71,6 +72,7 @@ public:
 private:
   // Control Instruction Selection Features
   bool HasAlu32;
+  bool HasJmp32;
 
   SDValue LowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerSELECT_CC(SDValue Op, SelectionDAG &DAG) const;

@@ -120,10 +120,12 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   if (STI.getHasAlu32()) {
     setOperationAction(ISD::BSWAP, MVT::i32, Promote);
     setOperationAction(ISD::BR_CC, MVT::i32, Custom);
-    setOperationAction(ISD::CTTZ, MVT::i32, Expand);
-    setOperationAction(ISD::CTLZ, MVT::i32, Expand);
-    setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i32, Expand);
-    setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i32, Expand);
+    if (!STI.getHasJmp32()) {
+      setOperationAction(ISD::CTTZ, MVT::i32, Expand);
+      setOperationAction(ISD::CTLZ, MVT::i32, Expand);
+      setOperationAction(ISD::CTTZ_ZERO_UNDEF, MVT::i32, Expand);
+      setOperationAction(ISD::CTLZ_ZERO_UNDEF, MVT::i32, Expand);
+    }
   }
 
   setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
@@ -168,6 +170,7 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
 
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
+  HasJmp32 = STI.getHasJmp32();
   SBFRegisterInfo::FrameLength = 4096;
 }
 
@@ -695,6 +698,11 @@ SDValue SBFTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue Dest = Op.getOperand(4);
   SDLoc DL(Op);
 
+  if (getHasJmp32()) {
+    return DAG.getNode(SBFISD::BR_CC, DL, Op.getValueType(), Chain, LHS, RHS,
+                       DAG.getConstant(CC, DL, LHS.getValueType()), Dest);
+  }
+
   bool IsSignedCmp = (CC == ISD::SETGT ||
                       CC == ISD::SETGE ||
                       CC == ISD::SETLT ||
@@ -1005,7 +1013,10 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   switch (CC) {
 #define SET_NEWCC(X, Y)                                                        \
   case ISD::X:                                                                 \
-    NewCC = isSelectRROp ? SBF::Y##_rr : SBF::Y##_ri;                          \
+    if (is32BitCmp && HasJmp32)                                                \
+      NewCC = isSelectRROp ? SBF::Y##_rr_32 : SBF::Y##_ri_32;                  \
+    else                                                                       \
+      NewCC = isSelectRROp ? SBF::Y##_rr : SBF::Y##_ri;                        \
     break
   SET_NEWCC(SETGT, JSGT);
   SET_NEWCC(SETUGT, JUGT);
@@ -1027,17 +1038,17 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                       CC == ISD::SETLT ||
                       CC == ISD::SETLE);
 
-  // SBF at the moment only has 64-bit comparison. Any 32-bit comparison needs
+  // When JMP32 is not available, any 32-bit comparison needs
   // to be promoted. If we are comparing against an immediate value, we must
   // sign extend the registers. Likewise for signed comparisons. Unsigned
   // comparisons will zero extent registers.
-  if (is32BitCmp)
+  if (is32BitCmp && !HasJmp32)
     LHS = EmitSubregExt(MI, BB, LHS, isSignedCmp || !isSelectRROp);
 
   if (isSelectRROp) {
     Register RHS = MI.getOperand(2).getReg();
 
-    if (is32BitCmp)
+    if (is32BitCmp && !HasJmp32)
       RHS = EmitSubregExt(MI, BB, RHS, isSignedCmp);
 
     BuildMI(BB, DL, TII.get(NewCC)).addReg(LHS).addReg(RHS).addMBB(Copy1MBB);

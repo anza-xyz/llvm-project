@@ -88,6 +88,10 @@ protected:
   // Whether we are using AbiV2
   bool IsAbiV2;
 
+  // Whether we support JMP32
+  // JMP32 support depends on ALU32 being enabled
+  bool HasJmp32;
+
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
   std::unique_ptr<LegalizerInfo> Legalizer;
@@ -117,6 +121,7 @@ public:
   bool getHasExplicitSignExt() const { return HasExplicitSignExt; }
   bool getNewMemEncoding() const { return NewMemEncoding; }
   bool getHasStaticSyscalls() const { return HasStaticSyscalls; }
+  bool getHasJmp32() const { return HasJmp32; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
   const SBFFrameLowering *getFrameLowering() const override {
     return &FrameLowering;
