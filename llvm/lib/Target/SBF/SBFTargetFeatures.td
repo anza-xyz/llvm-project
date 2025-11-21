@@ -55,6 +55,9 @@ def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
 def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
                                                 "Enable the JMP32 instruction class">;
 
+def FeatureDynamicFramesV3 : SubtargetFeature<"dynamic-frames-v3", "HasDynamicFramesV3", "true",
+                                            "Enable dynamic frames in SBPFv3">;
+
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
