@@ -56,7 +56,7 @@ entry:
 }
 
 ; CHECK-LABEL: test_xchg_64
-; CHECK: ldxdw r0, [r1 + 0]
+; CHECK: ldxw w0, [r1 + 0]
 ; CHECK: stxdw [r1 + 0], r2
 define dso_local i32 @test_xchg_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:

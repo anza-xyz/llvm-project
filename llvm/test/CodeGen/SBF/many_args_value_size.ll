@@ -27,7 +27,7 @@ start:
 ; CHECK: ldxdw r4, [r10 + 32]
 
 ; -64 + 60 = -4, so this is 5 in %b8
-; CHECK: ldxw w4, [r10 + 60]
+; CHECK: ldxb w4, [r10 + 60]
   %c0 = trunc i64 %a to i8
   %b1 = add i8 %b8, %c0
 

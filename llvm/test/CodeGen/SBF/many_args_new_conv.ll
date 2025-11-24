@@ -64,11 +64,11 @@ define i32 @callee_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %p
 ; CHECK-LABEL: callee_alloca
 ; CHECK: add64 r10, -128
 ; Loading arguments
-; CHECK: ldxdw r2, [r10 + 120]
-; CHECK: ldxdw r2, [r10 + 112]
-; CHECK: ldxdw r2, [r10 + 104]
-; CHECK: ldxdw r2, [r10 + 96]
-; CHECK: ldxdw r2, [r10 + 88]
+; CHECK: ldxw r2, [r10 + 120]
+; CHECK: ldxw r2, [r10 + 112]
+; CHECK: ldxw r2, [r10 + 104]
+; CHECK: ldxw r2, [r10 + 96]
+; CHECK: ldxw r2, [r10 + 88]
 ; Loading allocated i32
 ; CHECK: ldxw r0, [r10 + 24]
 ; CHECK-NOT: add64 r10, 128
@@ -94,11 +94,11 @@ define i32 @callee_no_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32
 ; CHECK-LABEL: callee_no_alloca
 ; CHECK: add64 r10, -64
 ; Loading arguments
-; CHECK: ldxdw r1, [r10 + 56]
-; CHECK: ldxdw r1, [r10 + 48]
-; CHECK: ldxdw r1, [r10 + 40]
-; CHECK: ldxdw r1, [r10 + 32]
-; CHECK: ldxdw r1, [r10 + 24]
+; CHECK: ldxw r1, [r10 + 56]
+; CHECK: ldxw r1, [r10 + 48]
+; CHECK: ldxw r1, [r10 + 40]
+; CHECK: ldxw r1, [r10 + 32]
+; CHECK: ldxw r1, [r10 + 24]
 
 ; CHECK-NOT: add64 r10, 64
 entry:
