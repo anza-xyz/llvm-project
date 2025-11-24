@@ -41,8 +41,8 @@ start:
   %b1 = add i8 %b8, %c0
 
 ; -64 + 52 = -12, so this is -20 in %b16
-; CHECK: ldxw w1, [r10 + 52]
-; CHECK-V3: ldxw w1, [r10 - 52]
+; CHECK: ldxh w1, [r10 + 52]
+; CHECK-V3: ldxh w1, [r10 - 52]
   %c1 = trunc i64 %b to i16
   %b2 = add i16 %b16, %c1
 
