@@ -1,5 +1,6 @@
 ; RUN: llc -march=sbf -mcpu=v2 < %s | FileCheck %s
 ; RUN: llc -mtriple=sbpfv2-solana-solana < %s | FileCheck %s
+; RUN: llc -O3 -march=sbf -mattr=+dynamic-frames-v3,+alu32 < %s | FileCheck --check-prefix=CHECK-V3 %s
 
 define i64 @test_func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e) {
 start:
@@ -10,6 +11,11 @@ start:
 ; CHECK: stw [r10 - 12], 65516
 ; CHECK: stw [r10 - 4], 5
 
+; CHECK-V3: stdw [r10 + 32], 5400
+; CHECK-V3: stw [r10 + 20], 300
+; CHECK-V3: stw [r10 + 12], 65516
+; CHECK-V3: stw [r10 + 4], 5
+
   %res = call i64 @func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e, i8 5, i16 -20, i32 300, i64 5400)
   ret i64 %res
 }
@@ -18,6 +24,7 @@ define i64 @func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e, i8 %b8, i16 %b16, i32 %
 start:
 ; CHECK-LABEL: func:
 ; CHECK: add64 r10, -64
+; CHECK-V3: add64 r10, 64
   %a1 = add i64 %a, %b
   %a2 = sub i64 %a1, %c
   %a3 = mul i64 %a2, %d
@@ -25,19 +32,23 @@ start:
 
 ; -64 + 32 = -32, so this is 5400 in %a5
 ; CHECK: ldxdw r4, [r10 + 32]
+; CHECK-V3: ldxdw r4, [r10 - 32]
 
 ; -64 + 60 = -4, so this is 5 in %b8
-; CHECK: ldxw w4, [r10 + 60]
+; CHECK: ldxb w4, [r10 + 60]
+; CHECK-V3: ldxb w4, [r10 - 60]
   %c0 = trunc i64 %a to i8
   %b1 = add i8 %b8, %c0
 
 ; -64 + 52 = -12, so this is -20 in %b16
-; ldxw w1, [r10 + 52]
+; CHECK: ldxh w1, [r10 + 52]
+; CHECK-V3: ldxh w1, [r10 - 52]
   %c1 = trunc i64 %b to i16
   %b2 = add i16 %b16, %c1
 
 ; -64 + 44 = -20, so this is 300 in %b32
 ; CHECK: ldxw w1, [r10 + 44]
+; CHECK-V3: ldxw w1, [r10 - 44]
   %c2 = trunc i64 %c to i32
   %b3 = add i32 %b32, %c2
 
