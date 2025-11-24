@@ -1,4 +1,5 @@
 ; RUN: llc < %s -march=sbf -mattr=+dynamic-frames | FileCheck %s
+; RUN: llc -O3 -march=sbf -mattr=+dynamic-frames-v3,+alu32 < %s | FileCheck --check-prefix=CHECK-V3 %s
 ;
 ; Source:
 ; int test_func(int * vec, int idx) {
@@ -13,7 +14,7 @@
 define i32 @test_func(ptr noundef %vec, i32 noundef %idx) #0 {
 ; CHECK-LABEL: test_func:
 ; CHECK: add64 r10, -128
-; CHECK-NOT: add64 r10, 128
+; CHECK-V3: add64 r10, 128
 entry:
   %vec.addr = alloca ptr, align 8
   %idx.addr = alloca i512, align 4

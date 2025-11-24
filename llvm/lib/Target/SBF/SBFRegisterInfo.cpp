@@ -167,13 +167,20 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
 
   if (SubTarget.getHasDynamicFrames() &&
       SBFFuncInfo->containsFrameIndex(FI)) {
-    return -Offset;
+    if (SubTarget.isDynamicFramesV1())
+      return -Offset;
+
+    return Offset;
   }
 
   Offset += Imm.value_or(0);
 
   if (SubTarget.getHasDynamicFrames()) {
-    return static_cast<int>(StackSize) + Offset;
+    Offset += static_cast<int>(StackSize);
+    if (SubTarget.isDynamicFramesV1())
+      return Offset;
+
+    return -Offset;
   }
 
   return Offset;
