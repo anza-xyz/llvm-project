@@ -54,6 +54,7 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   NewMemEncoding = false;
   HasStaticSyscalls = false;
   IsAbiV2 = false;
+  HasDynamicFramesV3 = false;
 }
 
 void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
