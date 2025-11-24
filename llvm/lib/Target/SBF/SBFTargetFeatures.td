@@ -59,6 +59,9 @@ def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
                                        "true", "Enables AbiV2 in SBF (no-op in LLVM)">;
 
 
+def FeatureDynamicFramesV3 : SubtargetFeature<"dynamic-frames-v3", "HasDynamicFramesV3", "true",
+                                            "Enable dynamic frames in SBPFv3">;
+
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
