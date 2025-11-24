@@ -94,6 +94,9 @@ protected:
   // Whether we are using AbiV2
   bool IsAbiV2;
 
+  // Whether we are dealing with dynamic stack frames in SBPFv3
+  bool HasDynamicFramesV3;
+
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
   std::unique_ptr<LegalizerInfo> Legalizer;
@@ -113,7 +116,12 @@ public:
   void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
   bool getHasJmpExt() const { return HasJmpExt; }
   bool getHasAlu32() const { return HasAlu32; }
-  bool getHasDynamicFrames() const { return HasDynamicFrames; }
+  bool getHasDynamicFrames() const {
+    return HasDynamicFrames || HasDynamicFramesV3;
+  }
+  bool isDynamicFramesV1() const {
+    return HasDynamicFrames;
+  }
   bool getUseDwarfRIS() const { return UseDwarfRIS; }
   bool getDisableNeg() const { return DisableNeg; }
   bool getReverseSubImm() const { return ReverseSubImm; }

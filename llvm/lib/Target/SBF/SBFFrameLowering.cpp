@@ -23,19 +23,25 @@ bool SBFFrameLowering::hasFP(const MachineFunction &MF) const { return true; }
 
 void SBFFrameLowering::emitPrologue(MachineFunction &MF,
                                     MachineBasicBlock &MBB) const {
-  if (!MF.getSubtarget<SBFSubtarget>().getHasDynamicFrames()) {
+  const SBFSubtarget& Subtarget = MF.getSubtarget<SBFSubtarget>();
+  if (!Subtarget.getHasDynamicFrames()) {
     return;
   }
+
   MachineBasicBlock::iterator MBBI = MBB.begin();
   MachineFrameInfo &MFI = MF.getFrameInfo();
   int NumBytes = (int)MFI.getStackSize();
-  if (NumBytes || MF.getSubtarget<SBFSubtarget>().getHasStaticSyscalls()) {
+  if (NumBytes && MBBI != MBB.end()) {
     DebugLoc Dl = MBBI->getDebugLoc();
     const SBFInstrInfo &TII =
         *static_cast<const SBFInstrInfo *>(MF.getSubtarget().getInstrInfo());
+
+    if (Subtarget.isDynamicFramesV1())
+      NumBytes = -NumBytes;
+
     BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
         .addReg(SBF::R10)
-        .addImm(-NumBytes);
+        .addImm(NumBytes);
   }
 }
 
