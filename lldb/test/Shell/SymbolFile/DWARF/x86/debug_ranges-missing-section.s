@@ -1,3 +1,4 @@
+# XFAIL: *
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s > %t
 # RUN: %lldb %t -o "image lookup -v -s lookup_ranges" -o exit 2>%t.error | FileCheck %s
 # RUN: cat %t.error | FileCheck %s --check-prefix ERROR

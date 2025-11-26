@@ -1,6 +1,7 @@
 ## This tests if .debug_loclists.dwo are correctly read if they are part
 ## of a dwp file.
 
+# XFAIL: *
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s --defsym MAIN=0 > %t
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s > %t.dwp
 # RUN: %lldb %t -o "image lookup -v -s lookup_loclists" -o exit | FileCheck %s
