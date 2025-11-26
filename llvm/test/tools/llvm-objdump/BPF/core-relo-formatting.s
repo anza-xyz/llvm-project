@@ -42,15 +42,15 @@
 # NOADDR:	r1 = 0x1
 # NOADDR-NEXT:		CO-RE <type_exists> [3] struct foo
 # NOADDR-NEXT:	call -0x1
-# NOADDR-NEXT:		R_BPF_64_32	consume
+# NOADDR-NEXT:		R_SBF_64_32	consume
 # NOADDR-NEXT:	r1 = 0x0
 # NOADDR-NEXT:		CO-RE <byte_off> [3] struct foo::a (0:0)
 # NOADDR-NEXT:	call -0x1
-# NOADDR-NEXT:		R_BPF_64_32	consume
+# NOADDR-NEXT:		R_SBF_64_32	consume
 # NOADDR-NEXT:	r1 = 0x1 ll
 # NOADDR-NEXT:		CO-RE <enumval_exists> [8] enum bar::U = 0
 # NOADDR-NEXT:	call -0x1
-# NOADDR-NEXT:		R_BPF_64_32	consume
+# NOADDR-NEXT:		R_SBF_64_32	consume
 # NOADDR-NEXT:	exit
 
 # NORELO:	r1 = 0x1
@@ -64,29 +64,29 @@
 # ADDR:            1:	r1 = 0x1
 # ADDR-NEXT:		0000000000000008:  CO-RE <type_exists> [3] struct foo
 # ADDR-NEXT:       2:	call -0x1
-# ADDR-NEXT:		0000000000000010:  R_BPF_64_32	consume
+# ADDR-NEXT:		0000000000000010:  R_SBF_64_32	consume
 # ADDR-NEXT:       3:	r1 = 0x0
 # ADDR-NEXT:		0000000000000018:  CO-RE <byte_off> [3] struct foo::a (0:0)
 # ADDR-NEXT:       4:	call -0x1
-# ADDR-NEXT:		0000000000000020:  R_BPF_64_32	consume
+# ADDR-NEXT:		0000000000000020:  R_SBF_64_32	consume
 # ADDR-NEXT:       5:	r1 = 0x1 ll
 # ADDR-NEXT:		0000000000000028:  CO-RE <enumval_exists> [8] enum bar::U = 0
 # ADDR-NEXT:       7:	call -0x1
-# ADDR-NEXT:		0000000000000038:  R_BPF_64_32	consume
+# ADDR-NEXT:		0000000000000038:  R_SBF_64_32	consume
 # ADDR-NEXT:       8:	exit
 
 # VMA:            3:	r1 = 0x1
 # VMA-NEXT:		0000000000000018:  CO-RE <type_exists> [3] struct foo
 # VMA-NEXT:       4:	call -0x1
-# VMA-NEXT:		0000000000000010:  R_BPF_64_32	consume
+# VMA-NEXT:		0000000000000010:  R_SBF_64_32	consume
 # VMA-NEXT:       5:	r1 = 0x0
 # VMA-NEXT:		0000000000000028:  CO-RE <byte_off> [3] struct foo::a (0:0)
 # VMA-NEXT:       6:	call -0x1
-# VMA-NEXT:		0000000000000020:  R_BPF_64_32	consume
+# VMA-NEXT:		0000000000000020:  R_SBF_64_32	consume
 # VMA-NEXT:       7:	r1 = 0x1 ll
 # VMA-NEXT:		0000000000000038:  CO-RE <enumval_exists> [8] enum bar::U = 0
 # VMA-NEXT:       9:	call -0x1
-# VMA-NEXT:		0000000000000038:  R_BPF_64_32	consume
+# VMA-NEXT:		0000000000000038:  R_SBF_64_32	consume
 # VMA-NEXT:      10:	exit
 
 	.text
