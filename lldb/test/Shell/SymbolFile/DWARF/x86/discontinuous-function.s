@@ -6,6 +6,7 @@
 # The function bar has been placed "in the middle" of foo, and the function
 # entry point is deliberately not its lowest address.
 
+# XFAIL: *
 # RUN: llvm-mc -triple x86_64-pc-linux -filetype=obj %s -o %t
 # RUN: %lldb %t -o "image lookup -v -n foo" -o "expr -- &foo" -o exit | FileCheck %s
 

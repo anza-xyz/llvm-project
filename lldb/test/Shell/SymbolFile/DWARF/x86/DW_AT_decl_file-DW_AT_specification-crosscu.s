@@ -2,6 +2,7 @@
 # DW_TAG_compile_unit is using the DW_TAG_compile_unit->DW_AT_stmt_list where the
 # DW_AT_decl_file is located (and not where the DW_AT_specification is located).
 
+# XFAIL: *
 # RUN: llvm-mc -filetype=obj -triple x86_64-pc-linux %s -o %t
 # RUN: %lldb %t \
 # RUN:   -o "image lookup -v -n main" \

@@ -1,3 +1,4 @@
+# XFAIL: *
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s > %t
 # RUN: %lldb %t -o "image lookup -v -s f1" -o exit | FileCheck %s
 

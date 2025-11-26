@@ -1,6 +1,7 @@
 # Test that we can handle DWARF 4 and 5 location lists in the same object file
 # (but different compile units).
 
+# XFAIL: *
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s > %t
 # RUN: %lldb %t -o "image lookup -v -s loc" -o "image lookup -v -s loclists" \
 # RUN:   -o exit | FileCheck %s

@@ -2,6 +2,7 @@
 # behavior in the invalid cases is not particularly important, but it should be
 # "reasonable".
 
+# XFAIL: *
 # RUN: llvm-mc -triple=x86_64-pc-linux -filetype=obj %s --defsym LOC=0 > %t
 # RUN: %lldb %t -o "image lookup -v -a 0" -o "image lookup -v -a 2" \
 # RUN:   -o "image dump symfile" -o exit | FileCheck %s

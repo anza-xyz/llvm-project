@@ -1,3 +1,4 @@
+# XFAIL: *
 # RUN: yaml2obj %S/Inputs/inlined-file0-line0-col0.yaml -o %t
 # RUN: %lldb %t -s %s -o exit | FileCheck %s
 

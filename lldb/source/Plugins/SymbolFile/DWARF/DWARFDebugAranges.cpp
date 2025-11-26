@@ -41,7 +41,7 @@ void DWARFDebugAranges::extract(const DWARFDataExtractor &debug_aranges_data) {
     }
     const uint64_t cu_offset = set.getCompileUnitDIEOffset();
     for (const auto &desc : set.descriptors()) {
-      if (desc.Length != 0)
+      if (desc.Length != 0 && desc.Address > 0)
         m_aranges.Append(
             RangeToDIE::Entry(desc.Address, desc.Length, cu_offset));
     }
@@ -63,7 +63,7 @@ void DWARFDebugAranges::Dump(Log *log) const {
 
 void DWARFDebugAranges::AppendRange(dw_offset_t offset, dw_addr_t low_pc,
                                     dw_addr_t high_pc) {
-  if (high_pc > low_pc)
+  if (high_pc > low_pc && low_pc > 0)
     m_aranges.Append(RangeToDIE::Entry(low_pc, high_pc - low_pc, offset));
 }
 
