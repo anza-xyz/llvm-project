@@ -27,7 +27,7 @@
 // CHECK: 18 09 00 00 ff ff ff ff 00 00 00 00 01 00 00 00 	r9 = 8589934591 ll
 // CHECK: 18 09 00 00 ff ff ff ff 00 00 00 00 01 00 00 00 	r9 = 8589934591 ll
 // CHECK: 18 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 	r9 = 0 ll
-// CHECK: 0000000000000060:  R_BPF_64_64	dummy_map
+// CHECK: 0000000000000060:  R_SBF_64_64	dummy_map
 
 // ======== BPF_LDX Class ========
   r5 = *(u8 *)(r0 + 0)   // BPF_LDX | BPF_B

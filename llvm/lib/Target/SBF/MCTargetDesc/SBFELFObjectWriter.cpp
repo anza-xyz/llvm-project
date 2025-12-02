@@ -47,7 +47,7 @@ bool SBFELFObjectWriter::needsRelocateWithSymbol(const MCSymbol &Sym,
 }
 
 SBFELFObjectWriter::SBFELFObjectWriter(uint8_t OSABI, bool relocAbs64)
-  : MCELFObjectTargetWriter(/*Is64Bit*/ true, OSABI,ELF::EM_SBF,
+  : MCELFObjectTargetWriter(/*Is64Bit*/ true, OSABI, relocAbs64? ELF::EM_BPF : ELF::EM_SBF,
                             /*HasRelocationAddend*/ false),
       relocAbs64(relocAbs64) {}
 

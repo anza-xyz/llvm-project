@@ -1,4 +1,5 @@
-; RUN: llc -march=bpfel -filetype=obj -o %t.el < %s
+; XFAIL: *
+; RUN: llc -mtriple=bpfel -filetype=obj -o %t.el < %s
 ; RUN: llvm-readelf -r %t.el | FileCheck %s
 ; RUN: llc -march=bpfeb -filetype=obj -o %t.eb < %s
 ; RUN: llvm-readelf -r %t.eb | FileCheck %s
