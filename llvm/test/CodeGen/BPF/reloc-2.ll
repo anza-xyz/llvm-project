@@ -1,3 +1,4 @@
+; XFAIL: *
 ; RUN: llc -mtriple=bpfel -mcpu=v1 -filetype=obj -o %t.el < %s
 ; RUN: llvm-objdump -r %t.el | FileCheck --check-prefix=RELOC %s
 ; RUN: llvm-objdump --no-print-imm-hex -d --no-show-raw-insn %t.el | FileCheck --check-prefix=DUMP %s

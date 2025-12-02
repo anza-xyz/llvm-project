@@ -3,10 +3,10 @@
 
 # CHECK:      Relocations [
 # CHECK-NEXT:   Section (3) .rel.text {
-# CHECK-NEXT:     0x0 R_BPF_64_64 g
+# CHECK-NEXT:     0x0 R_SBF_64_64 g
 # CHECK-NEXT:   }
 # CHECK-NEXT:   Section (5) .rel.stack_sizes {
-# CHECK-NEXT:     0x0 R_BPF_64_ABS64 .text
+# CHECK-NEXT:     0x0 R_SBF_64_ABS64 .text
 # CHECK-NEXT:   }
 # CHECK-NEXT: ]
 # CHECK:      StackSizes [
@@ -47,7 +47,7 @@ Sections:
     Info:            .text
     Relocations:
       - Symbol:          g
-        Type:            R_BPF_64_64
+        Type:            R_SBF_64_64
   - Name:            .rel.stack_sizes
     Type:            SHT_REL
     Link:            .symtab
@@ -55,7 +55,7 @@ Sections:
     Info:            .stack_sizes
     Relocations:
       - Symbol:          .text
-        Type:            R_BPF_64_ABS64
+        Type:            R_SBF_64_ABS64
   - Type:            SectionHeaderTable
     Sections:
       - Name:            .strtab
