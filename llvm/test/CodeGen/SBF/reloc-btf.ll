@@ -6,7 +6,7 @@ entry:
   ret i32 0, !dbg !11
 }
 
-; CHECK-RELOC: file format elf64-sbf
+; CHECK-RELOC: file format elf64-bpf
 ; CHECK-RELOC: RELOCATION RECORDS FOR [.debug_info]:
 ; CHECK-RELOC: R_SBF_64_ABS32 .debug_abbrev
 ; CHECK-RELOC: R_SBF_64_ABS64

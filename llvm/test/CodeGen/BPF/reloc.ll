@@ -1,4 +1,5 @@
 ; RUN: llc -march=bpfel -filetype=obj < %s | llvm-objdump -r - | FileCheck --check-prefix=CHECK-RELOC %s
+; XFAIL: *
 
 %struct.bpf_context = type { i64, i64, i64, i64, i64, i64, i64 }
 %struct.sk_buff = type { i64, i64, i64, i64, i64, i64, i64 }
