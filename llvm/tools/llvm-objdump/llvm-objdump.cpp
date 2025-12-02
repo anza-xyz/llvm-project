@@ -522,6 +522,19 @@ static const Target *getTarget(const ObjectFile *Obj) {
       Obj->setARMSubArch(TheTriple);
   }
 
+  // This condition tricks llvm-objdump into believing that an SBPFv3 with EM_BPF
+  // should use the SBF mnemonics.
+  if (const auto *Elf64 = dyn_cast<ELF64LEObjectFile>(Obj)) {
+    if (TheTriple.isBPF() &&
+        (Elf64->getPlatformFlags() == llvm::ELF::EF_SBF_V3 ||
+         Elf64->getPlatformFlags() == llvm::ELF::EF_SBF_V4)) {
+      TheTriple.setArch(Triple::sbf);
+      TheTriple.setOS(Triple::SolanaOS);
+      TheTriple.setVendor(Triple::Solana);
+      ArchName = "sbf";
+    }
+  }
+
   // Get the target specific parser.
   std::string Error;
   const Target *TheTarget = TargetRegistry::lookupTarget(ArchName, TheTriple,
@@ -2585,7 +2598,7 @@ static void disassembleObject(ObjectFile *Obj, bool InlineRelocs) {
 
   // The SBF target specifies the cpu type as an ELF flag, which is not parsed automatically in LLVM objdump.
   // We must set the CPU type here so that the disassembler can decode the newer SBF features correctly.
-  if (MCPU.empty() && Obj->isELF() && Obj->getArch() == Triple::sbf) {
+  if (MCPU.empty() && Obj->isELF() && (Obj->getArch() == Triple::sbf || Obj->getArch() == Triple::bpfel)) {
     const auto *Elf64 = dyn_cast<ELF64LEObjectFile>(Obj);
     switch (Elf64->getPlatformFlags()) {
       case llvm::ELF::EF_SBF_V1:
