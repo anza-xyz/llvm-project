@@ -436,9 +436,9 @@ static const ArchDefinitionEntry g_elf_arch_entries[] = {
      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbf
     {ArchSpec::eCore_sbfv2, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv2,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv2
-    {ArchSpec::eCore_sbfv3, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv3,
+    {ArchSpec::eCore_sbfv3, llvm::ELF::EM_BPF, ArchSpec::eSBFSubType_sbfv3,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv3
-    {ArchSpec::eCore_sbfv4, llvm::ELF::EM_SBF, ArchSpec::eSBFSubType_sbfv4,
+    {ArchSpec::eCore_sbfv4, llvm::ELF::EM_BPF, ArchSpec::eSBFSubType_sbfv4,
       0xFFFFFFFFu, 0xFFFFFFFFu}, // sbfv4
 };
 
