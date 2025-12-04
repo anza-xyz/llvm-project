@@ -26,7 +26,7 @@
 #include "SBFGenRegisterInfo.inc"
 using namespace llvm;
 
-unsigned SBFRegisterInfo::FrameLength = 512;
+unsigned SBFRegisterInfo::FrameLength = 4096;
 
 SBFRegisterInfo::SBFRegisterInfo()
     : SBFGenRegisterInfo(SBF::R0) {}
@@ -176,11 +176,10 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
   Offset += Imm.value_or(0);
 
   if (SubTarget.getHasDynamicFrames()) {
-    Offset += static_cast<int>(StackSize);
     if (SubTarget.isDynamicFramesV1())
-      return Offset;
+      return Offset + static_cast<int>(StackSize);
 
-    return -Offset;
+    return -(Offset + std::max(static_cast<int>(StackSize), static_cast<int>(FrameLength)));
   }
 
   return Offset;
