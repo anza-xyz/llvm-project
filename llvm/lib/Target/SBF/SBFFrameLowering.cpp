@@ -38,6 +38,12 @@ void SBFFrameLowering::emitPrologue(MachineFunction &MF,
 
     if (Subtarget.isDynamicFramesV1())
       NumBytes = -NumBytes;
+    else if (NumBytes <= FrameSize)
+      // In V3, we don't bump if the number of bytes is less than the default
+      // frame size.
+      return;
+    else
+      NumBytes -= FrameSize;
 
     BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
         .addReg(SBF::R10)
