@@ -30,23 +30,24 @@ void SBFFrameLowering::emitPrologue(MachineFunction &MF,
   MachineFrameInfo &MFI = MF.getFrameInfo();
   int NumBytes = (int)MFI.getStackSize();
 
-  if (NumBytes && MBBI != MBB.end()) {
+  if (MBBI != MBB.end()) {
     DebugLoc Dl = MBBI->getDebugLoc();
     const SBFInstrInfo &TII =
         *static_cast<const SBFInstrInfo *>(MF.getSubtarget().getInstrInfo());
 
     if (Subtarget.isDynamicFramesV1())
       NumBytes = -NumBytes;
-    else if (NumBytes <= FrameSize)
+    else if (NumBytes <= FrameSize && !Subtarget.getOptimizeStackSpace())
       // In V3, we don't bump if the number of bytes is less than the default
       // frame size.
       return;
     else
       NumBytes -= FrameSize;
 
-    BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
-        .addReg(SBF::R10)
-        .addImm(NumBytes);
+    if (NumBytes)
+      BuildMI(MBB, MBBI, Dl, TII.get(SBF::ADD_ri), SBF::R10)
+          .addReg(SBF::R10)
+          .addImm(NumBytes);
   }
 }
 
