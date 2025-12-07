@@ -1,6 +1,6 @@
 ; RUN: llc -march=sbf -mcpu=v3 -filetype=obj -o - %s | llvm-objdump -d - | FileCheck %s
 
-; CHECK: jslt r1, 0x0,
+; CHECK: jslt32 w1, 0x0,
 ; CHECK: call 0x1
 ; CHECK: exit
 ; CHECK: call 0x2
