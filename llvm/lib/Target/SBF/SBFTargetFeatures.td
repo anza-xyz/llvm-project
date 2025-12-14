@@ -72,11 +72,8 @@ def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
 
-def : Proc<"v3", [FeatureDynamicFrames, FeatureDisableLddw,
-                  FeatureNewMemEncoding, FeatureCallxRegDst, FeaturePqrInstr, FeatureExplicitSext,
-                  FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64]>;
+def : Proc<"v3", [ALU32, FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
+                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
 
-def : Proc<"v4", [FeatureDynamicFrames, FeatureDisableLddw,
-                  FeatureNewMemEncoding, FeatureCallxRegDst, FeaturePqrInstr, FeatureExplicitSext,
-                  FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureStaticSyscalls, FeatureRelocAbs64,
-                  FeatureAbiV2]>;
+def : Proc<"v4", [ALU32, FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
+                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
