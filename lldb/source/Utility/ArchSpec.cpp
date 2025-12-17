@@ -249,11 +249,11 @@ static const CoreDefinition g_core_definitions[] = {
     {eByteOrderLittle, 4, 1, 4, llvm::Triple::wasm32, ArchSpec::eCore_wasm32,
      "wasm32"},
     {eByteOrderLittle, 8, 8, 8, llvm::Triple::bpfel, ArchSpec::eCore_bpf, "bpf"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv0, "sbf"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv1, "sbfv1"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv2, "sbfv2"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv3, "sbfv3"},
-    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv4, "sbfv4"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv0, "sbpf"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv1, "sbpfv1"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv2, "sbpfv2"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv3, "sbpfv3"},
+    {eByteOrderLittle, 8, 8, 8, llvm::Triple::sbf, ArchSpec::eCore_sbfv4, "sbpfv4"},
 };
 
 // Ensure that we have an entry in the g_core_definitions for each core. If you
