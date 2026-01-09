@@ -338,6 +338,8 @@ template <class ELFT> void Writer<ELFT>::run() {
   // we know the size of the sections.
   for (Partition &part : ctx.partitions)
     removeEmptyPTLoad(ctx, part.phdrs);
+  ctx.out.programHeaders->size =
+        sizeof(Elf_Phdr) * ctx.mainPart->phdrs.size();
 
   if (!ctx.arg.oFormatBinary)
     assignFileOffsets();
