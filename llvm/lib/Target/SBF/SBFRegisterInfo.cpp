@@ -149,10 +149,9 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
   const SBFFunctionInfo *SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
   int Offset = MFI.getObjectOffset(FI);
   const SBFSubtarget & SubTarget = MF.getSubtarget<SBFSubtarget>();
-  uint64_t StackSize = MFI.getStackSize();
+  const uint64_t StackSize = MFI.getStackSize();
 
-  if (!SubTarget.getHasDynamicFrames() &&
-      SBFFuncInfo->containsFrameIndex(FI)) {
+  if (!SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
     Offset = SBFRegisterInfo::FrameLength - Offset;
     if (static_cast<uint64_t>(Offset) < StackSize) {
       dbgs() << "Error: A function call in method "
@@ -165,12 +164,8 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
     return -Offset;
   }
 
-  if (SubTarget.getHasDynamicFrames() &&
-      SBFFuncInfo->containsFrameIndex(FI)) {
-    if (SubTarget.isDynamicFramesV1())
-      return -Offset;
-
-    return Offset;
+  if (SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
+    return -Offset;
   }
 
   Offset += Imm.value_or(0);
@@ -180,9 +175,10 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
       return Offset + static_cast<int>(StackSize);
 
     if (SubTarget.getOptimizeStackSpace())
-      return -(Offset + static_cast<int>(StackSize));
+      return Offset -static_cast<int>(StackSize);
 
-    return -(Offset + std::max(static_cast<int>(StackSize), static_cast<int>(FrameLength)));
+    return Offset -
+           std::max(static_cast<int>(StackSize), static_cast<int>(FrameLength));
   }
 
   return Offset;

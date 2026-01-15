@@ -122,6 +122,7 @@ public:
   bool isDynamicFramesV1() const {
     return HasDynamicFrames;
   }
+  bool getHasDynamicFramesV3() const { return HasDynamicFramesV3; }
   bool getUseDwarfRIS() const { return UseDwarfRIS; }
   bool getDisableNeg() const { return DisableNeg; }
   bool getReverseSubImm() const { return ReverseSubImm; }

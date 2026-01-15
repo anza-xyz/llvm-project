@@ -27,9 +27,8 @@ entry:
 define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK-LABEL: caller_alloca
 ; CHECK: add64 r10, -896
-; CHECK: ldxw r1, [r10 - 128]
-; 88 is 8*7 + 32
-
+; CHECK: ldxw r1, [r10 - 3144]
+; 4096 - 896 + 56 = 3144
 
 ; Saving arguments in the callee's frame
 
@@ -47,7 +46,7 @@ define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK: mov64 r4, 1
 ; CHECK: mov64 r5, 2
 ; CHECK: call callee_no_alloca
-; CHECK: ldxw r1, [r10 - 56]
+; CHECK: ldxw r1, [r10 - 72]
 
 entry:
   %g = alloca [3128 x i8], align 8
@@ -72,7 +71,7 @@ define i32 @callee_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %p
 ; CHECK: ldxw r2, [r10 - 3040]
 ; CHECK: ldxw r2, [r10 - 3032]
 ; Loading allocated i32
-; CHECK-V3: ldxw r0, [r10 - 32]
+; CHECK-V3: ldxw r0, [r10 - 3024]
 
 
 ; CHECK-NOT: add64 r10, 128
