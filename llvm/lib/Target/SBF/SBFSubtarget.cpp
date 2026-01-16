@@ -67,9 +67,12 @@ void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
 
 SBFSubtarget::SBFSubtarget(const Triple &TT, const std::string &CPU,
                            const std::string &FS, const TargetMachine &TM)
-    : SBFGenSubtargetInfo(TT, cpuFromSubArch(TT, CPU), /*TuneCPU*/ cpuFromSubArch(TT, CPU), FS), InstrInfo(),
-      FrameLowering(initializeSubtargetDependencies(TT, cpuFromSubArch(TT, CPU), FS)),
-      TLInfo(TM, *this) {
+  : SBFGenSubtargetInfo(TT, cpuFromSubArch(TT, CPU),
+                        /*TuneCPU*/ cpuFromSubArch(TT, CPU), FS),
+    InstrInfo(), FrameLowering(initializeSubtargetDependencies(
+                                   TT, cpuFromSubArch(TT, CPU), FS)
+                                   .getHasDynamicFramesV3()),
+  TLInfo(TM, *this) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
 
   CallLoweringInfo.reset(new SBFCallLowering(*getTargetLowering()));
