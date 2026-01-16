@@ -400,11 +400,17 @@ SDValue SBFTargetLowering::LowerFormalArguments(
         // In the new convention, arguments are in at the end of the callee
         // frame.
         uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
-        int64_t Offset = -static_cast<int64_t>(VA.getLocMemOffset() + Size);
-        int FrameIndex =
+        int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset() + Size);
+        // Since the stack grows to the opposite direction in V3, the offset
+        // is inverted.
+        if (Subtarget->getFrameLowering()->getStackGrowthDirection() ==
+            TargetFrameLowering::StackGrowsDown)
+          Offset = -Offset;
+
+        const int FrameIndex =
             MF.getFrameInfo().CreateFixedObject(Size, Offset, false);
-        SDValue DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
-        MachinePointerInfo DstInfo =
+        const SDValue DstAddr = DAG.getFrameIndex(FrameIndex, PtrVT);
+        const MachinePointerInfo DstInfo =
             MachinePointerInfo::getFixedStack(MF, FrameIndex, Offset);
         SDV = DAG.getLoad(LocVT, DL, Chain, DstAddr, DstInfo);
       } else {
@@ -522,6 +528,12 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
         // the caller.
         Offset += Size;
       }
+
+      // Since the stack grows to the opposite direction in V3, the offset
+      // is inverted.
+      if (Subtarget->getFrameLowering()->getStackGrowthDirection() ==
+          TargetFrameLowering::StackGrowsUp)
+        Offset = -Offset;
 
       int FrameIndex = MF.getFrameInfo().CreateFixedObject(
           Size, Offset, false);
