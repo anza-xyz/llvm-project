@@ -400,7 +400,8 @@ SDValue SBFTargetLowering::LowerFormalArguments(
         int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset() + Size);
         // Since the stack grows to the opposite direction in V3, the offset
         // is inverted.
-        if (!Subtarget->getHasDynamicFramesV3())
+        if (Subtarget->getFrameLowering()->getStackGrowthDirection() ==
+            TargetFrameLowering::StackGrowsDown)
           Offset = -Offset;
 
         const int FrameIndex =
@@ -527,7 +528,8 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
       // Since the stack grows to the opposite direction in V3, the offset
       // is inverted.
-      if (Subtarget->getHasDynamicFramesV3())
+      if (Subtarget->getFrameLowering()->getStackGrowthDirection() ==
+          TargetFrameLowering::StackGrowsUp)
         Offset = -Offset;
 
       int FrameIndex = MF.getFrameInfo().CreateFixedObject(
