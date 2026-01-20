@@ -171,11 +171,10 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
   Offset += Imm.value_or(0);
 
   if (SubTarget.getHasNoStackGaps()) {
-    if (SubTarget.isDynamicFramesV1())
+    if (SubTarget.getHasDynamicFrames())
       return Offset + static_cast<int>(StackSize);
 
-    return Offset -
-           std::max(static_cast<int>(StackSize), static_cast<int>(FrameLength));
+    return Offset - static_cast<int>(FrameLength);
   }
 
   return Offset;

@@ -57,7 +57,6 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   HasStaticSyscalls = false;
   IsAbiV2 = false;
   HasJmp32 = false;
-  HasDynamicFramesV3 = false;
   HasNoStackGaps = false;
 }
 
@@ -71,7 +70,7 @@ SBFSubtarget::SBFSubtarget(const Triple &TT, const std::string &CPU,
                         /*TuneCPU*/ cpuFromSubArch(TT, CPU), FS),
     InstrInfo(), FrameLowering(initializeSubtargetDependencies(
                                    TT, cpuFromSubArch(TT, CPU), FS)
-                                   .getHasDynamicFramesV3()),
+                                   .getHasJmp32()),
   TLInfo(TM, *this) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
 

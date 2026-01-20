@@ -92,9 +92,6 @@ protected:
   // JMP32 support depends on ALU32 being enabled
   bool HasJmp32;
 
-  // Whether we are dealing with dynamic stack frames in SBPFv3
-  bool HasDynamicFramesV3;
-
   // Whether the SBF VM doest not have stack gaps enabled
   bool HasNoStackGaps;
 
@@ -117,14 +114,10 @@ public:
   void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
   bool getHasAlu32() const { return HasAlu32; }
   bool getHasDynamicFrames() const {
-    return HasDynamicFrames || HasDynamicFramesV3;
-  }
-  bool isDynamicFramesV1() const {
     return HasDynamicFrames;
   }
   // Dynamic frames imply no stack gaps
-  bool getHasNoStackGaps() const { return HasNoStackGaps || HasDynamicFrames || HasDynamicFramesV3; }
-  bool getHasDynamicFramesV3() const { return HasDynamicFramesV3; }
+  bool getHasNoStackGaps() const { return HasNoStackGaps || HasDynamicFrames; }
   bool getUseDwarfRIS() const { return UseDwarfRIS; }
   bool getDisableNeg() const { return DisableNeg; }
   bool getReverseSubImm() const { return ReverseSubImm; }
