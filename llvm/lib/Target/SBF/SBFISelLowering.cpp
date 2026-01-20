@@ -393,7 +393,7 @@ SDValue SBFTargetLowering::LowerFormalArguments(
       EVT LocVT = VA.getLocVT();
 
       SDValue SDV;
-      if (Subtarget->getHasDynamicFrames()) {
+      if (Subtarget->getHasNoStackGaps()) {
         // In the new convention, arguments are in at the end of the callee
         // frame.
         uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
@@ -519,7 +519,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
       int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset());
       uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
-      if (Subtarget->getHasDynamicFrames()) {
+      if (Subtarget->getHasNoStackGaps()) {
         // In the new call convention, arguments are stored in the callee frame
         // We must increase the offset, simply because offset zero belongs to
         // the caller.

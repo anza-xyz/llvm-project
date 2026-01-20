@@ -151,7 +151,7 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
   const SBFSubtarget & SubTarget = MF.getSubtarget<SBFSubtarget>();
   const uint64_t StackSize = MFI.getStackSize();
 
-  if (!SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
+  if (!SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
     Offset = SBFRegisterInfo::FrameLength - Offset;
     if (static_cast<uint64_t>(Offset) < StackSize) {
       dbgs() << "Error: A function call in method "
@@ -164,13 +164,13 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
     return -Offset;
   }
 
-  if (SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
+  if (SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
     return -Offset;
   }
 
   Offset += Imm.value_or(0);
 
-  if (SubTarget.getHasDynamicFrames()) {
+  if (SubTarget.getHasNoStackGaps()) {
     if (SubTarget.isDynamicFramesV1())
       return Offset + static_cast<int>(StackSize);
 

@@ -58,19 +58,23 @@ def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
 def FeatureDynamicFramesV3 : SubtargetFeature<"dynamic-frames-v3", "HasDynamicFramesV3", "true",
                                             "Enable dynamic frames in SBPFv3">;
 
+def FeatureNoStackGaps : SubtargetFeature<"stack-gaps", "HasNoStackGaps", "true",
+                                                               "The SBPF VM has no stack gaps">;
+
+
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames]>;
+def : Proc<"v1", [FeatureDynamicFrames, FeatureNoStackGaps]>;
 
 def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
-                  FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
+                  FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureNoStackGaps]>;
 
 def : Proc<"v3", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
+                  FeatureDynamicFramesV3, FeatureCallxRegDst, FeatureNoStackGaps]>;
 
 def : Proc<"v4", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
+                  FeatureDynamicFramesV3, FeatureCallxRegDst, FeatureNoStackGaps]>;

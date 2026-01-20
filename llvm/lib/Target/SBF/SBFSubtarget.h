@@ -95,6 +95,9 @@ protected:
   // Whether we are dealing with dynamic stack frames in SBPFv3
   bool HasDynamicFramesV3;
 
+  // Whether the SBF VM doest not have stack gaps enabled
+  bool HasNoStackGaps;
+
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
   std::unique_ptr<LegalizerInfo> Legalizer;
@@ -119,6 +122,8 @@ public:
   bool isDynamicFramesV1() const {
     return HasDynamicFrames;
   }
+  // Dynamic frames imply no stack gaps
+  bool getHasNoStackGaps() const { return HasNoStackGaps || HasDynamicFrames || HasDynamicFramesV3; }
   bool getHasDynamicFramesV3() const { return HasDynamicFramesV3; }
   bool getUseDwarfRIS() const { return UseDwarfRIS; }
   bool getDisableNeg() const { return DisableNeg; }

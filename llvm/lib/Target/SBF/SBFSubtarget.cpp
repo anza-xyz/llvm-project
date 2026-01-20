@@ -58,6 +58,7 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   IsAbiV2 = false;
   HasJmp32 = false;
   HasDynamicFramesV3 = false;
+  HasNoStackGaps = false;
 }
 
 void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
