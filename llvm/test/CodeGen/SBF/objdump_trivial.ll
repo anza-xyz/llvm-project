@@ -1,4 +1,4 @@
-; RUN: llc -march=sbf -mcpu=v3 -filetype=obj -o - %s | llvm-objdump -d - | FileCheck %s
+; RUN: llc -march=sbf -mcpu=v3 -mattr=+alu32 -filetype=obj -o - %s | llvm-objdump -d - | FileCheck %s
 
 ; CHECK: jslt32 w1, 0x0,
 ; CHECK: call 0x1
