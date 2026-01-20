@@ -95,9 +95,6 @@ protected:
   // Whether we are dealing with dynamic stack frames in SBPFv3
   bool HasDynamicFramesV3;
 
-  // Whether we should bump down the frame pointer in SBPFv3
-  bool OptimizeStackSpace;
-
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
   std::unique_ptr<LegalizerInfo> Legalizer;
@@ -134,7 +131,6 @@ public:
   bool getNewMemEncoding() const { return NewMemEncoding; }
   bool getHasStaticSyscalls() const { return HasStaticSyscalls; }
   bool getHasJmp32() const { return HasJmp32; }
-  bool getOptimizeStackSpace() const { return OptimizeStackSpace; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
   const SBFFrameLowering *getFrameLowering() const override {
     return &FrameLowering;

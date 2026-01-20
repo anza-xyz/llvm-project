@@ -37,10 +37,6 @@ void SBFFrameLowering::emitPrologue(MachineFunction &MF,
 
     if (Subtarget.isDynamicFramesV1())
       NumBytes = -NumBytes;
-    else if (NumBytes <= FrameSize && !Subtarget.getOptimizeStackSpace())
-      // In V3, we don't bump if the number of bytes is less than the default
-      // frame size.
-      return;
     else
       NumBytes -= FrameSize;
 

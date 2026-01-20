@@ -58,9 +58,6 @@ def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
 def FeatureDynamicFramesV3 : SubtargetFeature<"dynamic-frames-v3", "HasDynamicFramesV3", "true",
                                             "Enable dynamic frames in SBPFv3">;
 
-def OptimizeStackSpace : SubtargetFeature<"optimize-stack-space", "OptimizeStackSpace", "true",
-                                                                       "Optimize stack space usage in SBPFv3">;
-
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
