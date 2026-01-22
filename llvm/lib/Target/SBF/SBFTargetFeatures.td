@@ -55,8 +55,11 @@ def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
 def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
                                                 "Enable the JMP32 instruction class">;
 
-def FeatureNoStackGaps : SubtargetFeature<"stack-gaps", "HasNoStackGaps", "true",
+def FeatureNoStackGaps : SubtargetFeature<"no-stack-gaps", "HasNoStackGaps", "true",
                                                                "The SBPF VM has no stack gaps">;
+
+def FeatureStackGrowsUp : SubtargetFeature<"stack-grows-up", "StackGrowsUp", "true",
+                                                  "Place objects within each function frame on top of each other">;
 
 
 class Proc<string Name, list<SubtargetFeature> Features>
@@ -71,7 +74,7 @@ def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureNoStackGaps]>;
 
 def : Proc<"v3", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureCallxRegDst, FeatureNoStackGaps]>;
+                  FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;
 
 def : Proc<"v4", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureCallxRegDst, FeatureNoStackGaps]>;
+                  FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;

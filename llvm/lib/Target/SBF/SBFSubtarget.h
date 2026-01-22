@@ -92,8 +92,11 @@ protected:
   // JMP32 support depends on ALU32 being enabled
   bool HasJmp32;
 
-  // Whether the SBF VM doest not have stack gaps enabled
+  // Whether the SBF VM does not have stack gaps enabled
   bool HasNoStackGaps;
+
+  // Whether we place objects within each function frame on top of each other
+  bool StackGrowsUp;
 
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
@@ -129,6 +132,7 @@ public:
   bool getNewMemEncoding() const { return NewMemEncoding; }
   bool getHasStaticSyscalls() const { return HasStaticSyscalls; }
   bool getHasJmp32() const { return HasJmp32; }
+  bool stackGrowsUp() const { return StackGrowsUp; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
   const SBFFrameLowering *getFrameLowering() const override {
     return &FrameLowering;

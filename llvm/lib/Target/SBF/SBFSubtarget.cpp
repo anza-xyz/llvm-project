@@ -58,6 +58,7 @@ void SBFSubtarget::initializeEnvironment(const Triple &TT) {
   IsAbiV2 = false;
   HasJmp32 = false;
   HasNoStackGaps = false;
+  StackGrowsUp = false;
 }
 
 void SBFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
@@ -70,7 +71,7 @@ SBFSubtarget::SBFSubtarget(const Triple &TT, const std::string &CPU,
                         /*TuneCPU*/ cpuFromSubArch(TT, CPU), FS),
     InstrInfo(), FrameLowering(initializeSubtargetDependencies(
                                    TT, cpuFromSubArch(TT, CPU), FS)
-                                   .getHasJmp32()),
+                                   .stackGrowsUp()),
   TLInfo(TM, *this) {
   assert(TT.getArch() == Triple::sbf && "expected Triple::sbf");
 
