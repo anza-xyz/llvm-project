@@ -42,27 +42,37 @@ BitVector SBFRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   return Reserved;
 }
 
-static void WarnSize(int Offset, MachineFunction &MF, DebugLoc& DL)
+static void warnSize(const int Offset, MachineFunction &MF,
+                     const DebugLoc & DL, const bool StackGrowsUp)
 {
   static Function *OldMF = nullptr;
-  int MaxOffset = -1 * SBFRegisterInfo::FrameLength;
-  if (Offset < MaxOffset) {
+  const int MaxOffset = -1 * SBFRegisterInfo::FrameLength;
+  bool ShouldWarn = false;
 
-    if (&(MF.getFunction()) == OldMF) {
+  if (StackGrowsUp && Offset > 0) {
+    ShouldWarn = true;
+  } else if (!StackGrowsUp && Offset < MaxOffset) {
+    ShouldWarn = true;
+  }
+
+  if (ShouldWarn) {
+    if (&MF.getFunction() == OldMF) {
       return;
     }
-    OldMF = &(MF.getFunction());
+    OldMF = &MF.getFunction();
 
     dbgs() << "Error:";
     if (DL) {
       dbgs() << " ";
       DL.print(dbgs());
     }
-    uint64_t StackSize = MF.getFrameInfo().getStackSize();
+    const uint64_t StackSize = MF.getFrameInfo().getStackSize();
+    const uint64_t Overflow =
+        StackSize - static_cast<uint64_t>(SBFRegisterInfo::FrameLength);
     dbgs() << " Function " << MF.getFunction().getName()
-           << " Stack offset of " << -Offset << " exceeded max offset of "
-           << -MaxOffset << " by " << MaxOffset - Offset
-           << " bytes, please minimize large stack variables. "
+           << " overflows the maximum allowed frame space by accessing "
+           << "an offset " << Overflow << " bytes greater than the "
+           << "maximum of 4096. Please, minimize large stack variables. "
            << "Estimated function frame size: " << StackSize << " bytes."
            << " Exceeding the maximum stack offset may cause "
               "undefined behavior during execution.\n\n";
@@ -98,11 +108,8 @@ bool SBFRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
   if (MI.getOpcode() == SBF::MOV_rr) {
-    int Offset = resolveInternalFrameIndex(MF, FrameIndex, std::nullopt);
+    int Offset = resolveInternalFrameIndex(MF, FrameIndex, std::nullopt, DL);
 
-    if (!MF.getSubtarget<SBFSubtarget>().getHasDynamicFrames()) {
-      WarnSize(Offset, MF, DL);
-    }
     MI.getOperand(i).ChangeToRegister(FrameReg, false);
     Register reg = MI.getOperand(i - 1).getReg();
     BuildMI(MBB, ++II, DL, TII.get(SBF::ADD_ri), reg)
@@ -112,15 +119,11 @@ bool SBFRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   }
 
   int Offset =
-      resolveInternalFrameIndex(MF, FrameIndex, MI.getOperand(i + 1).getImm());
-
+      resolveInternalFrameIndex(MF, FrameIndex,
+                                MI.getOperand(i + 1).getImm(), DL);
 
   if (!isInt<32>(Offset))
     llvm_unreachable("bug in frame offset");
-
-  if (!MF.getSubtarget<SBFSubtarget>().getHasDynamicFrames()) {
-    WarnSize(Offset, MF, DL);
-  }
 
   if (MI.getOpcode() == SBF::FI_ri) {
     // architecture does not really support FI_ri, replace it with
@@ -143,15 +146,17 @@ bool SBFRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   return false;
 }
 
-int SBFRegisterInfo::resolveInternalFrameIndex(
-    const llvm::MachineFunction &MF, int FI, std::optional<int64_t> Imm) const {
+int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
+                                               int FI,
+                                               std::optional<int64_t> Imm,
+                                               const DebugLoc &DL) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const SBFFunctionInfo *SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
   int Offset = MFI.getObjectOffset(FI);
   const SBFSubtarget & SubTarget = MF.getSubtarget<SBFSubtarget>();
   const uint64_t StackSize = MFI.getStackSize();
 
-  if (!SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
+  if (!SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
     Offset = SBFRegisterInfo::FrameLength - Offset;
     if (static_cast<uint64_t>(Offset) < StackSize) {
       dbgs() << "Error: A function call in method "
@@ -164,20 +169,23 @@ int SBFRegisterInfo::resolveInternalFrameIndex(
     return -Offset;
   }
 
-  if (SubTarget.getHasDynamicFrames() && SBFFuncInfo->containsFrameIndex(FI)) {
+  if (SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
     return -Offset;
   }
 
   Offset += Imm.value_or(0);
 
-  if (SubTarget.getHasDynamicFrames()) {
-    if (SubTarget.isDynamicFramesV1())
+  if (SubTarget.getHasNoStackGaps()) {
+    if (SubTarget.getHasDynamicFrames())
       return Offset + static_cast<int>(StackSize);
 
-    return Offset -
-           std::max(static_cast<int>(StackSize), static_cast<int>(FrameLength));
+    const int V3Offset = Offset - static_cast<int>(FrameLength);
+    warnSize(V3Offset, MF, DL, SubTarget.stackGrowsUp());
+    return V3Offset;
   }
 
+  // Only sBPFv0 will reach this stage, because it has stack gaps.
+  warnSize(Offset, MF, DL, SubTarget.stackGrowsUp());
   return Offset;
 }
 
