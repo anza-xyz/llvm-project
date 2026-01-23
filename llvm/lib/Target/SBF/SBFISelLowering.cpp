@@ -341,7 +341,7 @@ SDValue SBFTargetLowering::LowerFormalArguments(
   // Assign locations to all of the incoming arguments.
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
-  if (!Subtarget->getHasDynamicFrames() && Ins.size() > MaxArgs) {
+  if (!Subtarget->getHasNoStackGaps() && Ins.size() > MaxArgs) {
     // Pass args 1-4 via registers, remaining args via stack, referenced via
     // SBF::R5
     CCInfo.AnalyzeFormalArguments(Ins,
@@ -393,7 +393,7 @@ SDValue SBFTargetLowering::LowerFormalArguments(
       EVT LocVT = VA.getLocVT();
 
       SDValue SDV;
-      if (Subtarget->getHasDynamicFrames()) {
+      if (Subtarget->getHasNoStackGaps()) {
         // In the new convention, arguments are in at the end of the callee
         // frame.
         uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
@@ -463,7 +463,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
   if (Outs.size() > MaxArgs) {
-    if (Subtarget->getHasDynamicFrames()) {
+    if (Subtarget->getHasNoStackGaps()) {
       // Pass args 1-5 via registers, remaining args via stack
       CCInfo.AnalyzeCallOperands(Outs, getHasAlu32() ? CC_SBF32 : CC_SBF64);
     } else {
@@ -519,7 +519,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
       int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset());
       uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
-      if (Subtarget->getHasDynamicFrames()) {
+      if (Subtarget->getHasNoStackGaps()) {
         // In the new call convention, arguments are stored in the callee frame
         // We must increase the offset, simply because offset zero belongs to
         // the caller.

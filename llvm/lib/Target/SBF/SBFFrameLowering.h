@@ -38,8 +38,6 @@ public:
                                 MachineBasicBlock::iterator MI) const override {
     return MBB.erase(MI);
   }
-private:
-  const int FrameSize = 4096;
 };
 } // namespace llvm
 #endif

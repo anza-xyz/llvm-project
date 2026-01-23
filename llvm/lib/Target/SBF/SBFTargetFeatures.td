@@ -55,25 +55,26 @@ def FeatureAbiV2 : SubtargetFeature<"abi-v2", "IsAbiV2",
 def FeatureJmp32 : SubtargetFeature<"jmp-32", "HasJmp32", "true",
                                                 "Enable the JMP32 instruction class">;
 
-def FeatureDynamicFramesV3 : SubtargetFeature<"dynamic-frames-v3", "HasDynamicFramesV3", "true",
-                                            "Enable dynamic frames in SBPFv3">;
+def FeatureNoStackGaps : SubtargetFeature<"no-stack-gaps", "HasNoStackGaps", "true",
+                                                               "The SBPF VM has no stack gaps">;
 
-def OptimizeStackSpace : SubtargetFeature<"optimize-stack-space", "OptimizeStackSpace", "true",
-                                                                       "Optimize stack space usage in SBPFv3">;
+def FeatureStackGrowsUp : SubtargetFeature<"stack-grows-up", "StackGrowsUp", "true",
+                                                  "Place objects within each function frame on top of each other">;
+
 
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames]>;
+def : Proc<"v1", [FeatureDynamicFrames, FeatureNoStackGaps]>;
 
 def : Proc<"v2", [FeatureDynamicFrames, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
-                  FeatureDisableNeg, FeatureReverseSubImm, ALU32]>;
+                  FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureNoStackGaps]>;
 
 def : Proc<"v3", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
+                  FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;
 
 def : Proc<"v4", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJmp32,
-                  FeatureDynamicFramesV3, FeatureCallxRegDst]>;
+                  FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;
