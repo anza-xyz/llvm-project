@@ -36,8 +36,9 @@ struct SBFRegisterInfo : public SBFGenRegisterInfo {
 
   Register getFrameRegister(const MachineFunction &MF) const override;
 
-  int resolveInternalFrameIndex(const MachineFunction &MF, int FI,
-                                std::optional<int64_t> Imm) const;
+  int resolveInternalFrameIndex(MachineFunction &MF, int FI,
+                                std::optional<int64_t> Imm,
+                                const DebugLoc &DL) const;
 };
 }
 

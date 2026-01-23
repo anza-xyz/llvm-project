@@ -1,11 +1,12 @@
 ; RUN: llc -march=sbf < %s 2>&1 >/dev/null | FileCheck %s
+; RUN: llc -march=sbf -mcpu=v3 < %s 2>&1 >/dev/null | FileCheck %s
 
 define void @nowarn() local_unnamed_addr #0 !dbg !6 {
   %1 = alloca [4096 x i8], align 1
   %2 = getelementptr inbounds [4096 x i8], [4096 x i8]* %1, i64 0, i64 0, !dbg !15
   call void @llvm.lifetime.start.p0i8(i64 4096, i8* nonnull %2) #4, !dbg !15
   tail call void @llvm.dbg.declare(metadata [4096 x i8]* %1, metadata !10, metadata !16), !dbg !17
-  call void @doit(i8* nonnull %2) #4, !dbg !18
+  call void @doit(ptr nonnull %2) #4, !dbg !18
   call void @llvm.lifetime.end.p0i8(i64 4096, i8* nonnull %2) #4, !dbg !19
   ret void, !dbg !19
 }
@@ -16,20 +17,21 @@ declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture) #1
 ; Function Attrs: nounwind readnone
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #2
 
-declare void @doit(i8*) local_unnamed_addr #3
+declare void @doit(ptr) local_unnamed_addr #3
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.lifetime.end.p0i8(i64, i8* nocapture) #1
 
 ; CHECK: Error: warn_stack.c
-; CHECK: please minimize large stack variables
+; CHECK: Please, minimize large stack variables
 ; CHECK: Exceeding the maximum stack offset may cause undefined behavior during execution.
 define void @warn() local_unnamed_addr #0 !dbg !20 {
-  %1 = alloca [4124 x i8], align 1
-  %2 = getelementptr inbounds [4124 x i8], [4124 x i8]* %1, i64 0, i64 0, !dbg !26
+  %1 = alloca [4128 x i8], align 1
+  %c =alloca i64, align 8
+  %2 = getelementptr inbounds [4128 x i8], [4128 x i8]* %1, i64 0, i64 0, !dbg !26
   call void @llvm.lifetime.start.p0i8(i64 512, i8* nonnull %2) #4, !dbg !26
-  tail call void @llvm.dbg.declare(metadata [4124 x i8]* %1, metadata !22, metadata !16), !dbg !27
-  call void @doit(i8* nonnull %2) #4, !dbg !28
+  tail call void @llvm.dbg.declare(metadata [4128 x i8]* %1, metadata !22, metadata !16), !dbg !27
+  call void @doit(ptr nonnull %c) #4, !dbg !28
   call void @llvm.lifetime.end.p0i8(i64 512, i8* nonnull %2) #4, !dbg !29
   ret void, !dbg !29
 }
