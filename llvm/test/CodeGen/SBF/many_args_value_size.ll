@@ -1,6 +1,6 @@
 ; RUN: llc -march=sbf -mcpu=v2 < %s | FileCheck %s
 ; RUN: llc -mtriple=sbpfv2-solana-solana < %s | FileCheck %s
-; RUN: llc -march=sbf -mattr=+dynamic-frames-v3,+alu32 < %s | FileCheck --check-prefix=CHECK-V3 %s
+; RUN: llc -march=sbf -mcpu=v3 -mattr=+alu32 < %s | FileCheck --check-prefixes=CHECK-V3 %s
 
 define i64 @test_func(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e) {
 start:
