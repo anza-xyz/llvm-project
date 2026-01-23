@@ -396,13 +396,15 @@ SDValue SBFTargetLowering::LowerFormalArguments(
       if (Subtarget->getHasNoStackGaps()) {
         // In the new convention, arguments are in at the end of the callee
         // frame.
-        uint64_t Size = VA.getLocVT().getFixedSizeInBits() / 8;
-        int64_t Offset = static_cast<int64_t>(VA.getLocMemOffset() + Size);
-        // Since the stack grows to the opposite direction in V3, the offset
-        // is inverted.
+        const int64_t Size =
+          static_cast<int64_t>(VA.getLocVT().getFixedSizeInBits() / 8);
+        int64_t Offset = VA.getLocMemOffset();
+
+        // Only when the stack grows down do we need to reverse the offset
+        // and compensate for the size.
         if (Subtarget->getFrameLowering()->getStackGrowthDirection() ==
             TargetFrameLowering::StackGrowsDown)
-          Offset = -Offset;
+          Offset = -Offset - Size;
 
         const int FrameIndex =
             MF.getFrameInfo().CreateFixedObject(Size, Offset, false);
