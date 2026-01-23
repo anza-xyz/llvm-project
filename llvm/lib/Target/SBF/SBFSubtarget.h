@@ -94,8 +94,11 @@ protected:
   // Whether we are using AbiV2
   bool IsAbiV2;
 
-  // Whether we are dealing with dynamic stack frames in SBPFv3
-  bool HasDynamicFramesV3;
+  // Whether the SBF VM does not have stack gaps enabled
+  bool HasNoStackGaps;
+
+  // Whether we place objects within each function frame on top of each other
+  bool StackGrowsUp;
 
   std::unique_ptr<CallLowering> CallLoweringInfo;
   std::unique_ptr<InstructionSelector> InstSelector;
@@ -117,12 +120,10 @@ public:
   bool getHasJmpExt() const { return HasJmpExt; }
   bool getHasAlu32() const { return HasAlu32; }
   bool getHasDynamicFrames() const {
-    return HasDynamicFrames || HasDynamicFramesV3;
-  }
-  bool isDynamicFramesV1() const {
     return HasDynamicFrames;
   }
-  bool getHasDynamicFramesV3() const { return HasDynamicFramesV3; }
+  // Dynamic frames imply no stack gaps
+  bool getHasNoStackGaps() const { return HasNoStackGaps || HasDynamicFrames; }
   bool getUseDwarfRIS() const { return UseDwarfRIS; }
   bool getDisableNeg() const { return DisableNeg; }
   bool getReverseSubImm() const { return ReverseSubImm; }
@@ -134,6 +135,7 @@ public:
   bool getHasExplicitSignExt() const { return HasExplicitSignExt; }
   bool getNewMemEncoding() const { return NewMemEncoding; }
   bool getHasStaticSyscalls() const { return HasStaticSyscalls; }
+  bool stackGrowsUp() const { return StackGrowsUp; }
   const SBFInstrInfo *getInstrInfo() const override { return &InstrInfo; }
   const SBFFrameLowering *getFrameLowering() const override {
     return &FrameLowering;
