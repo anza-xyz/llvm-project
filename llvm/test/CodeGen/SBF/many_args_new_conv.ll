@@ -1,7 +1,7 @@
 ; RUN: llc -march=sbf -mcpu=v1 < %s | FileCheck %s
 ; RUN: llc -mtriple=sbpfv1-solana-solana < %s | FileCheck %s
 ; RUN: llc -march=sbf -mcpu=v1 -mattr=+mem-encoding < %s | FileCheck %s
-; RUN: llc -march=sbf -mattr=+dynamic-frames-v3 < %s | FileCheck --check-prefix=CHECK-V3 %s
+; RUN: llc -march=sbf -mcpu=v3 < %s | FileCheck --check-prefix=CHECK-V3 %s
 
 ; Function Attrs: nounwind uwtable
 define i32 @caller_no_alloca(i32 %a, i32 %b, i32 %c) #0 {
@@ -35,13 +35,12 @@ entry:
 ; Function Attrs: nounwind uwtable
 define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK-LABEL: caller_alloca
-; CHECK: add64 r10, -4160
-; CHECK: ldxw r1, [r10 + 88]
-; 88 is 8*7 + 32
+; CHECK: add64 r10, -1088
+; CHECK: ldxw r1, [r10 + 120]
+; 1088 - 1024 + 56 = 120
 
-; CHECK-V3: add64 r10, 64
-; CHECK-V3: ldxw r1, [r10 - 4104]
-; 4096 + 64 - 8*7 = 4104
+; CHECK-V3: ldxw r1, [r10 - 4040]
+; 4096 - 8*7 = 4104
 
 ; Saving arguments in the callee's frame
 
@@ -70,11 +69,11 @@ define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK: mov64 r4, 1
 ; CHECK: mov64 r5, 2
 ; CHECK: call callee_no_alloca
-; CHECK: ldxw r1, [r10 + 16]
-; CHECK-V3: ldxw r1, [r10 - 32]
+; CHECK: ldxw r1, [r10 + 48]
+; CHECK-V3: ldxw r1, [r10 - 3072]
 
 entry:
-  %g = alloca [4128 x i8], align 8
+  %g = alloca [1024 x i8], align 8
   %off = getelementptr i64, ptr %g, i64 7
   %g1 = load i32, ptr %off
   %call = tail call i32 @callee_no_alloca(i32 %g1, i32 %b, i32 %c, i32 1, i32 2, i32 3, i32 4, i32 50, i32 55, i32 60) #3
@@ -87,31 +86,30 @@ entry:
 ; Function Attrs: nounwind uwtable
 define i32 @callee_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %p, i32 %y, i32 %a1, i32 %a2) #1 {
 ; CHECK-LABEL: callee_alloca
-; CHECK: add64 r10, -5056
-; CHECK-V3: add64 r10, 960
+; CHECK: add64 r10, -2112
 
 ; Loading arguments
-; CHECK: ldxw r2, [r10 + 5048]
-; CHECK: ldxw r2, [r10 + 5040]
-; CHECK: ldxw r2, [r10 + 5032]
-; CHECK: ldxw r2, [r10 + 5024]
-; CHECK: ldxw r2, [r10 + 5016]
+; CHECK: ldxw r2, [r10 + 2104]
+; CHECK: ldxw r2, [r10 + 2096]
+; CHECK: ldxw r2, [r10 + 2088]
+; CHECK: ldxw r2, [r10 + 2080]
+; CHECK: ldxw r2, [r10 + 2072]
 ; Loading allocated i32
-; CHECK: ldxw r0, [r10 + 16]
+; CHECK: ldxw r0, [r10 + 24]
 
-; CHECK-V3: ldxw r2, [r10 - 5048]
-; CHECK-V3: ldxw r2, [r10 - 5040]
-; CHECK-V3: ldxw r2, [r10 - 5032]
-; CHECK-V3: ldxw r2, [r10 - 5024]
-; CHECK-V3: ldxw r2, [r10 - 5016]
+; CHECK-V3: ldxw r2, [r10 - 4088]
+; CHECK-V3: ldxw r2, [r10 - 4080]
+; CHECK-V3: ldxw r2, [r10 - 4072]
+; CHECK-V3: ldxw r2, [r10 - 4064]
+; CHECK-V3: ldxw r2, [r10 - 4056]
 ; Loading allocated i32
-; CHECK-V3: ldxw r0, [r10 - 5008]
+; CHECK-V3: ldxw r0, [r10 - 4048]
 
 
 ; CHECK-NOT: add64 r10, 128
 
 entry:
-  %o = alloca [5000 x i8], align 8
+  %o = alloca [2048 x i8], align 8
   %g = add i32 %a, %b
   %h = sub i32 %g, %c
   %i = add i32 %h, %d
