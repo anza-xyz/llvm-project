@@ -173,7 +173,7 @@ int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
     // When the stack grows up, the argument offset is off by the size of the
     // object because LLVM interprets that offset zero belongs to the caller,
     // not the callee.
-    // PS: We have incremented it in fn LowerCall at SBFISellLowering.
+    // PS: We have incremented it in fn LowerCall at SBFISelLowering.
     if (SubTarget.stackGrowsUp())
       return -(static_cast<int>(MFI.getObjectSize(FI)) + Offset);
 
