@@ -643,8 +643,8 @@ SBFTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   // CCState - Info about the registers and stack slot.
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, *DAG.getContext());
 
-  if (Outs.size() > 1) {
-    fail(DL, DAG, "Only a single return supported");
+  if (Outs.size() > 2) {
+    fail(DL, DAG, "Only two returns supported");
     assert(false);
   }
 
@@ -686,8 +686,8 @@ SDValue SBFTargetLowering::LowerCallResult(
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, *DAG.getContext());
 
-  if (Ins.size() > 1) {
-    fail(DL, DAG, "Only a single return supported");
+  if (Ins.size() > 2) {
+    fail(DL, DAG, "Only two returns supported");
     assert(false);
   }
 

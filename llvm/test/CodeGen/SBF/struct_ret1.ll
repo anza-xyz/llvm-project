@@ -7,11 +7,9 @@
 ; Function Attrs: nounwind readonly uwtable
 define { i64, i32 } @bar(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e) #0 {
 ; CHECK-LABEL: bar:
-; CHECK: lddw r2, s
-; CHECK: ldxw r3, [r2 + 8]
-; CHECK: stxw [r1 + 8], r3
-; CHECK: ldxdw r2, [r2 + 0]
-; CHECK: stxdw [r1 + 0], r2
+; CHECK: lddw r1, s
+; CHECK: ldxdw r0, [r1 + 0]
+; CHECK: ldxw r1, [r1 + 8]
 entry:
   %retval.sroa.0.0.copyload = load i64, i64* bitcast (%struct.S* @s to i64*), align 4
   %retval.sroa.2.0.copyload = load i32, i32* getelementptr inbounds (%struct.S, %struct.S* @s, i64 0, i32 2), align 4
