@@ -72,7 +72,8 @@ static void warnSize(const int Offset, MachineFunction &MF,
     dbgs() << " Function " << MF.getFunction().getName()
            << " overflows the maximum allowed frame space by accessing "
            << "an offset " << Overflow << " bytes greater than the "
-           << "maximum of 4096. Please, minimize large stack variables. "
+           << "maximum of " << SBFRegisterInfo::FrameLength
+           << ". Please, minimize large stack variables. "
            << "Estimated function frame size: " << StackSize << " bytes."
            << " Exceeding the maximum stack offset may cause "
               "undefined behavior during execution.\n\n";

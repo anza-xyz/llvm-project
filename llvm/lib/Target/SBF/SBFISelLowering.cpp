@@ -24,10 +24,15 @@
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/DiagnosticPrinter.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
 using namespace llvm;
 
 #define DEBUG_TYPE "sbf-lower"
+
+static cl::opt<unsigned>
+    SBFStackSize("sbf-stack-size", cl::init(4096),
+                 cl::desc("Specify the SBF stack frame size in bytes"));
 
 static void fail(const SDLoc &DL, SelectionDAG &DAG, const Twine &Msg) {
   MachineFunction &MF = DAG.getMachineFunction();
@@ -171,7 +176,7 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   // CPU/Feature control
   HasAlu32 = STI.getHasAlu32();
   HasJmp32 = STI.getHasJmp32();
-  SBFRegisterInfo::FrameLength = 4096;
+  SBFRegisterInfo::FrameLength = SBFStackSize;
 }
 
 bool SBFTargetLowering::allowsMisalignedMemoryAccesses(
