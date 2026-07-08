@@ -302,7 +302,9 @@ void ELFWriter::writeHeader() {
   W.OS << char(ELF::EV_CURRENT);        // e_ident[EI_VERSION]
   // e_ident[EI_OSABI]
   uint8_t OSABI = OWriter.TargetObjectWriter->getOSABI();
-  W.OS << char(OSABI == ELF::ELFOSABI_NONE && OWriter.seenGnuAbi()
+  uint16_t e_machine = OWriter.TargetObjectWriter->getEMachine();
+  W.OS << char(OSABI == ELF::ELFOSABI_NONE && OWriter.seenGnuAbi() &&
+                       e_machine != ELF::EM_BPF && e_machine != ELF::EM_SBF
                    ? int(ELF::ELFOSABI_GNU)
                    : OSABI);
   // e_ident[EI_ABIVERSION]
