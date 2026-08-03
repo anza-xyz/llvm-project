@@ -1,5 +1,6 @@
 ; RUN: llc -march=sbf -mattr=+alu32 < %s | FileCheck -check-prefix=CHECK32 %s
 ; RUN: llc -march=sbf < %s | FileCheck -check-prefix=CHECK64 %s
+; RUN: llc -march=sbf -mcpu=v3 -mattr=+alu32 < %s | FileCheck -check-prefix=CHECK32 %s
 
 ; TODO: Add much more coverage. Currently this a sign extension regression
 ; test (SBFTargetLowering::shouldSignExtendTypeInLibCall).
