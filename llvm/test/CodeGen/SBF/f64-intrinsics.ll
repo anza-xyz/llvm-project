@@ -1,5 +1,6 @@
 ; RUN: llc -march=sbf -mattr=+alu32 < %s | FileCheck -check-prefix=CHECK32 %s
 ; RUN: llc -march=sbf < %s | FileCheck -check-prefix=CHECK64 %s
+; RUN: llc -march=sbf -mcpu=v3 -mattr=+alu32 < %s | FileCheck -check-prefix=CHECK32 %s
 
 ; TODO: Add much more coverage. Currently this a sign extension regression
 ; test (SBFTargetLowering::shouldSignExtendTypeInLibCall).
@@ -22,3 +23,34 @@ define double @powi_f64(double %a, i32 %b) nounwind {
   ret double %1
 }
 
+define double @uitofp64(i32 %arg) nounwind {
+; CHECK32-LABEL: uitofp64:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    call __floatunsidf
+; CHECK32-NEXT:    exit
+;
+; CHECK64-LABEL: uitofp64:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    lsh64 r1, 32
+; CHECK64-NEXT:    rsh64 r1, 32
+; CHECK64-NEXT:    call __floatunsidf
+; CHECK64-NEXT:    exit
+  %1 = uitofp i32 %arg to double
+  ret double %1
+}
+
+define double @sitofp64(i32 %arg) nounwind {
+; CHECK32-LABEL: sitofp64:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    call __floatsidf
+; CHECK32-NEXT:    exit
+;
+; CHECK64-LABEL: sitofp64:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    lsh64 r1, 32
+; CHECK64-NEXT:    arsh64 r1, 32
+; CHECK64-NEXT:    call __floatsidf
+; CHECK64-NEXT:    exit
+  %1 = sitofp i32 %arg to double
+  ret double %1
+}
