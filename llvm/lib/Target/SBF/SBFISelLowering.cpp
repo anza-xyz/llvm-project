@@ -618,11 +618,6 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                          InVals);
 }
 
-bool SBFTargetLowering::shouldSignExtendTypeInLibCall(Type* Ty,
-                                                      bool IsSigned) const {
-  return IsSigned || Ty->isIntegerTy(32);
-}
-
 bool SBFTargetLowering::CanLowerReturn(
     CallingConv::ID CallConv, MachineFunction &MF, bool IsVarArg,
     const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext &Context,
