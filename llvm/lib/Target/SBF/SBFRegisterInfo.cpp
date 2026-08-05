@@ -43,13 +43,14 @@ BitVector SBFRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
 }
 
 static void warnSize(const int Offset, MachineFunction &MF,
-                     const DebugLoc & DL, const bool StackGrowsUp)
-{
+                     const DebugLoc & DL, const bool StackGrowsUp,
+                     const int64_t ObjectSize) {
+
   static Function *OldMF = nullptr;
   const int MaxOffset = -1 * SBFRegisterInfo::FrameLength;
   bool ShouldWarn = false;
 
-  if (StackGrowsUp && Offset > 0) {
+  if (StackGrowsUp && Offset + ObjectSize > 0) {
     ShouldWarn = true;
   } else if (!StackGrowsUp && Offset < MaxOffset) {
     ShouldWarn = true;
@@ -182,17 +183,18 @@ int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
 
   Offset += Imm.value_or(0);
 
+  int64_t ObjectSize = MFI.getObjectSize(FI);
   if (SubTarget.getHasNoStackGaps()) {
     if (SubTarget.getHasDynamicFrames())
       return Offset + static_cast<int>(StackSize);
 
     const int V3Offset = Offset - static_cast<int>(FrameLength);
-    warnSize(V3Offset, MF, DL, SubTarget.stackGrowsUp());
+    warnSize(V3Offset, MF, DL, SubTarget.stackGrowsUp(), ObjectSize);
     return V3Offset;
   }
 
   // Only sBPFv0 will reach this stage, because it has stack gaps.
-  warnSize(Offset, MF, DL, SubTarget.stackGrowsUp());
+  warnSize(Offset, MF, DL, SubTarget.stackGrowsUp(), ObjectSize);
   return Offset;
 }
 
