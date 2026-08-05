@@ -658,7 +658,7 @@ SDValue DAGTypeLegalizer::SoftenFloatRes_ExpOp(SDNode *N) {
   EVT OpsVT[2] = { N->getOperand(0 + Offset).getValueType(),
                    N->getOperand(1 + Offset).getValueType() };
   CallOptions.setTypeListBeforeSoften(OpsVT, N->getValueType(0), true);
-  CallOptions.setIsSigned();
+  CallOptions.setSExt();
   std::pair<SDValue, SDValue> Tmp = TLI.makeLibCall(DAG, LC, NVT, Ops,
                                                     CallOptions, SDLoc(N),
                                                     Chain);

@@ -1,4 +1,4 @@
-; RUN: llc -sbf-enable-btf-emission -O2 -march=sbf -mcpu=v3 < %s | FileCheck %s
+; RUN: llc -sbf-enable-btf-emission -O2 -march=sbf -mcpu=v2 < %s | FileCheck %s
 ; Source code:
 ;   struct t3 {
 ;     int i;
