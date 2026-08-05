@@ -865,7 +865,7 @@ void InputSection::relocateNonAlloc(uint8_t *buf, ArrayRef<RelTy> rels) {
     RelType type = rel.getType(config->isMips64EL);
 
     // FIX: Temporary remap BPF_64_64 relocations in debug sections.
-    if ((ctx.arg.emachine == EM_SBF || ctx.arg.emachine == EM_BPF) && type == R_SBF_64_64 && isDebug)
+    if ((emachine == EM_SBF || emachine == EM_BPF) && type == R_SBF_64_64 && isDebug)
       type = R_BPF_64_ABS64;
 
     // GCC 8.0 or earlier have a bug that they emit R_386_GOTPC relocations
