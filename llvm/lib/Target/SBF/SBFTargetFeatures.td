@@ -70,14 +70,14 @@ class Proc<string Name, list<SubtargetFeature> Features>
 
 def : Proc<"generic", []>;
 
-def : Proc<"v1", [FeatureDynamicFrames, FeatureNoStackGaps, FeatureJumpExt]>;
+def : Proc<"v1", [FeatureDynamicFrames, FeatureNoStackGaps, FeatureJumpExt, FeatureStoreImm]>;
 
 def : Proc<"v2", [FeatureDynamicFrames, FeatureStoreImm, FeatureJumpExt, FeatureDisableLddw,
                   FeatureNewMemEncoding, FeatureCallxRegSrc, FeaturePqrInstr, FeatureExplicitSext,
                   FeatureDisableNeg, FeatureReverseSubImm, ALU32, FeatureNoStackGaps]>;
 
-def : Proc<"v3", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJumpExt,
+def : Proc<"v3", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureJumpExt, FeatureStoreImm,
                   FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;
 
-def : Proc<"v4", [FeatureStaticSyscalls, FeatureRelocAbs64,
+def : Proc<"v4", [FeatureStaticSyscalls, FeatureRelocAbs64, FeatureStoreImm,
                   FeatureCallxRegDst, FeatureNoStackGaps, FeatureStackGrowsUp]>;
