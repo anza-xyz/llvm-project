@@ -61,6 +61,7 @@ TargetInfo *elf::getTarget() {
   case EM_AVR:
     return getAVRTargetInfo();
   case EM_SBF:
+  case EM_BPF:
     return getSBFTargetInfo();
   case EM_HEXAGON:
     return getHexagonTargetInfo();
