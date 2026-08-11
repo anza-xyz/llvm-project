@@ -95,6 +95,7 @@ protected:
   // Whether we place objects within each function frame on top of each other
   bool StackGrowsUp;
 
+public:
   // This constructor initializes the data members to match that
   // of the specified triple.
   SBFSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
