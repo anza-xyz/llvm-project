@@ -45,3 +45,26 @@ define i64 @caller(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e) {
     %res = call i64 @callee(i64 %a, i64 %b, i64 %c, i64 %d, i64 %e, i64 %f, i64 %g)
     ret i64 %res
 }
+
+; CHECK-NOT: Error: Function stack_overflow_wrong
+define i64 @stack_overflow_wrong(i64 %a) {
+start:
+  %0 = alloca [100 x i8], align 8
+  %1 = alloca [100 x i8], align 8
+  %2 = alloca [100 x i8], align 8
+  %buffer = alloca [3700 x i8], align 1
+; The offset for this getelementptr is less than the object size.
+  %b1 = getelementptr inbounds nuw i8, ptr %buffer, i64 500
+  %b2 = getelementptr inbounds nuw i8, ptr %0, i64 10
+  %b3 = getelementptr inbounds nuw i8, ptr %1, i64 10
+  %b4 = getelementptr inbounds nuw i8, ptr %2, i64 10
+  %b = load i64, ptr %b1, align 8
+  %c1 = load i64, ptr %b2, align 8
+  %c2 = load i64, ptr %b3, align 8
+  %c3 = load i64, ptr %b4, align 8
+  %c = add i64 %b, %a
+  %d = add i64 %c, %c1
+  %e = add i64 %c2, %d
+  %f = add i64 %c3, %e
+  ret i64 %f
+}
