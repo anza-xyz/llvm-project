@@ -133,10 +133,10 @@ struct SBFMIPreEmitPeephole : public MachineFunctionPass {
   const TargetRegisterInfo *TRI;
   const SBFInstrInfo *TII;
   const SBFSubtarget *SubTarget;
-  const CodeGenOptLevel OptLevel;
+  const llvm::CodeGenOpt::Level OptLevel;
   const bool DisablePeephole;
 
-  SBFMIPreEmitPeephole(CodeGenOptLevel OptLevel, bool DisablePeephole)
+  SBFMIPreEmitPeephole(llvm::CodeGenOpt::Level OptLevel, bool DisablePeephole)
       : MachineFunctionPass(ID), OptLevel(OptLevel),
         DisablePeephole(DisablePeephole) {
     initializeSBFMIPreEmitPeepholePass(*PassRegistry::getPassRegistry());
@@ -213,7 +213,7 @@ INITIALIZE_PASS(SBFMIPreEmitPeephole, "sbf-mi-pemit-peephole",
                 "SBF PreEmit Peephole Optimization", false, false)
 
 char SBFMIPreEmitPeephole::ID = 0;
-FunctionPass* llvm::createSBFMIPreEmitPeepholePass(CodeGenOptLevel OptLevel, bool DisablePeephole)
+FunctionPass* llvm::createSBFMIPreEmitPeepholePass(llvm::CodeGenOpt::Level OptLevel, bool DisablePeephole)
 {
   return new SBFMIPreEmitPeephole(OptLevel, DisablePeephole);
 }
