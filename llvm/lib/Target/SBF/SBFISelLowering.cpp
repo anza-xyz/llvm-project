@@ -186,11 +186,11 @@ bool SBFTargetLowering::allowsMisalignedMemoryAccesses(
 
 bool SBFTargetLowering::lowerAtomicStoreAsStoreSDNode(
     const StoreInst &SI) const {
-  return Subtarget->isSolana();
+  return true;
 }
 
 bool SBFTargetLowering::lowerAtomicLoadAsLoadSDNode(const LoadInst &LI) const {
-  return Subtarget->isSolana();
+  return true;
 }
 
 bool SBFTargetLowering::isOffsetFoldingLegal(

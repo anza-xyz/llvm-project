@@ -287,11 +287,7 @@ entry:
 
 ; CHECK-LABEL: test_load_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r2, 0
-; CHECK: jeq r0, 0, LBB24_2
-; CHECK: mov64 r2, r0
-; CHECK: LBB24_2:
-; CHECK: stxdw [r1 + 0], r2
+; CHECK: exit
 define dso_local i64 @test_load_64(ptr nocapture %p) local_unnamed_addr {
 entry:
   %0 = load atomic i64, ptr %p seq_cst, align 8
@@ -300,12 +296,7 @@ entry:
 
 ; CHECK-LABEL: test_load_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov32 w2, 0
-; CHECK: mov32 r3, w0
-; CHECK: jeq r3, 0, LBB25_2
-; CHECK: mov64 w2, w0
-; CHECK: LBB25_2:
-; CHECK: stxw [r1 + 0], w2
+; CHECK: exit
 define dso_local i32 @test_load_32(ptr nocapture %p) local_unnamed_addr {
 entry:
   %0 = load atomic i32, ptr %p seq_cst, align 8
