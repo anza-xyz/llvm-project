@@ -42,17 +42,17 @@ BitVector SBFRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   return Reserved;
 }
 
-static void warnSize(const int Offset, MachineFunction &MF,
+static void warnSize(const int RequestedOffset, MachineFunction &MF,
                      const DebugLoc & DL, const bool StackGrowsUp,
-                     const int64_t ObjectSize) {
+                     const int ObjectOffset, const int ObjectSize) {
 
   static Function *OldMF = nullptr;
   const int MaxOffset = -1 * SBFRegisterInfo::FrameLength;
   bool ShouldWarn = false;
 
-  if (StackGrowsUp && Offset + ObjectSize > 0) {
+  if (StackGrowsUp && ObjectOffset + ObjectSize > 0) {
     ShouldWarn = true;
-  } else if (!StackGrowsUp && Offset < MaxOffset) {
+  } else if (!StackGrowsUp && RequestedOffset < MaxOffset) {
     ShouldWarn = true;
   }
 
@@ -154,13 +154,13 @@ int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
                                                const DebugLoc &DL) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const SBFFunctionInfo *SBFFuncInfo = MF.getInfo<SBFFunctionInfo>();
-  int Offset = MFI.getObjectOffset(FI);
+  int ObjectOffset = MFI.getObjectOffset(FI);
   const SBFSubtarget & SubTarget = MF.getSubtarget<SBFSubtarget>();
   const uint64_t StackSize = MFI.getStackSize();
 
   if (!SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
-    Offset = SBFRegisterInfo::FrameLength - Offset;
-    if (static_cast<uint64_t>(Offset) < StackSize) {
+    ObjectOffset = SBFRegisterInfo::FrameLength - ObjectOffset;
+    if (static_cast<uint64_t>(ObjectOffset) < StackSize) {
       dbgs() << "Error: A function call in method "
              << MF.getFunction().getName()
              << " overwrites values in the frame. Please, decrease stack usage "
@@ -168,7 +168,7 @@ int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
              << "The function call may cause undefined behavior "
                 "during execution.\n\n";
     }
-    return -Offset;
+    return -ObjectOffset;
   }
 
   if (SubTarget.getHasNoStackGaps() && SBFFuncInfo->containsFrameIndex(FI)) {
@@ -177,26 +177,30 @@ int SBFRegisterInfo::resolveInternalFrameIndex(llvm::MachineFunction &MF,
     // not the callee.
     // PS: We have incremented it in fn LowerCall at SBFISelLowering.
     if (SubTarget.stackGrowsUp())
-      return -(static_cast<int>(MFI.getObjectSize(FI)) + Offset);
+      return -(static_cast<int>(MFI.getObjectSize(FI)) + ObjectOffset);
 
-    return -Offset;
+    return -ObjectOffset;
   }
 
-  Offset += Imm.value_or(0);
 
-  int64_t ObjectSize = MFI.getObjectSize(FI);
+  int ElementOffset = ObjectOffset + Imm.value_or(0);
+
+  int ObjectSize = static_cast<int>(MFI.getObjectSize(FI));
   if (SubTarget.getHasNoStackGaps()) {
     if (SubTarget.getHasDynamicFrames())
-      return Offset + static_cast<int>(StackSize);
+      return ElementOffset + static_cast<int>(StackSize);
 
-    const int V3Offset = Offset - static_cast<int>(FrameLength);
-    warnSize(V3Offset, MF, DL, SubTarget.stackGrowsUp(), ObjectSize);
-    return V3Offset;
+    const int V3ElementOffset = ElementOffset - static_cast<int>(FrameLength);
+    const int V3ObjectOffset = ObjectOffset - static_cast<int>(FrameLength);
+    warnSize(V3ElementOffset, MF, DL, SubTarget.stackGrowsUp(), V3ObjectOffset,
+             ObjectSize);
+    return V3ElementOffset;
   }
 
   // Only sBPFv0 will reach this stage, because it has stack gaps.
-  warnSize(Offset, MF, DL, SubTarget.stackGrowsUp(), ObjectSize);
-  return Offset;
+  warnSize(ElementOffset, MF, DL, SubTarget.stackGrowsUp(), ObjectOffset,
+           ObjectSize);
+  return ElementOffset;
 }
 
 Register SBFRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
