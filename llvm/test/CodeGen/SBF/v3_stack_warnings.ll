@@ -54,10 +54,10 @@ start:
   %2 = alloca [100 x i8], align 8
   %buffer = alloca [3700 x i8], align 1
 ; The offset for this getelementptr is less than the object size.
-  %b1 = getelementptr inbounds nuw i8, ptr %buffer, i64 500
-  %b2 = getelementptr inbounds nuw i8, ptr %0, i64 10
-  %b3 = getelementptr inbounds nuw i8, ptr %1, i64 10
-  %b4 = getelementptr inbounds nuw i8, ptr %2, i64 10
+  %b1 = getelementptr inbounds i8, ptr %buffer, i64 500
+  %b2 = getelementptr inbounds i8, ptr %0, i64 10
+  %b3 = getelementptr inbounds i8, ptr %1, i64 10
+  %b4 = getelementptr inbounds i8, ptr %2, i64 10
   %b = load i64, ptr %b1, align 8
   %c1 = load i64, ptr %b2, align 8
   %c2 = load i64, ptr %b3, align 8
