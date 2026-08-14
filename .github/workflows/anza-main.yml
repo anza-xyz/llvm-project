@@ -1,0 +1,83 @@
+name: Test and check
+
+on:
+  push:
+    branches:
+      - 'solana-rustc/19.1-2024-12-03'
+  pull_request:
+    branches:
+      - 'solana-rustc/19.1-2024-12-03'
+
+jobs:
+  check-llvm:
+    name: Check LLVM
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout source files
+        uses: actions/checkout@v6
+      - name: Run CMake
+        working-directory: ./llvm
+        run: |
+          mkdir build
+          cd build
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+      - name: Test LLVM
+        working-directory: ./llvm/build
+        run: ninja check-llvm
+  check-lld:
+    name: Check LLD
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout source files
+        uses: actions/checkout@v6
+      - name: Run CMake
+        run: |
+          cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On \
+          '-DLLVM_ENABLE_PROJECTS=lld'  \
+          -DLLVM_ENABLE_TERMINFO=Off -DCMAKE_BUILD_TYPE=Release \
+          -DLLVM_ENABLE_ZSTD=Off \
+          -B build llvm
+      - name: Test LLD
+        working-directory: ./build
+        run: ninja check-lld
+  check-clang:
+    name: Check Clang
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout source files
+        uses: actions/checkout@v6
+      - name: Run CMake
+        run: |
+          cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On \
+          '-DLLVM_ENABLE_PROJECTS=clang'  \
+          -DLLVM_ENABLE_TERMINFO=Off -DCMAKE_BUILD_TYPE=Release \
+          -DLLVM_ENABLE_ZSTD=Off \
+          -B build llvm
+      - name: Test LLD
+        working-directory: ./build
+        run: ninja check-clang
+  check-lldb:
+    name: Check LLDB
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source files
+        uses: actions/checkout@v6
+      - name: Run CMake
+        run: |
+          cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On \
+          '-DLLVM_ENABLE_PROJECTS=clang;lldb'  \
+          -DLLVM_ENABLE_TERMINFO=Off -DCMAKE_BUILD_TYPE=Release \
+          -DLLVM_ENABLE_ZSTD=Off \
+          -B build llvm
+      - name: Test LLDB
+        working-directory: ./build
+        run: ninja check-clang
