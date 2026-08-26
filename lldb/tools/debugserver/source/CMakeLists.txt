@@ -177,7 +177,7 @@ endif()
 separate_arguments(MIG_ARCH_FLAGS_SEPARTED NATIVE_COMMAND "${MIG_ARCH_FLAGS}")
 
 add_custom_command(OUTPUT ${generated_mach_interfaces}
-  VERBATIM COMMAND mig ${MIG_ARCH_FLAGS_SEPARTED} -isysroot ${CMAKE_OSX_SYSROOT} ${CMAKE_CURRENT_SOURCE_DIR}/MacOSX/dbgnub-mig.defs
+  VERBATIM COMMAND mig ${MIG_ARCH_FLAGS_SEPARTED} -header ${CMAKE_CURRENT_BINARY_DIR}/mach_exc.h -server ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c -user ${CMAKE_CURRENT_BINARY_DIR}/mach_excUser.c ${CMAKE_CURRENT_SOURCE_DIR}/MacOSX/dbgnub-mig.defs
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/MacOSX/dbgnub-mig.defs
   )
 
