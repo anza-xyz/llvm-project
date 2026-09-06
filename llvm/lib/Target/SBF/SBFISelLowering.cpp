@@ -555,7 +555,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   if (!MemOpChain.empty()) {
     Chain = DAG.getNode(ISD::TokenFactor, CLI.DL, MVT::Other, MemOpChain);
-    if (!Subtarget->getHasDynamicFrames()) {
+    if (!Subtarget->getHasNoStackGaps()) {
       // Pass the current stack frame pointer via SBF::R5, gluing the
       // instruction to instructions passing the first 4 arguments in
       // registers below.
@@ -596,7 +596,7 @@ SDValue SBFTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   for (auto &Reg : RegsToPass)
     Ops.push_back(DAG.getRegister(Reg.first, Reg.second.getValueType()));
 
-  if (!MemOpChain.empty() && !Subtarget->getHasDynamicFrames()) {
+  if (!MemOpChain.empty() && !Subtarget->getHasNoStackGaps()) {
     Ops.push_back(DAG.getRegister(SBF::R5, MVT::i64));
   }
 

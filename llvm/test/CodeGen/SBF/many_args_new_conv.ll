@@ -2,7 +2,7 @@
 ; RUN: llc -mtriple=sbpfv1-solana-solana < %s | FileCheck %s
 ; RUN: llc -march=sbf -mcpu=v1 -mattr=+mem-encoding < %s | FileCheck %s
 ; RUN: llc -march=sbf -mcpu=v3 < %s | FileCheck --check-prefixes=CHECK-V3,CHECK-V3-OPT %s
-; RUN: llc -O0 -march=sbf -mcpu=v3 < %s | FileCheck --check-prefixes=CHECK-V3,CHECK-V3-OPTNONE %s
+; RUN: llc -O0 -march=sbf -mcpu=v3 < %s | FileCheck --check-prefixes=CHECK-V3 %s
 
 ; Function Attrs: nounwind uwtable
 define i32 @caller_no_alloca(i32 %a, i32 %b, i32 %c) #0 {
@@ -24,8 +24,7 @@ entry:
 ; CHECK-V3: stdw [r10 + 16], 50
 ; CHECK-V3: stdw [r10 + 8], 4
 ; CHECK-V3: stdw [r10 + 0], 3
-; CHECK-V3-OPT-NOT: mov64 r5, r10
-; CHECK-V3-OPTNONE: mov64 r5, r10
+; CHECK-V3-NOT: mov64 r5, r10
 
 ; CHECK: mov64 r4, 1
 ; CHECK: mov64 r5, 2
@@ -68,8 +67,7 @@ define i32 @caller_alloca(i32 %a, i32 %b, i32 %c) #0 {
 ; CHECK-V3: stdw [r10 + 8], 4
 ; Offset in the callee: -frame_size + 0
 ; CHECK-V3: stdw [r10 + 0], 3
-; CHECK-V3-OPT-NOT: mov64 r5, r10
-; CHECK-V3-OPTNONE: mov64 r5, r10
+; CHECK-V3-NOT: mov64 r5, r10
 
 ; CHECK: mov64 r4, 1
 ; CHECK: mov64 r5, 2
