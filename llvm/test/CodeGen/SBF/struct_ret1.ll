@@ -12,14 +12,14 @@ define { i64, i32 } @bar(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e) #0 {
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    lddw r1, s
 ; CHECK-NEXT:    ldxdw r0, [r1 + 0]
-; CHECK-NEXT:    ldxw r1, [r1 + 8]
+; CHECK-NEXT:    ldxw r2, [r1 + 8]
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: bar:
 ; CHECK-ALU32:       # %bb.0: # %entry
 ; CHECK-ALU32-NEXT:    lddw r1, s
 ; CHECK-ALU32-NEXT:    ldxdw r0, [r1 + 0]
-; CHECK-ALU32-NEXT:    ldxw w1, [r1 + 8]
+; CHECK-ALU32-NEXT:    ldxw w2, [r1 + 8]
 ; CHECK-ALU32-NEXT:    exit
 entry:
   %retval.sroa.0.0.copyload = load i64, i64* bitcast (%struct.S* @s to i64*), align 4
