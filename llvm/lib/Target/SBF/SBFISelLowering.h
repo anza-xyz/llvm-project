@@ -69,6 +69,8 @@ public:
 
   MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override;
 
+  MVT::SimpleValueType getCmpLibcallReturnType() const override;
+
 private:
   // Control Instruction Selection Features
   bool HasAlu32;
