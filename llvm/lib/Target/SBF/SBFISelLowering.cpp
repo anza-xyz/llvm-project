@@ -1127,3 +1127,8 @@ bool SBFTargetLowering::isLegalAddressingMode(const DataLayout &DL,
 
   return true;
 }
+
+MVT::SimpleValueType SBFTargetLowering::getCmpLibcallReturnType() const {
+  return MVT::i64;
+}
+
