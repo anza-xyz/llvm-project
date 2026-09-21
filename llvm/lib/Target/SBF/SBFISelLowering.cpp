@@ -947,6 +947,18 @@ SBFTargetLowering::EmitSubregExt(MachineInstr &MI, MachineBasicBlock *BB,
   if (Subtarget->getHasExplicitSignExt())
     return PromotedReg0;
 
+  if (Subtarget->stackGrowsUp()) {
+    const TargetRegisterClass *RC32 = getRegClassFor(MVT::i32);
+    Register Reg0 = RegInfo.createVirtualRegister(RC32);
+    Register PromotedReg1 = RegInfo.createVirtualRegister(RC);
+    BuildMI(BB, DL, TII.get(SBF::ADD_ri_32), Reg0).addReg(Reg).addImm(0);
+    BuildMI(BB, DL, TII.get(SBF::SUBREG_TO_REG), PromotedReg0)
+        .addImm(0)
+        .addReg(Reg0)
+        .addImm(SBF::sub_32);
+    return PromotedReg1;
+  }
+
   Register PromotedReg1 = RegInfo.createVirtualRegister(RC);
   Register PromotedReg2 = RegInfo.createVirtualRegister(RC);
   BuildMI(BB, DL, TII.get(SBF::SLL_ri), PromotedReg1)
