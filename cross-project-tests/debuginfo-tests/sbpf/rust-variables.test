@@ -1,0 +1,5 @@
+{
+  "source": "calls.rs",
+  "expectations": "rust-variables.dex",
+  "xfail": "SBPF-RUST-VALUE: scalar argument x is displayed incorrectly after being spilled to the stack"
+}

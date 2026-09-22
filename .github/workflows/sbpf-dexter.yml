@@ -1,0 +1,112 @@
+name: SBPF debug-info quality
+
+on:
+  pull_request:
+    branches: ['solana-rustc/22.1-2026-01-27']
+  push:
+    branches: ['solana-rustc/22.1-2026-01-27', 'sbpf-dexter-debug-info-ci']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sbpf-dexter-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  debug-info:
+    name: Dexter / SBPF interpreter / LLDB
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/runtime-build
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          repository: anza-xyz/sbpf
+          ref: f95941e1f8ffed43d8722543f350b09e389f332f
+          path: test-runtime
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang lld ccache swig python3-dev libedit-dev libxml2-dev liblzma-dev
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: sbpf-dexter-ubuntu22-${{ github.sha }}
+          restore-keys: sbpf-dexter-ubuntu22-
+      - name: Test remote attachment and failure classification
+        env:
+          PYTHONPATH: llvm/utils/lit:cross-project-tests/debuginfo-tests/dexter:cross-project-tests/debuginfo-tests/sbpf
+        run: /usr/bin/python3 -m unittest discover -v -s cross-project-tests/debuginfo-tests/sbpf/unit
+      - name: Build the PR's linker and Python-enabled LLDB
+        run: |
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DLLVM_ENABLE_PROJECTS='clang;lld;lldb' \
+            -DLLVM_TARGETS_TO_BUILD='SBF;X86' \
+            -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_USE_LINKER=lld \
+            -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON \
+            -DLLVM_PARALLEL_LINK_JOBS=1 \
+            -DLLDB_ENABLE_PYTHON=ON -DPython3_EXECUTABLE=/usr/bin/python3 \
+            -DLLDB_ENABLE_LUA=OFF -DLLDB_ENABLE_CURSES=OFF \
+            -DLLDB_INCLUDE_TESTS=OFF
+          cmake --build build --target lld lldb --parallel 2
+      - name: Build the pinned interpreter with its debug server
+        run: |
+          rustup toolchain install 1.94.1 --profile minimal
+          cargo +1.94.1 build --locked --manifest-path test-runtime/cli/Cargo.toml
+      - name: Install the pinned SBPF Rust producer
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/anza-xyz/platform-tools/releases/download/v1.57/platform-tools-linux-x86_64.tar.bz2 \
+            --output "$RUNNER_TEMP/platform-tools.tar.bz2"
+          echo 'b0f7af104adf726fff2a6a09ea2eb2f2d2965c92295f4d7388c08d140e0c2b00  '"$RUNNER_TEMP/platform-tools.tar.bz2" | sha256sum --check
+          mkdir -p platform-tools
+          tar -xjf "$RUNNER_TEMP/platform-tools.tar.bz2" -C platform-tools ./rust
+      - name: Record tested revisions and tools
+        run: |
+          mkdir -p sbpf-dexter-results
+          {
+            git rev-parse HEAD
+            git -C test-runtime rev-parse HEAD
+            build/bin/ld.lld --version
+            build/bin/lldb --version
+            platform-tools/rust/bin/rustc -vV
+            cargo +1.94.1 --version
+            /usr/bin/python3 --version
+          } > sbpf-dexter-results/toolchain.txt
+      - name: Measure debug-info quality
+        run: |
+          /usr/bin/python3 llvm/utils/lit/lit.py -v -j 1 \
+            --output sbpf-dexter-results/lit.json \
+            --xunit-xml-output sbpf-dexter-results/lit.xml \
+            --param lld="$PWD/build/bin/ld.lld" \
+            --param lldb="$PWD/build/bin/lldb" \
+            --param rustc="$PWD/platform-tools/rust/bin/rustc" \
+            --param sbpf_cli="$CARGO_TARGET_DIR/debug/sbpf_cli" \
+            --param python=/usr/bin/python3 \
+            --param sbpf_output="$PWD/sbpf-dexter-results" \
+            cross-project-tests/debuginfo-tests/sbpf
+      - name: Publish the quality scorecard
+        if: always()
+        run: /usr/bin/python3 cross-project-tests/debuginfo-tests/sbpf/summarize.py sbpf-dexter-results >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload scores, observations, fixtures, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbpf-dexter-results
+          path: |
+            sbpf-dexter-results/
+            build/CMakeCache.txt
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 14

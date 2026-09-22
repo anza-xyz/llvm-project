@@ -1,0 +1,2 @@
+DexDeclareFile('calls.rs')
+DexExpectWatchValue('x', '7', on_line=5)

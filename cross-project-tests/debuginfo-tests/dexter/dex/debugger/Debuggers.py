@@ -68,6 +68,13 @@ def add_debugger_tool_base_arguments(parser, defaults):
         display_default=defaults.lldb_executable,
         help="location of `lldb` executable for --debugger=lldb, or `lldb-dap` for --debugger=lldb-dap",
     )
+    parser.add_argument(
+        "--lldb-remote-url",
+        default=None,
+        help="connect --debugger=lldb to an already listening GDB remote URL "
+        "(for example connect://127.0.0.1:1234) instead of launching locally; "
+        "the caller owns the server lifecycle",
+    )
     dap_group = parser.add_argument_group("DAP Debugger arguments")
     dap_group.add_argument(
         "--dap-message-log",
@@ -198,6 +205,9 @@ def handle_debugger_tool_options(context, defaults):  # noqa
     options = context.options
 
     handle_debugger_tool_base_options(context, defaults)
+
+    if options.lldb_remote_url and options.debugger != "lldb":
+        raise ToolArgumentError("--lldb-remote-url requires --debugger=lldb")
 
     if options.arch is None:
         options.arch = defaults.arch

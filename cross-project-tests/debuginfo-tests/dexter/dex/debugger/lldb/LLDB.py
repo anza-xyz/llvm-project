@@ -181,12 +181,22 @@ class LLDB(DebuggerBase):
 
         if self.context.options.target_run_args:
             cmdline += shlex.split(self.context.options.target_run_args)
-        launch_info = self._target.GetLaunchInfo()
-        launch_info.SetWorkingDirectory(os.getcwd())
-        launch_info.SetArguments(cmdline, True)
         error = self._interface.SBError()
-        self._process = self._target.Launch(launch_info, error)
-        
+        remote_url = self.context.options.lldb_remote_url
+        if remote_url:
+            if cmdline:
+                raise DebuggerException(
+                    "remote attach does not accept launch arguments"
+                )
+            self._process = self._target.ConnectRemote(
+                self._debugger.GetListener(), remote_url, "gdb-remote", error
+            )
+        else:
+            launch_info = self._target.GetLaunchInfo()
+            launch_info.SetWorkingDirectory(os.getcwd())
+            launch_info.SetArguments(cmdline, True)
+            self._process = self._target.Launch(launch_info, error)
+
         if error.Fail():
             raise DebuggerException(error.GetCString())
         if not os.path.exists(self._target.executable.fullpath):
@@ -196,12 +206,22 @@ class LLDB(DebuggerBase):
         if self._process.GetNumThreads() != 1:
             raise DebuggerException("multiple threads not supported")
         self._thread = self._process.GetThreadAtIndex(0)
-        
+        if remote_url:
+            # A remote server initially stops at entry with SIGTRAP. Begin the
+            # observation at a test breakpoint, as the local launch path does.
+            # Do not reinterpret arbitrary signals as source steps.
+            if self._thread.GetStopReason() != self._interface.eStopReasonBreakpoint:
+                error = self._process.Continue()
+                if error.Fail():
+                    raise DebuggerException(error.GetCString())
+            self._thread = self._process.GetThreadAtIndex(0)
+
         num_stopped_threads = 0
         for thread in self._process:
             if thread.GetStopReason() == self._interface.eStopReasonBreakpoint:
                 num_stopped_threads += 1
-        assert num_stopped_threads > 0
+        if not num_stopped_threads:
+            raise DebuggerException("process did not reach a test breakpoint")
         assert self._thread, (self._process, self._thread)
 
     def step_in(self):

@@ -1,0 +1,5 @@
+{
+  "source": "rust-dbg-arg.rs",
+  "expectations": "rust-dbg-arg.rs",
+  "return_value": 2
+}
