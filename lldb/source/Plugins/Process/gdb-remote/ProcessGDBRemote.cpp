@@ -82,6 +82,7 @@
 #include "Plugins/Process/Utility/StopInfoMachException.h"
 #include "ProcessGDBRemote.h"
 #include "ProcessGDBRemoteLog.h"
+#include "SBPFCallStack.h"
 #include "ThreadGDBRemote.h"
 #include "lldb/Host/Host.h"
 #include "lldb/Utility/StringExtractorGDBRemote.h"
@@ -218,6 +219,20 @@ lldb::ProcessSP ProcessGDBRemote::CreateInstance(
 void ProcessGDBRemote::DumpPluginHistory(Stream &s) {
   GDBRemoteCommunicationClient &gdb_comm(GetGDBRemote());
   gdb_comm.DumpHistory(s);
+}
+
+llvm::Expected<std::vector<SBPFCallFrame>>
+ProcessGDBRemote::GetSBPFCallStack(lldb::tid_t tid) {
+  StreamString packet;
+  packet.Printf("qSBPFCallStack:%" PRIx64, tid);
+
+  StringExtractorGDBRemote response;
+  if (m_gdb_comm.SendPacketAndWaitForResponse(packet.GetString(), response) !=
+      GDBRemoteCommunication::PacketResult::Success)
+    return llvm::createStringError("failed to send qSBPFCallStack");
+  if (!response.IsNormalResponse())
+    return llvm::createStringError("failed to get qSBPFCallStack response");
+  return ParseSBPFCallStack(response.GetStringRef());
 }
 
 std::chrono::seconds ProcessGDBRemote::GetPacketTimeout() {

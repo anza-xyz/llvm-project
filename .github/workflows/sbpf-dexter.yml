@@ -24,13 +24,15 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
     steps:
-      - uses: actions/checkout@v6
+      - name: Check out the LLVM and LLDB changes
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/checkout@v6
+      - name: Check out the coordinated SBPF runtime
+        uses: actions/checkout@v6
         with:
-          repository: anza-xyz/sbpf
-          ref: main
+          repository: walnuthq/sbpf
+          ref: feat/improve-bt
           path: test-runtime
           persist-credentials: false
       - name: Install build dependencies
@@ -61,7 +63,12 @@ jobs:
             -DLLDB_ENABLE_LUA=OFF -DLLDB_ENABLE_CURSES=OFF \
             -DLLDB_INCLUDE_TESTS=OFF
           cmake --build build --target lld lldb --parallel 2
-      - name: Build the SBPF main interpreter with its debug server
+      - name: Verify the coordinated gdbstub branch
+        run: |
+          grep --fixed-strings \
+            'git+https://github.com/walnuthq/gdbstub?branch=feat%2Fsbpf-call-stack#' \
+            test-runtime/cli/Cargo.lock
+      - name: Build the SBPF interpreter with its debug server
         run: |
           rustup toolchain install 1.98.1 --profile minimal
           cargo +1.98.1 build --locked --manifest-path test-runtime/cli/Cargo.toml
@@ -78,6 +85,7 @@ jobs:
           {
             git rev-parse HEAD
             git -C test-runtime rev-parse HEAD
+            sed -n '/name = "gdbstub"/,+3p' test-runtime/cli/Cargo.lock
             build/bin/ld.lld --version
             build/bin/lldb --version
             platform-tools/rust/bin/rustc -vV

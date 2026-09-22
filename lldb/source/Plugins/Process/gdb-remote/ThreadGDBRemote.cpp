@@ -24,6 +24,7 @@
 
 #include "ProcessGDBRemote.h"
 #include "ProcessGDBRemoteLog.h"
+#include "UnwindSBPF.h"
 
 #include <memory>
 
@@ -58,6 +59,27 @@ ThreadGDBRemote::~ThreadGDBRemote() {
   LLDB_LOG(log, "this = {0}, pid = {1}, tid = {2}", this,
            process_sp ? process_sp->GetID() : LLDB_INVALID_PROCESS_ID, GetID());
   DestroyThread();
+}
+
+llvm::Expected<std::vector<SBPFCallFrame>> ThreadGDBRemote::GetSBPFCallStack() {
+  ProcessSP process_sp = GetProcess();
+  if (!process_sp)
+    return llvm::createStringError("no process");
+  return static_cast<ProcessGDBRemote *>(process_sp.get())
+      ->GetSBPFCallStack(GetID());
+}
+
+Unwind &ThreadGDBRemote::GetUnwinder() {
+  if (m_unwinder_up)
+    return *m_unwinder_up;
+
+  TargetSP target_sp = CalculateTarget();
+  if (!target_sp ||
+      target_sp->GetArchitecture().GetMachine() != llvm::Triple::sbf)
+    return Thread::GetUnwinder();
+
+  m_unwinder_up = std::make_unique<UnwindSBPF>(*this);
+  return *m_unwinder_up;
 }
 
 const char *ThreadGDBRemote::GetName() {

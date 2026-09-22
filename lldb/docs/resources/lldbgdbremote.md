@@ -2549,6 +2549,24 @@ read packet: $e0030100#b9
 **Priority to Implement:** Only required for Wasm support. Necessary to show
 variables.
 
+## SBPF Packets
+
+### qSBPFCallStack
+
+Get the SBPF interpreter call stack for the given thread id. The response is a
+hex-encoded list without delimiters. Each frame contains a 64-bit PC followed
+by the 64-bit value of SBPF register r10, both in little-endian byte order.
+Frames are ordered from the active frame to the oldest caller. The active PC is
+the current instruction; caller PCs are return addresses.
+
+```
+send packet: $qSBPFCallStack:1#79
+read packet: $2001000000000000002000000200000068010000000000000010000002000000#19
+```
+
+**Priority to Implement:** Only required for interpreted SBPF support.
+Necessary to show stack traces because return PCs are stored in host memory.
+
 ## "x" - Binary memory read
 
 > **Warning:** The format of this packet was decided before GDB 16
