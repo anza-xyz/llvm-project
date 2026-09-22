@@ -2567,6 +2567,13 @@ read packet: $2001000000000000002000000200000068010000000000000010000002000000#1
 **Priority to Implement:** Only required for interpreted SBPF support.
 Necessary to show stack traces because return PCs are stored in host memory.
 
+The stack must include every physical frame through the oldest caller. LLDB
+uses each frame's depth from that oldest caller as its identity across stops.
+The frame pointer is the guest r10 register, not a DWARF CFA: dynamic-stack
+versions can change it within a function or share it between recursive calls.
+LLDB reports the CFA as unavailable when using this packet; register-based
+DWARF expressions still use the actual guest registers.
+
 ## "x" - Binary memory read
 
 > **Warning:** The format of this packet was decided before GDB 16

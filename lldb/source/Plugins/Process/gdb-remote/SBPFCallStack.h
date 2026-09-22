@@ -21,12 +21,6 @@ struct SBPFCallFrame {
   lldb::addr_t frame_pointer;
 };
 
-/// Map SBPF's upward-growing frame pointer to the downward-growing CFA order
-/// assumed by StackID while preserving frame identity across stops.
-inline lldb::addr_t GetSBPFFrameCFA(lldb::addr_t frame_pointer) {
-  return ~frame_pointer;
-}
-
 /// Parse the response to qSBPFCallStack. Each frame is a pair of little-endian
 /// 64-bit PC and frame-pointer values, hex encoded without delimiters. Frames
 /// are ordered from the active frame to the oldest caller. Caller PCs are

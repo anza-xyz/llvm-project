@@ -20,6 +20,7 @@ public:
   UnwindSBPF(Thread &thread) : Unwind(thread) {}
 
 protected:
+  std::optional<uint32_t> DoGetCallFrameDepth(uint32_t frame_idx) override;
   void DoClear() override;
   uint32_t DoGetFrameCount() override;
   bool DoGetFrameInfoAtIndex(uint32_t frame_idx, lldb::addr_t &cfa,

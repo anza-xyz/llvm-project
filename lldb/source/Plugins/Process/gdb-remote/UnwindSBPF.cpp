@@ -57,11 +57,18 @@ bool UnwindSBPF::DoGetFrameInfoAtIndex(uint32_t frame_idx, lldb::addr_t &cfa,
 
   behaves_like_zeroth_frame = frame_idx == 0;
   pc = m_frames[frame_idx].pc;
-  // StackID assumes a younger frame has a lower CFA, while SBPF fixed frames
-  // grow upward. Invert r10 to retain a stable frame identity with the order
-  // StackID expects. RegisterContextSBPF exposes the actual r10 value.
-  cfa = GetSBPFFrameCFA(m_frames[frame_idx].frame_pointer);
+  // The remote packet contains r10, not DWARF call frame information. Do not
+  // expose a guest frame pointer (or an ordering key) as a fabricated CFA.
+  cfa = LLDB_INVALID_ADDRESS;
   return true;
+}
+
+std::optional<uint32_t> UnwindSBPF::DoGetCallFrameDepth(uint32_t frame_idx) {
+  if (!m_unwind_complete)
+    DoGetFrameCount();
+  if (m_fallback || frame_idx >= m_frames.size())
+    return std::nullopt;
+  return static_cast<uint32_t>(m_frames.size() - frame_idx - 1);
 }
 
 lldb::RegisterContextSP

@@ -61,8 +61,20 @@ jobs:
             -DLLVM_PARALLEL_LINK_JOBS=1 \
             -DLLDB_ENABLE_PYTHON=ON -DPython3_EXECUTABLE=/usr/bin/python3 \
             -DLLDB_ENABLE_LUA=OFF -DLLDB_ENABLE_CURSES=OFF \
-            -DLLDB_INCLUDE_TESTS=OFF
-          cmake --build build --target lld lldb --parallel 2
+            -DLLDB_INCLUDE_TESTS=ON
+          cmake --build build --target lld lldb TargetTests ProcessGdbRemoteTests --parallel 2
+      - name: Test frame identity and remote stack parsing
+        run: |
+          build/tools/lldb/unittests/Target/TargetTests --gtest_filter='StackIDTest.*'
+          build/tools/lldb/unittests/Process/gdb-remote/ProcessGdbRemoteTests --gtest_filter='SBPFCallStackTest.*'
+      - name: Test SBPF remote frames through the LLDB API
+        run: |
+          /usr/bin/python3 lldb/test/API/dotest.py \
+            --executable "$PWD/build/bin/lldb" \
+            --compiler /usr/bin/clang --cmake-build-type Release \
+            --build-dir "$PWD/build/lldb-api-sbpf" \
+            -p TestSBPFCallStack.py \
+            lldb/test/API/functionalities/gdb_remote_client
       - name: Verify the coordinated gdbstub branch
         run: |
           grep --fixed-strings \
@@ -72,6 +84,7 @@ jobs:
         run: |
           rustup toolchain install 1.98.1 --profile minimal
           cargo +1.98.1 build --locked --manifest-path test-runtime/cli/Cargo.toml
+          cargo +1.98.1 test --locked --manifest-path test-runtime/Cargo.toml --features debugger --test vm
       - name: Install the pinned SBPF Rust producer
         run: |
           curl --fail --location --retry 3 \

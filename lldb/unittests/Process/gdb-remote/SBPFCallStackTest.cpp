@@ -48,9 +48,3 @@ TEST(SBPFCallStackTest, RejectsEmptyStack) {
   ASSERT_FALSE(static_cast<bool>(frames));
   llvm::consumeError(frames.takeError());
 }
-
-TEST(SBPFCallStackTest, MapsUpwardGrowingFramesToStackIDOrder) {
-  constexpr lldb::addr_t caller_fp = 0x200003000;
-  constexpr lldb::addr_t callee_fp = 0x200005000;
-  EXPECT_LT(GetSBPFFrameCFA(callee_fp), GetSBPFFrameCFA(caller_fp));
-}

@@ -1,0 +1,2 @@
+DexDeclareFile('recursive.rs')
+DexExpectProgramState({'frames': [{'location': {'lineno': 6}}, {'location': {'lineno': 9}}, {'location': {'lineno': 9}}, {'location': {'lineno': 9}}, {'location': {'lineno': 14}}]})

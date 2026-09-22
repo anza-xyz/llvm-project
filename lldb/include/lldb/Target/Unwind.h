@@ -10,6 +10,7 @@
 #define LLDB_TARGET_UNWIND_H
 
 #include <mutex>
+#include <optional>
 
 #include "lldb/lldb-private.h"
 
@@ -58,10 +59,23 @@ public:
     return DoCreateRegisterContextForFrame(frame);
   }
 
+  /// An optional zero-based depth from the oldest physical frame. Unlike an
+  /// index from the current frame, this stays unchanged when callees are pushed
+  /// or popped. Virtual machines may use it to identify frames independently
+  /// of their guest stack addresses. It is not a canonical frame address.
+  std::optional<uint32_t> GetCallFrameDepth(uint32_t frame_idx) {
+    std::lock_guard<std::recursive_mutex> guard(m_unwind_mutex);
+    return DoGetCallFrameDepth(frame_idx);
+  }
+
   Thread &GetThread() { return m_thread; }
 
 protected:
   // Classes that inherit from Unwind can see and modify these
+  virtual std::optional<uint32_t> DoGetCallFrameDepth(uint32_t frame_idx) {
+    return std::nullopt;
+  }
+
   virtual void DoClear() = 0;
 
   virtual uint32_t DoGetFrameCount() = 0;
