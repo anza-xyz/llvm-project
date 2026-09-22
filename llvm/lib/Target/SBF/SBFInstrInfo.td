@@ -1304,9 +1304,8 @@ def : Pat<(i64 (sext GPR32:$src)),
           (MOV_32_64 GPR32:$src)>, Requires<[SBFExplicitSignExt]>;
 
 // SBFv1 sign extension
-def : Pat<(i64 (sext GPR32:$src)),
-          (SRA_ri (SLL_ri (MOV_32_64 GPR32:$src), 32), 32)>,
-                Requires<[SBFNoExplicitSignExt]>;
+def : Pat<(i64 (sext GPR32:$src)), (SUBREG_TO_REG (i64 0), (ADD_ri_32 GPR32:$src, 0), sub_32)>,
+                                                            Requires<[SBFNoExplicitSignExt]>;
 
 // SBFv2 zero extension
 def : Pat<(i64 (zext GPR32:$src)), (INSERT_SUBREG (i64 (IMPLICIT_DEF)),
