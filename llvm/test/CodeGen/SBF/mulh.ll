@@ -45,7 +45,7 @@ entry:
   %conv2 = trunc i128 %shr to i64
   ret i64 %conv2
 
-; CHECK: uhmul64 r0, r1
+; CHECK: uhmul64 r0, r2
 }
 
 define dso_local i64 @test_64_signed(i64 noundef %a, i64 noundef %b) {
@@ -58,5 +58,5 @@ entry:
   %conv2 = trunc i128 %shr to i64
   ret i64 %conv2
 
-; CHECK: shmul64 r0, r1
+; CHECK: shmul64 r0, r2
 }

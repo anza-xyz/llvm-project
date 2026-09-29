@@ -16,12 +16,11 @@ entry:
 define i32 @bar(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f) #1 {
 ; CHECK-LABEL: bar:
 ; CHECK: add64 r10, -64
-; CHECK: mov64 r0, r1
-; CHECK: add64 r0, r2
-; CHECK: sub64 r0, r3
-; CHECK: add64 r0, r4
-; CHECK: sub64 r0, r5
-; CHECK: ldxw r1, [r10 + 56]
+; CHECK: add64 r1, r2
+; CHECK: sub64 r1, r3
+; CHECK: add64 r1, r4
+; CHECK: sub64 r1, r5
+; CHECK: ldxw r0, [r10 + 56]
 ; CHECK: add64 r0, r1
 ; CHECK-NOT: add64 r10, 64
 entry:

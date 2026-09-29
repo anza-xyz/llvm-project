@@ -40,10 +40,10 @@ bb8:                                              ; preds = %bb2.backedge, %bb1,
   store i64 %_55, ptr %5, align 8
   ret void
 
-; CHECK: LBB0_4:
-; CHECK-NOT: jeq r4, 0, .LBB0_7
+; CHECK: LBB0_3:
+; CHECK-NOT: jeq r5, 0, .LBB0_6
 ; CHECK-NOT: ja LBB0_3
-; CHECK: jne r4, 0, .LBB0_4
+; CHECK: jne r5, 0, .LBB0_3
 
 bb3:                                              ; preds = %bb1, %bb2.backedge
   %to_process.sroa.0.09 = phi i64 [ %to_process.sroa.0.0, %bb2.backedge ], [ %to_process.sroa.0.05, %bb1 ]

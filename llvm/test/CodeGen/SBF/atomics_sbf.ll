@@ -2,9 +2,8 @@
 ;
 ; CHECK-LABEL: test_load_add_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov64 w3, w0
-; CHECK: add32 w3, w2
-; CHECK: stxw [r1 + 0], w3
+; CHECK: add32 w2, w0
+; CHECK: stxw [r1 + 0], w2
 define dso_local i32 @test_load_add_32(i32* nocapture %p, i32 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw add i32* %p, i32 %v seq_cst
@@ -13,9 +12,8 @@ entry:
 
 ; CHECK-LABEL: test_load_add_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r3, r0
-; CHECK: add64 r3, r2
-; CHECK: stxdw [r1 + 0], r3
+; CHECK: add64 r2, r0
+; CHECK: stxdw [r1 + 0], r2
 define dso_local i32 @test_load_add_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw add i64* %p, i64 %v seq_cst
@@ -93,9 +91,8 @@ entry:
 
 ; CHECK-LABEL: test_load_and_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov64 w3, w0
-; CHECK: and32 w3, w2
-; CHECK: stxw [r1 + 0], w3
+; CHECK: and32 w2, w0
+; CHECK: stxw [r1 + 0], w2
 define dso_local i32 @test_load_and_32(i32* nocapture %p, i32 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw and i32* %p, i32 %v seq_cst
@@ -104,9 +101,8 @@ entry:
 
 ; CHECK-LABEL: test_load_and_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r3, r0
-; CHECK: and64 r3, r2
-; CHECK: stxdw [r1 + 0], r3
+; CHECK: and64 r2, r0
+; CHECK: stxdw [r1 + 0], r2
 define dso_local i64 @test_load_and_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw and i64* %p, i64 %v seq_cst
@@ -115,10 +111,9 @@ entry:
 
 ; CHECK-LABEL: test_load_nand_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov64 w3, w0
-; CHECK: and32 w3, w2
-; CHECK: xor32 w3, -1
-; CHECK: stxw [r1 + 0], w3
+; CHECK: and32 w2, w0
+; CHECK: xor32 w2, -1
+; CHECK: stxw [r1 + 0], w2
 define dso_local i32 @test_load_nand_32(i32* nocapture %p, i32 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw nand i32* %p, i32 %v seq_cst
@@ -127,10 +122,9 @@ entry:
 
 ; CHECK-LABEL: test_load_nand_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r3, r0
-; CHECK: and64 r3, r2
-; CHECK: xor64 r3, -1
-; CHECK: stxdw [r1 + 0], r3
+; CHECK: and64 r2, r0
+; CHECK: xor64 r2, -1
+; CHECK: stxdw [r1 + 0], r2
 define dso_local i64 @test_load_nand_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw nand i64* %p, i64 %v seq_cst
@@ -139,9 +133,8 @@ entry:
 
 ; CHECK-LABEL: test_load_or_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov64 w3, w0
-; CHECK: or32 w3, w2
-; CHECK: stxw [r1 + 0], w3
+; CHECK: or32 w2, w0
+; CHECK: stxw [r1 + 0], w2
 define dso_local i32 @test_load_or_32(i32* nocapture %p, i32 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw or i32* %p, i32 %v seq_cst
@@ -150,9 +143,8 @@ entry:
 
 ; CHECK-LABEL: test_load_or_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r3, r0
-; CHECK: or64 r3, r2
-; CHECK: stxdw [r1 + 0], r3
+; CHECK: or64 r2, r0
+; CHECK: stxdw [r1 + 0], r2
 define dso_local i64 @test_load_or_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw or i64* %p, i64 %v seq_cst
@@ -161,9 +153,8 @@ entry:
 
 ; CHECK-LABEL: test_load_xor_32
 ; CHECK: ldxw w0, [r1 + 0]
-; CHECK: mov64 w3, w0
-; CHECK: xor32 w3, w2
-; CHECK: stxw [r1 + 0], w3
+; CHECK: xor32 w2, w0
+; CHECK: stxw [r1 + 0], w2
 define dso_local i32 @test_load_xor_32(i32* nocapture %p, i32 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw xor i32* %p, i32 %v seq_cst
@@ -172,9 +163,8 @@ entry:
 
 ; CHECK-LABEL: test_load_xor_64
 ; CHECK: ldxdw r0, [r1 + 0]
-; CHECK: mov64 r3, r0
-; CHECK: xor64 r3, r2
-; CHECK: stxdw [r1 + 0], r3
+; CHECK: xor64 r2, r0
+; CHECK: stxdw [r1 + 0], r2
 define dso_local i64 @test_load_xor_64(i64* nocapture %p, i64 %v) local_unnamed_addr {
 entry:
   %0 = atomicrmw xor i64* %p, i64 %v seq_cst

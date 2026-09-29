@@ -41,7 +41,9 @@ entry:
   br i1 %tobool.not, label %if.end, label %cleanup, !dbg !42
 
 ; CHECK-LABEL: test
-; CHECK:       ldxdw r1, [r1 + 0]
+; CHECK:       ldxdw r[[BASE:[0-9]+]], [r{{[0-9]+}} + 0]
+; CHECK:       add64 r[[BASE]], r1
+; CHECK:       ldxdw r1, [r[[BASE]] + 0]
 ; CHECK:       jne r1, 0,
 
 if.end:                                           ; preds = %entry

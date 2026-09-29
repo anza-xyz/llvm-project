@@ -62,5 +62,5 @@ attributes #1 = { nounwind readnone }
 ; CHECK: file_names[  1]:
 ; CHECK-NEXT: name: "testprog.c"
 ; CHECK-NEXT: dir_index: 0
-; CHECK: 0x0000000000000000      2
-; CHECK: 0x0000000000000028      7
+; CHECK: 0x0000000000000000      5
+; CHECK: 0x0000000000000020      7

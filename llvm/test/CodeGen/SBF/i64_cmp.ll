@@ -44,8 +44,7 @@ define noundef range(i64 0, 2) i64 @entrypoint(ptr noundef readnone captures(non
 ; CHECK-NEXT:    ldxdw r2, [r10 - 4096]
 ; CHECK-NEXT:    call __ltdf2
 ; CHECK-NEXT:    rsh64 r0, 63
-; CHECK-NEXT:    and64 r6, r0
-; CHECK-NEXT:    mov64 r0, r6
+; CHECK-NEXT:    and64 r0, r6
 ; CHECK-NEXT:    exit
 start:
   %0 = alloca [8 x i8], align 8
