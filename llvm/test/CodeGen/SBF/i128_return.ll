@@ -6,15 +6,13 @@ define i64 @bar(i64 %a, i64 %b) {
 ; CHECK-LABEL: bar:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    call foo
-; CHECK-NEXT:    add64 r2, r0
-; CHECK-NEXT:    mov64 r0, r2
+; CHECK-NEXT:    add64 r0, r2
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: bar:
 ; CHECK-ALU32:       # %bb.0: # %entry
 ; CHECK-ALU32-NEXT:    call foo
-; CHECK-ALU32-NEXT:    add64 r2, r0
-; CHECK-ALU32-NEXT:    mov64 r0, r2
+; CHECK-ALU32-NEXT:    add64 r0, r2
 ; CHECK-ALU32-NEXT:    exit
 entry:
     %c = call i128 @foo(i64 %a, i64 %b)
@@ -56,8 +54,7 @@ define i128 @foo(i64 %a, i64 %b) {
 ; CHECK-ALU32-NEXT:    arsh64 r1, 63
 ; CHECK-ALU32-NEXT:    add64 r1, r2
 ; CHECK-ALU32-NEXT:    mov32 r2, w3
-; CHECK-ALU32-NEXT:    add64 r1, r2
-; CHECK-ALU32-NEXT:    mov64 r2, r1
+; CHECK-ALU32-NEXT:    add64 r2, r1
 ; CHECK-ALU32-NEXT:    exit
 entry:
     %a1 = sext i64 %a to i128

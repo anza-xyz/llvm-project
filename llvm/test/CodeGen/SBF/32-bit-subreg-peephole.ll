@@ -104,7 +104,7 @@ define dso_local i32* @inc_p(i32* readnone %p, i32 %a) local_unnamed_addr #0 {
 ; CHECK-LABEL: inc_p:
 entry:
   %idx.ext = zext i32 %a to i64
-; CHECK: mov64 r{{[0-9]+}}, r{{[0-9]+}}
+; CHECK: mov64 {{[rw]}}{{[0-9]+}}, {{[rw]}}{{[0-9]+}}
 ; CHECK-NOT: lsh32 r{{[0-9]+}}, 32
 ; CHECK-NOT: rsh32 r{{[0-9]+}}, 32
   %add.ptr = getelementptr inbounds i32, i32* %p, i64 %idx.ext
