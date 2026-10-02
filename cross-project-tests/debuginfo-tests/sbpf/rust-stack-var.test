@@ -1,0 +1,6 @@
+{
+  "source": "rust-stack-var.rs",
+  "expectations": "rust-stack-var.rs",
+  "return_value": 23,
+  "xfail": "SBPF-RUST-VALUE: initialized Rust stack local is displayed incorrectly before and after the call"
+}

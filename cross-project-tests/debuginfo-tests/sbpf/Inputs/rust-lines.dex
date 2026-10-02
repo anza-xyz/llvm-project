@@ -1,0 +1,2 @@
+DexDeclareFile('calls.rs')
+DexExpectProgramState({'frames': [{'location': {'lineno': 5}}]})

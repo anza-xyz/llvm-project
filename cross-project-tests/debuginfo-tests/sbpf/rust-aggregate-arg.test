@@ -1,0 +1,6 @@
+{
+  "source": "rust-aggregate-arg.rs",
+  "expectations": "rust-aggregate-arg.rs",
+  "return_value": 2142,
+  "xfail": "SBPF-RUST-AGGREGATE: Rust by-value aggregate fields are displayed incorrectly in the callee"
+}

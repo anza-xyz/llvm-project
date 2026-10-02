@@ -1,0 +1,4 @@
+DexDeclareFile('calls.rs')
+DexExpectStepOrder(1, 5, on_line=14)
+DexExpectStepOrder(2, 4, on_line=10)
+DexExpectStepOrder(3, on_line=5)
