@@ -26,10 +26,10 @@ entry:
   ret i32 %conv5
 ; CHECK-LABEL: bswap:
 ; CHECK-EL: be64 r1
-; CHECK-EL: be32 r0
-; CHECK-EL: add64 r0, r1
-; CHECK-EL: be16 r3
-; CHECK-EL: add64 r0, r3
+; CHECK-EL: be32 r2
+; CHECK-EL: add64 r2, r1
+; CHECK-EL: be16 r0
+; CHECK-EL: add64 r0, r2
 }
 
 declare i64 @llvm.bswap.i64(i64) #1

@@ -93,17 +93,17 @@ define i32 @callee_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32 %p
 
 ; Loading arguments
 ; CHECK: ldxw r2, [r10 + 2104]
-; CHECK: ldxw r2, [r10 + 2096]
+; CHECK: ldxw r1, [r10 + 2096]
 ; CHECK: ldxw r2, [r10 + 2088]
-; CHECK: ldxw r2, [r10 + 2080]
+; CHECK: ldxw r1, [r10 + 2080]
 ; CHECK: ldxw r2, [r10 + 2072]
 ; Loading allocated i32
 ; CHECK: ldxw r0, [r10 + 24]
 
 ; CHECK-V3-OPT: ldxw r2, [r10 - 4096]
-; CHECK-V3-OPT: ldxw r2, [r10 - 4088]
+; CHECK-V3-OPT: ldxw r1, [r10 - 4088]
 ; CHECK-V3-OPT: ldxw r2, [r10 - 4080]
-; CHECK-V3-OPT: ldxw r2, [r10 - 4072]
+; CHECK-V3-OPT: ldxw r1, [r10 - 4072]
 ; CHECK-V3-OPT: ldxw r2, [r10 - 4064]
 ; Loading allocated i32
 ; CHECK-V3: ldxw r0, [r10 - 4056]
@@ -134,18 +134,18 @@ define i32 @callee_no_alloca(i32 %a, i32 %b, i32 %c, i32 %d, i32 %e, i32 %f, i32
 ; CHECK-V3-NOT: add64 r10, 64
 
 ; Loading arguments
-; CHECK: ldxw r1, [r10 + 56]
+; CHECK: ldxw r2, [r10 + 56]
 ; CHECK: ldxw r1, [r10 + 48]
-; CHECK: ldxw r1, [r10 + 40]
+; CHECK: ldxw r2, [r10 + 40]
 ; CHECK: ldxw r1, [r10 + 32]
-; CHECK: ldxw r1, [r10 + 24]
+; CHECK: ldxw r0, [r10 + 24]
 
 ; Loading arguments
-; CHECK-V3-OPT: ldxw r1, [r10 - 4096]
+; CHECK-V3-OPT: ldxw r2, [r10 - 4096]
 ; CHECK-V3-OPT: ldxw r1, [r10 - 4088]
-; CHECK-V3-OPT: ldxw r1, [r10 - 4080]
+; CHECK-V3-OPT: ldxw r2, [r10 - 4080]
 ; CHECK-V3-OPT: ldxw r1, [r10 - 4072]
-; CHECK-V3-OPT: ldxw r1, [r10 - 4064]
+; CHECK-V3-OPT: ldxw r0, [r10 - 4064]
 
 ; CHECK-NOT: add64 r10, 64
 entry:

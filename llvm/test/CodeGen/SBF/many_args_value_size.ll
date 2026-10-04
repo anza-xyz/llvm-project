@@ -36,9 +36,9 @@ start:
 ; CHECK-V3: ldxdw r4, [r10 - 4072]
 
 ; -64 + 60 = -4, so this is 5 in %b8
-; CHECK: ldxb w4, [r10 + 60]
+; CHECK: ldxb w5, [r10 + 60]
 ; 4096 - 4096 = 0
-; CHECK-V3: ldxb w4, [r10 - 4096]
+; CHECK-V3: ldxb w5, [r10 - 4096]
   %c0 = trunc i64 %a to i8
   %b1 = add i8 %b8, %c0
 
@@ -50,9 +50,9 @@ start:
   %b2 = add i16 %b16, %c1
 
 ; -64 + 44 = -20, so this is 300 in %b32
-; CHECK: ldxw w1, [r10 + 44]
+; CHECK: ldxw w2, [r10 + 44]
 ; 4096 - 4080 = 16
-; CHECK-V3: ldxw w1, [r10 - 4080]
+; CHECK-V3: ldxw w2, [r10 - 4080]
   %c2 = trunc i64 %c to i32
   %b3 = add i32 %b32, %c2
 
