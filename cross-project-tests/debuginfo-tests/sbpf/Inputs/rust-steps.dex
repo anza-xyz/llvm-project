@@ -1,4 +1,5 @@
 DexDeclareFile('calls.rs')
-DexExpectStepOrder(1, 5, on_line=14)
-DexExpectStepOrder(2, 4, on_line=10)
-DexExpectStepOrder(3, on_line=5)
+# The two columns on line 5 are the volatile read and wrapping_add.
+DexExpectStepOrder(1, 6, on_line=14)
+DexExpectStepOrder(2, 5, on_line=10)
+DexExpectStepOrder(3, 4, on_line=5)

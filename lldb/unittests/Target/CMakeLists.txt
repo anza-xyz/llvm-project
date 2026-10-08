@@ -12,6 +12,7 @@ add_lldb_unittest(TargetTests
   RegisterFlagsTest.cpp
   RemoteAwarePlatformTest.cpp
   ScratchTypeSystemTest.cpp
+  StackIDTest.cpp
   StackFrameRecognizerTest.cpp
   SummaryStatisticsTest.cpp
   FindFileTest.cpp

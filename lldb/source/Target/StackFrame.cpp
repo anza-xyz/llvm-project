@@ -28,6 +28,7 @@
 #include "lldb/Target/StackFrameRecognizer.h"
 #include "lldb/Target/Target.h"
 #include "lldb/Target/Thread.h"
+#include "lldb/Target/Unwind.h"
 #include "lldb/Utility/LLDBLog.h"
 #include "lldb/Utility/Log.h"
 #include "lldb/Utility/RegisterValue.h"
@@ -64,7 +65,10 @@ StackFrame::StackFrame(const ThreadSP &thread_sp, user_id_t frame_idx,
                        const SymbolContext *sc_ptr)
     : m_thread_wp(thread_sp), m_frame_index(frame_idx),
       m_concrete_frame_index(unwind_frame_index), m_reg_context_sp(),
-      m_id(pc, cfa, nullptr, thread_sp->GetProcess().get()),
+      m_id(pc, cfa, nullptr, thread_sp->GetProcess().get(),
+           kind == Kind::Regular && !artificial
+               ? thread_sp->GetUnwinder().GetCallFrameDepth(unwind_frame_index)
+               : std::nullopt),
       m_frame_code_addr(pc), m_sc(), m_flags(), m_frame_base(),
       m_frame_base_error(), m_cfa_is_valid(cfa_is_valid),
       m_stack_frame_kind(kind), m_artificial(artificial),
@@ -92,7 +96,8 @@ StackFrame::StackFrame(const ThreadSP &thread_sp, user_id_t frame_idx,
     : m_thread_wp(thread_sp), m_frame_index(frame_idx),
       m_concrete_frame_index(unwind_frame_index),
       m_reg_context_sp(reg_context_sp),
-      m_id(pc, cfa, nullptr, thread_sp->GetProcess().get()),
+      m_id(pc, cfa, nullptr, thread_sp->GetProcess().get(),
+           thread_sp->GetUnwinder().GetCallFrameDepth(unwind_frame_index)),
       m_frame_code_addr(pc), m_sc(), m_flags(), m_frame_base(),
       m_frame_base_error(), m_cfa_is_valid(true),
       m_stack_frame_kind(StackFrame::Kind::Regular), m_artificial(false),
@@ -120,7 +125,8 @@ StackFrame::StackFrame(const ThreadSP &thread_sp, user_id_t frame_idx,
       m_concrete_frame_index(unwind_frame_index),
       m_reg_context_sp(reg_context_sp),
       m_id(pc_addr.GetLoadAddress(thread_sp->CalculateTarget().get()), cfa,
-           nullptr, thread_sp->GetProcess().get()),
+           nullptr, thread_sp->GetProcess().get(),
+           thread_sp->GetUnwinder().GetCallFrameDepth(unwind_frame_index)),
       m_frame_code_addr(pc_addr), m_sc(), m_flags(), m_frame_base(),
       m_frame_base_error(), m_cfa_is_valid(true),
       m_stack_frame_kind(StackFrame::Kind::Regular), m_artificial(false),

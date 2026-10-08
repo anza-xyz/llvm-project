@@ -10,6 +10,7 @@
 #define LLDB_TARGET_STACKID_H
 
 #include "lldb/Core/AddressRange.h"
+#include <optional>
 
 namespace lldb_private {
 
@@ -20,7 +21,8 @@ public:
   StackID() = default;
 
   explicit StackID(lldb::addr_t pc, lldb::addr_t cfa,
-                   SymbolContextScope *symbol_scope, Process *process);
+                   SymbolContextScope *symbol_scope, Process *process,
+                   std::optional<uint32_t> call_frame_depth = std::nullopt);
 
   ~StackID() = default;
 
@@ -32,6 +34,10 @@ public:
 
   lldb::addr_t GetCallFrameAddressWithoutMetadata() const { return m_cfa; }
 
+  std::optional<uint32_t> GetCallFrameDepth() const {
+    return m_call_frame_depth;
+  }
+
   SymbolContextScope *GetSymbolContextScope() const { return m_symbol_scope; }
 
   void SetSymbolContextScope(SymbolContextScope *symbol_scope) {
@@ -41,11 +47,14 @@ public:
   void Clear() {
     m_pc = LLDB_INVALID_ADDRESS;
     m_cfa = LLDB_INVALID_ADDRESS;
+    m_cfa_with_metadata = LLDB_INVALID_ADDRESS;
+    m_call_frame_depth.reset();
     m_symbol_scope = nullptr;
   }
 
   bool IsValid() const {
-    return m_pc != LLDB_INVALID_ADDRESS || m_cfa != LLDB_INVALID_ADDRESS;
+    return m_call_frame_depth.has_value() || m_pc != LLDB_INVALID_ADDRESS ||
+           m_cfa != LLDB_INVALID_ADDRESS;
   }
 
   void Dump(Stream *s);
@@ -64,11 +73,15 @@ protected:
 
   /// The call frame address (stack pointer) value at the beginning of the
   /// function that uniquely identifies this frame (along with m_symbol_scope
-  /// below)
+  /// below), when no explicit call frame depth is available.
   lldb::addr_t m_cfa = LLDB_INVALID_ADDRESS;
 
   /// The cfa with metadata (i.e. prior to Process::FixAddress).
   lldb::addr_t m_cfa_with_metadata = LLDB_INVALID_ADDRESS;
+
+  /// Optional VM frame identity, counted from the oldest physical frame.
+  /// Greater depths are younger. This does not change CFA address semantics.
+  std::optional<uint32_t> m_call_frame_depth;
 
   /// If nullptr, there is no block or symbol for this frame. If not nullptr,
   /// this will either be the scope for the lexical block for the frame, or the

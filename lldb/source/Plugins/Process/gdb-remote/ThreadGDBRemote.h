@@ -15,6 +15,7 @@
 #include "lldb/Utility/StructuredData.h"
 
 #include "GDBRemoteRegisterContext.h"
+#include "SBPFCallStack.h"
 
 class StringExtractor;
 
@@ -52,6 +53,14 @@ public:
   bool ThreadHasQueueInformation() const override;
 
   lldb::RegisterContextSP GetRegisterContext() override;
+
+  Unwind &GetUnwinder() override;
+
+  llvm::Expected<std::vector<SBPFCallFrame>> GetSBPFCallStack();
+
+  GDBRemoteDynamicRegisterInfoSP GetDynamicRegisterInfo() const {
+    return m_reg_info_sp;
+  }
 
   lldb::RegisterContextSP
   CreateRegisterContextForFrame(StackFrame *frame) override;

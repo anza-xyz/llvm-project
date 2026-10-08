@@ -36,6 +36,7 @@
 
 #include "GDBRemoteCommunicationClient.h"
 #include "GDBRemoteRegisterContext.h"
+#include "SBPFCallStack.h"
 
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/StringMap.h"
@@ -199,6 +200,8 @@ public:
   bool StopNoticingNewThreads() override;
 
   GDBRemoteCommunicationClient &GetGDBRemote() { return m_gdb_comm; }
+
+  llvm::Expected<std::vector<SBPFCallFrame>> GetSBPFCallStack(lldb::tid_t tid);
 
   Status SendEventData(const char *data) override;
 

@@ -16,9 +16,10 @@
 using namespace lldb_private;
 
 StackID::StackID(lldb::addr_t pc, lldb::addr_t cfa,
-                 SymbolContextScope *symbol_scope, Process *process)
+                 SymbolContextScope *symbol_scope, Process *process,
+                 std::optional<uint32_t> call_frame_depth)
     : m_pc(pc), m_cfa(cfa), m_cfa_with_metadata(cfa),
-      m_symbol_scope(symbol_scope) {
+      m_call_frame_depth(call_frame_depth), m_symbol_scope(symbol_scope) {
   if (process) {
     m_pc = process->FixCodeAddress(m_pc);
     m_cfa = process->FixDataAddress(m_cfa);
@@ -38,6 +39,8 @@ void StackID::Dump(Stream *s) {
   s->Printf("StackID (pc = 0x%16.16" PRIx64 ", cfa = 0x%16.16" PRIx64
             ", symbol_scope = %p",
             m_pc, m_cfa, static_cast<void *>(m_symbol_scope));
+  if (m_call_frame_depth)
+    s->Printf(", depth = %" PRIu32, *m_call_frame_depth);
   if (m_symbol_scope) {
     SymbolContext sc;
 
@@ -51,16 +54,20 @@ void StackID::Dump(Stream *s) {
 }
 
 bool lldb_private::operator==(const StackID &lhs, const StackID &rhs) {
-  if (lhs.GetCallFrameAddressWithoutMetadata() !=
-      rhs.GetCallFrameAddressWithoutMetadata())
+  if (lhs.GetCallFrameDepth() || rhs.GetCallFrameDepth()) {
+    if (lhs.GetCallFrameDepth() != rhs.GetCallFrameDepth())
+      return false;
+  } else if (lhs.GetCallFrameAddressWithoutMetadata() !=
+             rhs.GetCallFrameAddressWithoutMetadata()) {
     return false;
+  }
 
   SymbolContextScope *lhs_scope = lhs.GetSymbolContextScope();
   SymbolContextScope *rhs_scope = rhs.GetSymbolContextScope();
 
   // Only compare the PC values if both symbol context scopes are nullptr
   if (lhs_scope == nullptr && rhs_scope == nullptr)
-    return lhs.GetPC() == rhs.GetPC();
+    return lhs.GetCallFrameDepth().has_value() || lhs.GetPC() == rhs.GetPC();
 
   return lhs_scope == rhs_scope;
 }
@@ -70,20 +77,26 @@ bool lldb_private::operator!=(const StackID &lhs, const StackID &rhs) {
 }
 
 bool lldb_private::operator<(const StackID &lhs, const StackID &rhs) {
-  const lldb::addr_t lhs_cfa = lhs.GetCallFrameAddressWithoutMetadata();
-  const lldb::addr_t rhs_cfa = rhs.GetCallFrameAddressWithoutMetadata();
+  // A depth identifies physical VM frames even when they share a guest stack
+  // pointer. Keep the existing scope comparison for inline frames at one depth.
+  if (lhs.GetCallFrameDepth() || rhs.GetCallFrameDepth()) {
+    if (lhs.GetCallFrameDepth() != rhs.GetCallFrameDepth())
+      return lhs.GetCallFrameDepth() > rhs.GetCallFrameDepth();
+  } else {
+    const lldb::addr_t lhs_cfa = lhs.GetCallFrameAddressWithoutMetadata();
+    const lldb::addr_t rhs_cfa = rhs.GetCallFrameAddressWithoutMetadata();
 
-  // FIXME: We are assuming that the stacks grow downward in memory.  That's not
-  // necessary, but true on
-  // all the machines we care about at present.  If this changes, we'll have to
-  // deal with that.  The ABI is the agent who knows this ordering, but the
-  // StackID has no access to the ABI. The most straightforward way to handle
-  // this is to add a "m_grows_downward" bool to the StackID, and set it in the
-  // constructor. But I'm not going to waste a bool per StackID on this till we
-  // need it.
+    // FIXME: We are assuming that the stacks grow downward in memory.  That's
+    // not necessary, but true on all the machines we care about at present.  If
+    // this changes, we'll have to deal with that.  The ABI is the agent who
+    // knows this ordering, but the StackID has no access to the ABI. The most
+    // straightforward way to handle this is to add a "m_grows_downward" bool to
+    // the StackID, and set it in the constructor. But I'm not going to waste a
+    // bool per StackID on this till we need it.
 
-  if (lhs_cfa != rhs_cfa)
-    return lhs_cfa < rhs_cfa;
+    if (lhs_cfa != rhs_cfa)
+      return lhs_cfa < rhs_cfa;
+  }
 
   SymbolContextScope *lhs_scope = lhs.GetSymbolContextScope();
   SymbolContextScope *rhs_scope = rhs.GetSymbolContextScope();
