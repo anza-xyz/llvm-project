@@ -14,6 +14,7 @@
 #include "SBFFunctionInfo.h"
 #include "SBFRegisterInfo.h"
 #include "SBFSubtarget.h"
+#include "llvm/ADT/SmallSet.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
@@ -957,30 +958,61 @@ SBFTargetLowering::EmitSubregExt(MachineInstr &MI, MachineBasicBlock *BB,
   return PromotedReg2;
 }
 
+// The select pseudos come in two forms per comparison width: one comparing two
+// registers, one comparing a register against an immediate.
+static bool isSelectRROpcode(unsigned Opc) {
+  return Opc == SBF::Select || Opc == SBF::Select_64_32 ||
+         Opc == SBF::Select_32 || Opc == SBF::Select_32_64;
+}
+
+static bool isSelectRIOpcode(unsigned Opc) {
+  return Opc == SBF::Select_Ri || Opc == SBF::Select_Ri_64_32 ||
+         Opc == SBF::Select_Ri_32 || Opc == SBF::Select_Ri_32_64;
+}
+
+static bool isSelectPseudo(unsigned Opc) {
+  return isSelectRROpcode(Opc) || isSelectRIOpcode(Opc);
+}
+
+// Whether the pseudo compares 32-bit operands. This is independent of the
+// width of the values being selected.
+static bool isSelectCmp32(unsigned Opc) {
+  return Opc == SBF::Select_32 || Opc == SBF::Select_32_64 ||
+         Opc == SBF::Select_Ri_32 || Opc == SBF::Select_Ri_32_64;
+}
+
+// Two select pseudos can share one branch when they test the same operands
+// under the same condition code. Only the comparison has to match: the values
+// being selected may have different widths, since each select still gets its
+// own PHI. That lets e.g. a Select and a Select_64_32 share a diamond.
+static bool sameSelectCondition(const MachineInstr &A, const MachineInstr &B) {
+  unsigned OpcA = A.getOpcode(), OpcB = B.getOpcode();
+  if (isSelectRROpcode(OpcA) != isSelectRROpcode(OpcB) ||
+      isSelectCmp32(OpcA) != isSelectCmp32(OpcB))
+    return false;
+  if (A.getOperand(1).getReg() != B.getOperand(1).getReg())
+    return false;
+  if (isSelectRROpcode(OpcA)) {
+    if (A.getOperand(2).getReg() != B.getOperand(2).getReg())
+      return false;
+  } else if (A.getOperand(2).getImm() != B.getOperand(2).getImm()) {
+    return false;
+  }
+  return A.getOperand(3).getImm() == B.getOperand(3).getImm();
+}
+
 MachineBasicBlock *
 SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                MachineBasicBlock *BB) const {
   const TargetInstrInfo &TII = *BB->getParent()->getSubtarget().getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
   unsigned Opc = MI.getOpcode();
-  bool isSelectRROp = (Opc == SBF::Select ||
-                       Opc == SBF::Select_64_32 ||
-                       Opc == SBF::Select_32 ||
-                       Opc == SBF::Select_32_64);
+  bool isSelectRROp = isSelectRROpcode(Opc);
 
   bool isAtomicFence = Opc == SBF::ATOMIC_FENCE;
 
-#ifndef NDEBUG
-  bool isSelectRIOp = (Opc == SBF::Select_Ri ||
-                       Opc == SBF::Select_Ri_64_32 ||
-                       Opc == SBF::Select_Ri_32 ||
-                       Opc == SBF::Select_Ri_32_64);
-
-
-  assert((isSelectRROp || isSelectRIOp || isAtomicFence) &&
+  assert((isSelectPseudo(Opc) || isAtomicFence) &&
          "Unexpected instr type to insert");
-#endif
-
 
   if (isAtomicFence) {
     // this is currently a nop
@@ -988,10 +1020,45 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
     return BB;
   }
 
-  bool is32BitCmp = (Opc == SBF::Select_32 ||
-                     Opc == SBF::Select_32_64 ||
-                     Opc == SBF::Select_Ri_32 ||
-                     Opc == SBF::Select_Ri_32_64);
+  bool is32BitCmp = isSelectCmp32(Opc);
+
+  // SBF has no condition register: the comparison is part of the branch. Each
+  // select expanded on its own therefore re-evaluates it, and because the
+  // expansion below moves everything after the pseudo into the tail block,
+  // consecutive selects nest, producing a diamond and a fresh copy of the
+  // comparison apiece. Collect the following selects that test the same
+  // condition so they can share a single branch and contribute one PHI each.
+  MachineInstr *LastSelect = &MI;
+  SmallSet<Register, 4> SelectDests;
+  SelectDests.insert(MI.getOperand(0).getReg());
+  for (MachineBasicBlock::iterator It = std::next(MI.getIterator()),
+                                   E = BB->end();
+       It != E; ++It) {
+    if (It->isDebugInstr())
+      continue;
+    if (isSelectPseudo(It->getOpcode())) {
+      // A select reading an earlier select's result is a cascade, not a
+      // sibling: its inputs are not available in the head block.
+      if (!sameSelectCondition(*It, MI) ||
+          SelectDests.count(It->getOperand(4).getReg()) ||
+          SelectDests.count(It->getOperand(5).getReg()))
+        break;
+      LastSelect = &*It;
+      SelectDests.insert(It->getOperand(0).getReg());
+      continue;
+    }
+    // Instructions in between stay in the head block and so move above the
+    // branch. That is only safe for pure computations that do not depend on a
+    // select result.
+    if (It->hasUnmodeledSideEffects() || It->mayLoadOrStore() ||
+        It->usesCustomInsertionHook() || TII.isFrameInstr(*It) ||
+        It->isStackAligningInlineAsm())
+      break;
+    if (llvm::any_of(It->operands(), [&](const MachineOperand &MO) {
+          return MO.isReg() && MO.isUse() && SelectDests.count(MO.getReg());
+        }))
+      break;
+  }
 
   // To "insert" a SELECT instruction, we actually have to insert the diamond
   // control-flow pattern.  The incoming instruction knows the destination vreg
@@ -1015,7 +1082,7 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   // Update machine-CFG edges by transferring all successors of the current
   // block to the new block which will contain the Phi node for the select.
   Copy1MBB->splice(Copy1MBB->begin(), BB,
-                   std::next(MachineBasicBlock::iterator(MI)), BB->end());
+                   std::next(LastSelect->getIterator()), BB->end());
   Copy1MBB->transferSuccessorsAndUpdatePHIs(BB);
   // Next, add the true and fallthrough blocks as its successors.
   BB->addSuccessor(Copy0MBB);
@@ -1086,13 +1153,23 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   //  %Result = phi [ %FalseValue, Copy0MBB ], [ %TrueValue, ThisMBB ]
   // ...
   BB = Copy1MBB;
-  BuildMI(*BB, BB->begin(), DL, TII.get(SBF::PHI), MI.getOperand(0).getReg())
-      .addReg(MI.getOperand(5).getReg())
-      .addMBB(Copy0MBB)
-      .addReg(MI.getOperand(4).getReg())
-      .addMBB(ThisMBB);
+  MachineBasicBlock::iterator InsertPt = BB->begin();
+  MachineBasicBlock::iterator SelIt = MI.getIterator();
+  MachineBasicBlock::iterator SelEnd = std::next(LastSelect->getIterator());
+  while (SelIt != SelEnd) {
+    MachineBasicBlock::iterator Next = std::next(SelIt);
+    if (isSelectPseudo(SelIt->getOpcode())) {
+      BuildMI(*BB, InsertPt, SelIt->getDebugLoc(), TII.get(SBF::PHI),
+              SelIt->getOperand(0).getReg())
+          .addReg(SelIt->getOperand(5).getReg())
+          .addMBB(Copy0MBB)
+          .addReg(SelIt->getOperand(4).getReg())
+          .addMBB(ThisMBB);
+      SelIt->eraseFromParent(); // The pseudo instruction is gone now.
+    }
+    SelIt = Next;
+  }
 
-  MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;
 }
 
