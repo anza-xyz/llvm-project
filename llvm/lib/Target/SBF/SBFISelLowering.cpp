@@ -1096,9 +1096,14 @@ SBFTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   return BB;
 }
 
+// Only produce a 32-bit boolean for a 32-bit comparison. Returning i32 for
+// i64 comparisons as well puts the result in GPR32, so every boolean that
+// later merges into a 64-bit phi, select or return needs a widening move, and
+// the two halves of such a merge end up in different register classes, which
+// blocks tail merging.
 EVT SBFTargetLowering::getSetCCResultType(const DataLayout &, LLVMContext &,
                                           EVT VT) const {
-  return getHasAlu32() ? MVT::i32 : MVT::i64;
+  return (getHasAlu32() && VT == MVT::i32) ? MVT::i32 : MVT::i64;
 }
 
 MVT SBFTargetLowering::getScalarShiftAmountTy(const DataLayout &DL,
