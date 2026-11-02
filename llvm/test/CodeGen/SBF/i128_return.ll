@@ -53,8 +53,8 @@ define i128 @foo(i64 %a, i64 %b) {
 ; CHECK-ALU32-NEXT:    arsh64 r2, 63
 ; CHECK-ALU32-NEXT:    arsh64 r1, 63
 ; CHECK-ALU32-NEXT:    add64 r1, r2
-; CHECK-ALU32-NEXT:    mov32 r2, w3
-; CHECK-ALU32-NEXT:    add64 r2, r1
+; CHECK-ALU32-NEXT:    add64 r1, r3
+; CHECK-ALU32-NEXT:    mov64 r2, r1
 ; CHECK-ALU32-NEXT:    exit
 entry:
     %a1 = sext i64 %a to i128
