@@ -11,30 +11,28 @@
 define i64 @two(i64 %a, i64 %b, i64 %p, i64 %q) {
 ; CHECK-LABEL: two:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, r4
 ; CHECK-NEXT:    jsgt r1, r2, .LBB0_1
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mov64 r1, r3
+; CHECK-NEXT:    mov64 r0, r3
 ; CHECK-NEXT:    ja .LBB0_3
 ; CHECK-NEXT:  .LBB0_1:
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    mov64 r0, r3
+; CHECK-NEXT:    mov64 r0, r4
+; CHECK-NEXT:    mov64 r4, r3
 ; CHECK-NEXT:  .LBB0_3:
-; CHECK-NEXT:    add64 r0, r1
+; CHECK-NEXT:    add64 r0, r4
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: two:
 ; CHECK-ALU32:       # %bb.0:
-; CHECK-ALU32-NEXT:    mov64 r0, r4
 ; CHECK-ALU32-NEXT:    jsgt r1, r2, .LBB0_1
 ; CHECK-ALU32-NEXT:  # %bb.2:
-; CHECK-ALU32-NEXT:    mov64 r1, r3
+; CHECK-ALU32-NEXT:    mov64 r0, r3
 ; CHECK-ALU32-NEXT:    ja .LBB0_3
 ; CHECK-ALU32-NEXT:  .LBB0_1:
-; CHECK-ALU32-NEXT:    mov64 r1, r0
-; CHECK-ALU32-NEXT:    mov64 r0, r3
+; CHECK-ALU32-NEXT:    mov64 r0, r4
+; CHECK-ALU32-NEXT:    mov64 r4, r3
 ; CHECK-ALU32-NEXT:  .LBB0_3:
-; CHECK-ALU32-NEXT:    add64 r0, r1
+; CHECK-ALU32-NEXT:    add64 r0, r4
 ; CHECK-ALU32-NEXT:    exit
   %c = icmp sgt i64 %a, %b
   %x = select i1 %c, i64 %p, i64 %q
@@ -48,27 +46,26 @@ define i64 @two(i64 %a, i64 %b, i64 %p, i64 %q) {
 define i64 @mixed_width(i64 %a, i64 %b, i64 %p, i64 %q, i32 %m) {
 ; CHECK-LABEL: mixed_width:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, r3
+; CHECK-NEXT:    mov64 r0, r5
 ; CHECK-NEXT:    jsgt r1, r2, .LBB1_2
 ; CHECK-NEXT:  # %bb.1:
-; CHECK-NEXT:    mov64 r5, 7
-; CHECK-NEXT:    mov64 r0, r4
+; CHECK-NEXT:    mov64 r0, 7
+; CHECK-NEXT:    mov64 r3, r4
 ; CHECK-NEXT:  .LBB1_2:
-; CHECK-NEXT:    lsh64 r5, 32
-; CHECK-NEXT:    rsh64 r5, 32
-; CHECK-NEXT:    add64 r0, r5
+; CHECK-NEXT:    lsh64 r0, 32
+; CHECK-NEXT:    rsh64 r0, 32
+; CHECK-NEXT:    add64 r0, r3
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: mixed_width:
 ; CHECK-ALU32:       # %bb.0:
-; CHECK-ALU32-NEXT:    mov64 r0, r3
 ; CHECK-ALU32-NEXT:    jsgt r1, r2, .LBB1_2
 ; CHECK-ALU32-NEXT:  # %bb.1:
 ; CHECK-ALU32-NEXT:    mov32 w5, 7
-; CHECK-ALU32-NEXT:    mov64 r0, r4
+; CHECK-ALU32-NEXT:    mov64 r3, r4
 ; CHECK-ALU32-NEXT:  .LBB1_2:
-; CHECK-ALU32-NEXT:    mov32 r1, w5
-; CHECK-ALU32-NEXT:    add64 r0, r1
+; CHECK-ALU32-NEXT:    mov32 r0, w5
+; CHECK-ALU32-NEXT:    add64 r0, r3
 ; CHECK-ALU32-NEXT:    exit
   %c = icmp sgt i64 %a, %b
   %x = select i1 %c, i64 %p, i64 %q
@@ -82,26 +79,26 @@ define i64 @mixed_width(i64 %a, i64 %b, i64 %p, i64 %q, i32 %m) {
 define i64 @imm_cond(i32 %k, i64 %a, i64 %b, i64 %c, i64 %d) {
 ; CHECK-LABEL: imm_cond:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, r2
+; CHECK-NEXT:    mov64 r0, r4
 ; CHECK-NEXT:    lsh64 r1, 32
 ; CHECK-NEXT:    rsh64 r1, 32
 ; CHECK-NEXT:    jeq r1, 0, .LBB2_2
 ; CHECK-NEXT:  # %bb.1:
-; CHECK-NEXT:    mov64 r4, r5
-; CHECK-NEXT:    mov64 r0, r3
+; CHECK-NEXT:    mov64 r0, r5
+; CHECK-NEXT:    mov64 r2, r3
 ; CHECK-NEXT:  .LBB2_2:
-; CHECK-NEXT:    xor64 r0, r4
+; CHECK-NEXT:    xor64 r0, r2
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: imm_cond:
 ; CHECK-ALU32:       # %bb.0:
-; CHECK-ALU32-NEXT:    mov64 r0, r2
+; CHECK-ALU32-NEXT:    mov64 r0, r4
 ; CHECK-ALU32-NEXT:    jeq32 w1, 0, .LBB2_2
 ; CHECK-ALU32-NEXT:  # %bb.1:
-; CHECK-ALU32-NEXT:    mov64 r4, r5
-; CHECK-ALU32-NEXT:    mov64 r0, r3
+; CHECK-ALU32-NEXT:    mov64 r0, r5
+; CHECK-ALU32-NEXT:    mov64 r2, r3
 ; CHECK-ALU32-NEXT:  .LBB2_2:
-; CHECK-ALU32-NEXT:    xor64 r0, r4
+; CHECK-ALU32-NEXT:    xor64 r0, r2
 ; CHECK-ALU32-NEXT:    exit
   %t = icmp eq i32 %k, 0
   %x = select i1 %t, i64 %a, i64 %b
@@ -190,33 +187,31 @@ define i64 @cascade(i64 %a, i64 %b, i64 %p, i64 %q) {
 define i64 @memory_between(i64 %a, i64 %b, i64 %p, i64 %q, ptr %m) {
 ; CHECK-LABEL: memory_between:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    mov64 r0, r4
 ; CHECK-NEXT:    jsgt r1, r2, .LBB5_1
 ; CHECK-NEXT:  # %bb.2:
 ; CHECK-NEXT:    mov64 r1, r3
 ; CHECK-NEXT:    ja .LBB5_3
 ; CHECK-NEXT:  .LBB5_1:
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    mov64 r0, r3
+; CHECK-NEXT:    mov64 r1, r4
+; CHECK-NEXT:    mov64 r4, r3
 ; CHECK-NEXT:  .LBB5_3:
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    ldxdw r1, [r5 + 0]
+; CHECK-NEXT:    add64 r1, r4
+; CHECK-NEXT:    ldxdw r0, [r5 + 0]
 ; CHECK-NEXT:    add64 r0, r1
 ; CHECK-NEXT:    exit
 ;
 ; CHECK-ALU32-LABEL: memory_between:
 ; CHECK-ALU32:       # %bb.0:
-; CHECK-ALU32-NEXT:    mov64 r0, r4
 ; CHECK-ALU32-NEXT:    jsgt r1, r2, .LBB5_1
 ; CHECK-ALU32-NEXT:  # %bb.2:
 ; CHECK-ALU32-NEXT:    mov64 r1, r3
 ; CHECK-ALU32-NEXT:    ja .LBB5_3
 ; CHECK-ALU32-NEXT:  .LBB5_1:
-; CHECK-ALU32-NEXT:    mov64 r1, r0
-; CHECK-ALU32-NEXT:    mov64 r0, r3
+; CHECK-ALU32-NEXT:    mov64 r1, r4
+; CHECK-ALU32-NEXT:    mov64 r4, r3
 ; CHECK-ALU32-NEXT:  .LBB5_3:
-; CHECK-ALU32-NEXT:    add64 r0, r1
-; CHECK-ALU32-NEXT:    ldxdw r1, [r5 + 0]
+; CHECK-ALU32-NEXT:    add64 r1, r4
+; CHECK-ALU32-NEXT:    ldxdw r0, [r5 + 0]
 ; CHECK-ALU32-NEXT:    add64 r0, r1
 ; CHECK-ALU32-NEXT:    exit
   %c = icmp sgt i64 %a, %b
