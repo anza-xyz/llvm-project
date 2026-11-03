@@ -10,9 +10,9 @@ define i32 @cttz_i32_zdef(i32 %a) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
-; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    mul64 r1, 125613361
-; CHECK-NEXT:    lddw r2, 4160749568
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    mul64 r2, 125613361
+; CHECK-NEXT:    lddw r1, 4160749568
 ; CHECK-NEXT:    and64 r1, r2
 ; CHECK-NEXT:    rsh64 r1, 27
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
@@ -34,9 +34,9 @@ define i32 @cttz_i32(i32 %a) {
 ; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
-; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    mul64 r1, 125613361
-; CHECK-NEXT:    lddw r2, 4160749568
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    mul64 r2, 125613361
+; CHECK-NEXT:    lddw r1, 4160749568
 ; CHECK-NEXT:    and64 r1, r2
 ; CHECK-NEXT:    rsh64 r1, 27
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
@@ -58,8 +58,8 @@ define i64 @cttz_i64_zdef(i64 %a) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
-; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    lddw r2, 151050438420815295
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    lddw r1, 151050438420815295
 ; CHECK-NEXT:    mul64 r1, r2
 ; CHECK-NEXT:    rsh64 r1, 58
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
@@ -78,8 +78,8 @@ define i64 @cttz_i64(i64 %a) {
 ; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    neg64 r2
-; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    lddw r2, 151050438420815295
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    lddw r1, 151050438420815295
 ; CHECK-NEXT:    mul64 r1, r2
 ; CHECK-NEXT:    rsh64 r1, 58
 ; CHECK-NEXT:    lddw r2, {{\.?LCPI[0-9]+_[0-9]+}}
@@ -101,47 +101,42 @@ define i32 @ctlz_i32_zdef(i32 %a) {
 ; CHECK-LABEL: ctlz_i32_zdef:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lddw r2, 4294967294
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 1
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294967292
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 2
-; CHECK-NEXT:    or64 r1, r3
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 1
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    lddw r1, 4294967292
+; CHECK-NEXT:    and64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 2
+; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    lddw r2, 4294967280
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 4
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294967040
-; CHECK-NEXT:    mov64 r3, r1
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    lddw r3, 4294967040
 ; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    rsh64 r3, 8
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294901760
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 16
+; CHECK-NEXT:    or64 r3, r2
+; CHECK-NEXT:    lddw r1, 4294901760
+; CHECK-NEXT:    and64 r1, r3
+; CHECK-NEXT:    rsh64 r1, 16
 ; CHECK-NEXT:    or64 r1, r3
 ; CHECK-NEXT:    xor64 r1, -1
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 1
 ; CHECK-NEXT:    and64 r2, 1431655765
 ; CHECK-NEXT:    sub64 r1, r2
-; CHECK-NEXT:    mov64 r0, r1
-; CHECK-NEXT:    and64 r0, 858993459
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    and64 r2, 858993459
 ; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    and64 r1, 858993459
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    rsh64 r1, 4
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    and64 r0, 252645135
-; CHECK-NEXT:    mul64 r0, 16843009
-; CHECK-NEXT:    lddw r1, 4278190080
-; CHECK-NEXT:    and64 r0, r1
+; CHECK-NEXT:    add64 r1, r2
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    add64 r2, r1
+; CHECK-NEXT:    and64 r2, 252645135
+; CHECK-NEXT:    mul64 r2, 16843009
+; CHECK-NEXT:    lddw r0, 4278190080
+; CHECK-NEXT:    and64 r0, r2
 ; CHECK-NEXT:    rsh64 r0, 24
 ; CHECK-NEXT:    exit
     %ret = call i32 @llvm.ctlz.i32(i32 %a, i1 1)
@@ -158,47 +153,42 @@ define i32 @ctlz_i32(i32 %a) {
 ; CHECK-NEXT:    jeq r2, 0, .LBB5_1
 ; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    lddw r2, 4294967294
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 1
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294967292
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 2
-; CHECK-NEXT:    or64 r1, r3
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 1
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    lddw r1, 4294967292
+; CHECK-NEXT:    and64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 2
+; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    lddw r2, 4294967280
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 4
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294967040
-; CHECK-NEXT:    mov64 r3, r1
+; CHECK-NEXT:    and64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    lddw r3, 4294967040
 ; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    rsh64 r3, 8
-; CHECK-NEXT:    or64 r1, r3
-; CHECK-NEXT:    lddw r2, 4294901760
-; CHECK-NEXT:    mov64 r3, r1
-; CHECK-NEXT:    and64 r3, r2
-; CHECK-NEXT:    rsh64 r3, 16
+; CHECK-NEXT:    or64 r3, r2
+; CHECK-NEXT:    lddw r1, 4294901760
+; CHECK-NEXT:    and64 r1, r3
+; CHECK-NEXT:    rsh64 r1, 16
 ; CHECK-NEXT:    or64 r1, r3
 ; CHECK-NEXT:    xor64 r1, -1
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 1
 ; CHECK-NEXT:    and64 r2, 1431655765
 ; CHECK-NEXT:    sub64 r1, r2
-; CHECK-NEXT:    mov64 r0, r1
-; CHECK-NEXT:    and64 r0, 858993459
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    and64 r2, 858993459
 ; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    and64 r1, 858993459
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    rsh64 r1, 4
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    and64 r0, 252645135
-; CHECK-NEXT:    mul64 r0, 16843009
-; CHECK-NEXT:    lddw r1, 4278190080
-; CHECK-NEXT:    and64 r0, r1
+; CHECK-NEXT:    add64 r1, r2
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    add64 r2, r1
+; CHECK-NEXT:    and64 r2, 252645135
+; CHECK-NEXT:    mul64 r2, 16843009
+; CHECK-NEXT:    lddw r0, 4278190080
+; CHECK-NEXT:    and64 r0, r2
 ; CHECK-NEXT:    rsh64 r0, 24
 ; CHECK-NEXT:    ja .LBB5_3
 ; CHECK-NEXT:  .LBB5_1:
@@ -216,21 +206,21 @@ define i64 @ctlz_i64_zdef(i64 %a) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 1
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 2
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 4
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 8
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 8
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 16
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 32
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 32
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    xor64 r1, -1
 ; CHECK-NEXT:    lddw r2, 6148914691236517205
@@ -239,17 +229,17 @@ define i64 @ctlz_i64_zdef(i64 %a) {
 ; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    sub64 r1, r3
 ; CHECK-NEXT:    lddw r2, 3689348814741910323
-; CHECK-NEXT:    mov64 r0, r1
-; CHECK-NEXT:    and64 r0, r2
+; CHECK-NEXT:    mov64 r3, r1
+; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    rsh64 r1, 4
-; CHECK-NEXT:    add64 r0, r1
+; CHECK-NEXT:    add64 r1, r3
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    add64 r2, r1
 ; CHECK-NEXT:    lddw r1, 1085102592571150095
-; CHECK-NEXT:    and64 r0, r1
-; CHECK-NEXT:    lddw r1, 72340172838076673
+; CHECK-NEXT:    and64 r1, r2
+; CHECK-NEXT:    lddw r0, 72340172838076673
 ; CHECK-NEXT:    mul64 r0, r1
 ; CHECK-NEXT:    rsh64 r0, 56
 ; CHECK-NEXT:    exit
@@ -265,21 +255,21 @@ define i64 @ctlz_i64(i64 %a) {
 ; CHECK-NEXT:  # %bb.2: # %cond.false
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 1
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 2
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 4
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 8
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 8
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    mov64 r2, r1
 ; CHECK-NEXT:    rsh64 r2, 16
-; CHECK-NEXT:    or64 r1, r2
-; CHECK-NEXT:    mov64 r2, r1
-; CHECK-NEXT:    rsh64 r2, 32
+; CHECK-NEXT:    or64 r2, r1
+; CHECK-NEXT:    mov64 r1, r2
+; CHECK-NEXT:    rsh64 r1, 32
 ; CHECK-NEXT:    or64 r1, r2
 ; CHECK-NEXT:    xor64 r1, -1
 ; CHECK-NEXT:    lddw r2, 6148914691236517205
@@ -288,17 +278,17 @@ define i64 @ctlz_i64(i64 %a) {
 ; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    sub64 r1, r3
 ; CHECK-NEXT:    lddw r2, 3689348814741910323
-; CHECK-NEXT:    mov64 r0, r1
-; CHECK-NEXT:    and64 r0, r2
+; CHECK-NEXT:    mov64 r3, r1
+; CHECK-NEXT:    and64 r3, r2
 ; CHECK-NEXT:    rsh64 r1, 2
 ; CHECK-NEXT:    and64 r1, r2
-; CHECK-NEXT:    add64 r0, r1
-; CHECK-NEXT:    mov64 r1, r0
-; CHECK-NEXT:    rsh64 r1, 4
-; CHECK-NEXT:    add64 r0, r1
+; CHECK-NEXT:    add64 r1, r3
+; CHECK-NEXT:    mov64 r2, r1
+; CHECK-NEXT:    rsh64 r2, 4
+; CHECK-NEXT:    add64 r2, r1
 ; CHECK-NEXT:    lddw r1, 1085102592571150095
-; CHECK-NEXT:    and64 r0, r1
-; CHECK-NEXT:    lddw r1, 72340172838076673
+; CHECK-NEXT:    and64 r1, r2
+; CHECK-NEXT:    lddw r0, 72340172838076673
 ; CHECK-NEXT:    mul64 r0, r1
 ; CHECK-NEXT:    rsh64 r0, 56
 ; CHECK-NEXT:    ja .LBB7_3

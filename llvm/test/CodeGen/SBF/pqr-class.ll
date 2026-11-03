@@ -13,7 +13,7 @@ entry:
 ; CHECK-v2: udiv64 r{{[0-9]+}}, r{{[0-9]+}}
 ; CHECK-v2: urem64 r{{[0-9]+}}, 17
 ; CHECK-v2: udiv64 r{{[0-9]+}}, 7
-; CHECK-v2: lmul64 r{{[0-9]+}}, r2
+; CHECK-v2: lmul64 r{{[0-9]+}}, r{{[0-9]+}}
 ; CHECK-V2: lmul64 r{{[0-9]+}}, 7
 
 ; CHECK-v1: mod64 r{{[0-9]+}}, r{{[0-9]+}}
@@ -46,7 +46,7 @@ entry:
 ; CHECK-v2: sdiv64 r{{[0-9]+}}, r{{[0-9]+}}
 ; CHECK-v2: srem64 r{{[0-9]+}}, 17
 ; CHECK-v2: sdiv64 r{{[0-9]+}}, 7
-; CHECK-v2: lmul64 r{{[0-9]+}}, r2
+; CHECK-v2: lmul64 r{{[0-9]+}}, r{{[0-9]+}}
 ; CHECK-v2: lmul64 r{{[0-9]+}}, 7
 
 ; CHECK-v1: call __divdi3

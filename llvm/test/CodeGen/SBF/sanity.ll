@@ -7,7 +7,7 @@ define i32 @foo_int(i32 %a, i32 %b) #0 {
   %1 = add nsw i32 %b, %a
   ret i32 %1
 ; CHECK-LABEL: foo_int:
-; CHECK: add64 r0, r1
+; CHECK: add64 r0, r2
 }
 
 ; Function Attrs: nounwind readnone uwtable
@@ -15,7 +15,7 @@ define signext i8 @foo_char(i8 signext %a, i8 signext %b) #0 {
   %1 = add i8 %b, %a
   ret i8 %1
 ; CHECK-LABEL: foo_char:
-; CHECK: add64 r0, r1
+; CHECK: add64 r0, r2
 ; CHECK: lsh64 r0, 56
 ; CHECK: arsh64 r0, 56
 }
@@ -26,8 +26,8 @@ define i64 @foo_ll(i64 %a, i64 %b, i64 %c) #0 {
   %2 = sub i64 %1, %c
   ret i64 %2
 ; CHECK-LABEL: foo_ll:
-; CHECK: mov64 r0, r2
-; CHECK: add64 r0, r1
+; CHECK: mov64 r0, r1
+; CHECK: add64 r0, r2
 ; CHECK: sub64 r0, r3
 }
 

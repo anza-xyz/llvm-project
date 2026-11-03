@@ -23,8 +23,7 @@ entry:
 }
 
 ; CHECK-LABEL: test
-; CHECK:       mov64 r0, r1
-; CHECK:       mov64 r1, 4
+; CHECK:       mov64 r0, 4
 ; CHECK:       add64 r0, r1
 ; CHECK:       exit
 ;
@@ -32,14 +31,14 @@ entry:
 ;
 ; CHECK:       .byte   115                     # string offset=1
 ; CHECK:       .ascii  ".text"                 # string offset=20
-; CHECK:       .ascii  "0:1"                   # string offset=63
+; CHECK:       .ascii  "0:1"                   # string offset=26
 ;
 ; CHECK:       .long   16                      # FieldReloc
 ; CHECK-NEXT:  .long   20                      # Field reloc section string offset=20
 ; CHECK-NEXT:  .long   1
 ; CHECK-NEXT:  .long   .Ltmp{{[0-9]+}}
 ; CHECK-NEXT:  .long   2
-; CHECK-NEXT:  .long   63
+; CHECK-NEXT:  .long   26
 ; CHECK-NEXT:  .long   0
 
 ; Function Attrs: nounwind readnone

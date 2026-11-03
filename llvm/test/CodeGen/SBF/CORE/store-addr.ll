@@ -39,8 +39,8 @@ entry:
 }
 
 ; CHECK:  mov64 r[[OFFSET:[0-9]+]], 0
-; CHECK:  add64 r1, r[[OFFSET]]
-; CHECK:  stxdw [r10 - 8], r1
+; CHECK:  add64 r[[OFFSET]], r1
+; CHECK:  stxdw [r10 - 8], r[[OFFSET]]
 
 ; Function Attrs: nounwind readnone speculatable
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1

@@ -319,8 +319,14 @@ class MATH_RR<SBFOpClass Class, SBFArithOp Opc,
   let SBFClass = Class;
 }
 
+// Commutable marks the reg-reg form as commutable, which lets the two-address
+// pass swap the operands instead of inserting a copy when the tied source is
+// still live. Only the reg-reg forms can commute: the immediate of a reg-imm
+// form is not a register, so the generic commuting code rejects it anyway.
 multiclass MATH_32<SBFArithOp Opc, string Mnemonic,
-                    SBFOpClass Class, SDNode OpNode, bit UseImmPat = 1> {
+                    SBFOpClass Class, SDNode OpNode, bit UseImmPat = 1,
+                    bit Commutable = 0> {
+  let isCommutable = Commutable in
   def _rr_32 : MATH_RR<Class, Opc,
                    (outs GPR32:$dst),
                    (ins GPR32:$src2, GPR32:$src),
@@ -336,10 +342,12 @@ multiclass MATH_32<SBFArithOp Opc, string Mnemonic,
 }
 
 multiclass MATH_64<SBFArithOp Opc, string Mnemonic,
-                     SBFOpClass Class, SDNode OpNode, bit UseImmPat = 1> {
+                     SBFOpClass Class, SDNode OpNode, bit UseImmPat = 1,
+                     bit Commutable = 0> {
 
   defvar isPqr64 = !if(!eq(Class, SBF_PQR), 1, 0);
 
+  let isCommutable = Commutable in
   def _rr : MATH_RR<Class, Opc,
                    (outs GPR:$dst),
                    (ins GPR:$src2, GPR:$src),
@@ -358,25 +366,26 @@ multiclass MATH_64<SBFArithOp Opc, string Mnemonic,
 }
 
 multiclass ALU<SBFArithOp Opc, string Mnemonic,
-                    SDNode OpNode, bit UseImmPat = 1> {
-  defm "" : MATH_64<Opc, Mnemonic, SBF_ALU64, OpNode, UseImmPat>;
+                    SDNode OpNode, bit UseImmPat = 1, bit Commutable = 0> {
+  defm "" : MATH_64<Opc, Mnemonic, SBF_ALU64, OpNode, UseImmPat, Commutable>;
 
-  defm "" : MATH_32<Opc, Mnemonic, SBF_ALU, OpNode, UseImmPat>;
+  defm "" : MATH_32<Opc, Mnemonic, SBF_ALU, OpNode, UseImmPat, Commutable>;
 }
 
-multiclass PQR<SBFArithOp Opc, string Mnemonic, SDNode OpNode> {
-  defm "" : MATH_64<Opc, Mnemonic, SBF_PQR, OpNode>;
-  defm "" : MATH_32<Opc, Mnemonic, SBF_PQR, OpNode>;
+multiclass PQR<SBFArithOp Opc, string Mnemonic, SDNode OpNode,
+               bit Commutable = 0> {
+  defm "" : MATH_64<Opc, Mnemonic, SBF_PQR, OpNode, 1, Commutable>;
+  defm "" : MATH_32<Opc, Mnemonic, SBF_PQR, OpNode, 1, Commutable>;
 }
 
 let Constraints = "$dst = $src2", isReMaterializable = 1 in {
-    defm ADD : ALU<SBF_ADD, "add", add>;
+    defm ADD : ALU<SBF_ADD, "add", add, 1, /*Commutable=*/1>;
     defm SUB : ALU<SBF_SUB, "sub", sub, 0>;
-    defm OR  : ALU<SBF_OR, "or", or>;
-    defm AND : ALU<SBF_AND, "and", and>;
+    defm OR  : ALU<SBF_OR, "or", or, 1, /*Commutable=*/1>;
+    defm AND : ALU<SBF_AND, "and", and, 1, /*Commutable=*/1>;
     defm SLL : ALU<SBF_LSH, "lsh", shl>;
     defm SRL : ALU<SBF_RSH, "rsh", srl>;
-    defm XOR : ALU<SBF_XOR, "xor", xor>;
+    defm XOR : ALU<SBF_XOR, "xor", xor, 1, /*Commutable=*/1>;
     defm SRA : ALU<SBF_ARSH, "arsh", sra>;
 
     let Predicates = [SBFNoLddw] in {
@@ -397,17 +406,19 @@ let Constraints = "$dst = $src2", isReMaterializable = 1 in {
 
 
     let Predicates = [SBFNoPqrInstr] in {
-        defm MUL : ALU<SBF_MUL, "mul", mul>;
+        defm MUL : ALU<SBF_MUL, "mul", mul, 1, /*Commutable=*/1>;
         defm DIV : ALU<SBF_DIV, "div", udiv>;
         defm MOD : ALU<SBF_MOD, "mod", urem>;
     }
 
     let Predicates = [SBFPqrInstr] in {
-        defm UHMUL    : MATH_64<PQR_UHMUL, "uhmul", SBF_PQR, mulhu>;
+        defm UHMUL    : MATH_64<PQR_UHMUL, "uhmul", SBF_PQR, mulhu, 1,
+                                /*Commutable=*/1>;
         defm UDIV     : PQR<PQR_UDIV, "udiv", udiv>;
         defm UREM     : PQR<PQR_UREM, "urem", urem>;
-        defm LMUL     : PQR<PQR_LMUL, "lmul", mul>;
-        defm SHMUL    : MATH_64<PQR_SHMUL, "shmul", SBF_PQR, mulhs>;
+        defm LMUL     : PQR<PQR_LMUL, "lmul", mul, /*Commutable=*/1>;
+        defm SHMUL    : MATH_64<PQR_SHMUL, "shmul", SBF_PQR, mulhs, 1,
+                                /*Commutable=*/1>;
         defm SDIV_pqr : PQR<PQR_SDIV, "sdiv", sdiv>;
         defm SREM     : PQR<PQR_SREM, "srem", srem>;
     }
