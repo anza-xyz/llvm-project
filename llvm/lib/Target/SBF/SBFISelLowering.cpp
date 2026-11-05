@@ -58,6 +58,7 @@ SBFTargetLowering::SBFTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BR_JT, MVT::Other, Expand);
   setOperationAction(ISD::BRIND, MVT::Other, Expand);
   setOperationAction(ISD::BRCOND, MVT::Other, Expand);
+  setOperationAction(ISD::TRAP, MVT::Other, Custom);
 
   setOperationAction({ISD::GlobalAddress, ISD::ConstantPool}, MVT::i64, Custom);
 
@@ -291,6 +292,30 @@ void SBFTargetLowering::ReplaceNodeResults(SDNode *N,
   fail(DL, DAG, err_msg);
 }
 
+// The static key of the `abort` syscall: murmur3_32("abort"), the hash the loader keys
+// syscalls by.
+static const uint64_t AbortSyscallKey = 0xb6fc1a11;
+
+/// Lowers a trap to the `abort` syscall. Under static syscalls (sbpf v3 and later) the loader
+/// keys syscalls by the call's immediate, so the call carries the key and no symbol: nothing to
+/// relocate, nothing for the linker to find. Before static syscalls a syscall is a relocated
+/// call to an undefined symbol that the loader resolves, so the call names `abort`, which is
+/// also what the generic lowering emits. An immediate call there would be an internal call.
+SDValue SBFTargetLowering::LowerTRAP(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT PtrVT = getPointerTy(DAG.getDataLayout());
+  SDValue Callee = Subtarget->getHasStaticSyscalls()
+                       ? DAG.getConstant(AbortSyscallKey, DL, PtrVT)
+                       : DAG.getExternalSymbol("abort", PtrVT);
+  TargetLowering::CallLoweringInfo CLI(DAG);
+  CLI.setDebugLoc(DL)
+      .setChain(Op.getOperand(0))
+      .setLibCallee(CallingConv::C, Type::getVoidTy(*DAG.getContext()), Callee,
+                    TargetLowering::ArgListTy())
+      .setNoReturn();
+  return LowerCallTo(CLI).second;
+}
+
 SDValue SBFTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
   case ISD::BR_CC:
@@ -315,6 +340,8 @@ SDValue SBFTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::ATOMIC_LOAD_UMIN:
   case ISD::ATOMIC_LOAD_XOR:
     return LowerATOMICRMW(Op, DAG);
+  case ISD::TRAP:
+    return LowerTRAP(Op, DAG);
   case ISD::INTRINSIC_W_CHAIN:
     // continue the expansion as defined with tablegen
     return SDValue();
